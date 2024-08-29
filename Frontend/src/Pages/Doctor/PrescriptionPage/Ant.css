@@ -1,0 +1,106 @@
+.custom-table .ant-table-thead > tr > th {
+  background-color: #e5eaf4;
+  text-align: center;
+}
+.submit-modal .ant-modal-content {
+  padding: 0;
+}
+.ant-otp-input {
+  border: 2px solid rgb(136, 136, 237);
+}
+.custom-steps .ant-steps-item-icon {
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  font-size: 22px;
+}
+
+.ant-steps
+  .ant-steps-item-process
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-description {
+  color: white;
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.ant-steps
+  .ant-steps-item-finish
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-title,
+.ant-steps
+  .ant-steps-item-wait
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-title,
+.ant-steps
+  .ant-steps-item-process
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-title {
+  color: white;
+  font-weight: 100;
+}
+.ant-steps
+  .ant-steps-item-finish
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-description,
+.ant-steps
+  .ant-steps-item-wait
+  > .ant-steps-item-container
+  > .ant-steps-item-content
+  > .ant-steps-item-description {
+  color: white;
+  font-weight: 500;
+}
+
+.ant-steps .ant-steps-item-process .ant-steps-item-icon > .ant-steps-icon {
+  color: white;
+}
+.ant-steps .ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon {
+  color: rgb(37, 50, 165);
+}
+
+.ant-steps .ant-steps-item-wait .ant-steps-item-icon {
+  border: 1px solid rgb(255, 255, 255);
+  background-color: rgb(254, 254, 254);
+}
+.ant-steps .ant-steps-item-process .ant-steps-item-icon {
+  border-color: white;
+  background-color: #c1e2ff;
+}
+
+.custom-steps .ant-steps-item-tail::after {
+  margin-left: 4px;
+}
+.ant-steps.ant-steps-vertical
+  > .ant-steps-item
+  > .ant-steps-item-container
+  > .ant-steps-item-tail::after {
+  width: 3px;
+  margin-top: 6px;
+  background-color: aliceblue;
+}
+.custom-scrollbar {
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+  scrollbar-color: #d0d0d4 #f1f1f1;
+}
+.ant-form-item .ant-form-item-label > label {
+  font-size: 17px;
+}
+/* Center the text in table headers */
+.center-head .ant-table-thead > tr > th {
+  text-align: center;
+}
+.center-head .ant-table-scroll-horizontal {
+  scrollbar-color: #d0d0d4 #f1f1f1;
+}
+div.ant-table-content {
+  scrollbar-width: thin;
+}
+.product-form .ant-form-item .ant-form-item-label {
+  text-align: start;
+}
