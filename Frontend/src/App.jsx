@@ -1,23 +1,25 @@
 import "./App.css";
-import LoginForm from "./Authentication/Pages/LoginForm";
+//import LoginForm from "./Authentication/Pages/LoginForm";
 //import UploadButton from "./Authentication/Components/UploadButton";
-import ForgetPassword from "./Authentication/Components/ForgetPassword";
+//import ForgetPassword from "./Authentication/Components/ForgetPassword";
 //import LoginForm from "./Authentication/Pages/LoginForm";
 //import RegistrationForm from "./Authentication/Components/RegistrationForm";
-import RegistrationPage from "./Authentication/Pages/RegistrationPage";
+//import RegistrationPage from "./Authentication/Pages/RegistrationPage";
 
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+//import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import PrescriptionForm from "./Pages/Doctor/PrescriptionPage/PrescriptionForm";
 //import Dashboard from "./Pages/Pharmacist/Dashboard";
 function App() {
   return (
     <div className="">
-      <Router>
+      {/*<Router>
         <Routes>
           <Route path="/" element={<RegistrationPage />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/forgetpassword" element={<ForgetPassword />} />
         </Routes>
-      </Router>
+      </Router>*/}
+      <PrescriptionForm />
     </div>
   );
 }

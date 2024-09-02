@@ -70,11 +70,6 @@ export const columnDoc = (showModal) => [
     },
   },
   {
-    title: "Role",
-    dataIndex: "role",
-    // No sorter provided, as this might be categorical
-  },
-  {
     title: "Hospital Details",
     dataIndex: "hospitalDetails",
     sorter: (a, b) => a.hospitalDetails.localeCompare(b.hospitalDetails), // Correctly sorts alphabetically by 'hospitalDetails'
@@ -134,11 +129,6 @@ export const columnPm = (showModal) => [
       const numB = parseFloat(b.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
       return numA - numB; // Sort numerically
     },
-  },
-  {
-    title: "Role",
-    dataIndex: "role",
-    // No sorter provided, as this might be categorical
   },
   {
     title: "License Information",
@@ -233,28 +223,10 @@ export const columnUser = [
   },
 
   {
-    title: "Actions",
-    dataIndex: "actions",
-    render: (_, record) => (
-      <div className="flex ">
-        <Button
-          onClick={() => handleApprove(record.key)}
-          style={{
-            marginRight: 8,
-            background: "#23C560",
-            color: "white",
-          }}
-        >
-          Activate
-        </Button>
-        <Button
-          onClick={() => handleReject(record.key)}
-          style={{ background: "red", color: "white" }}
-        >
-          Deactivate
-        </Button>
-      </div>
-    ),
+    title: "Action",
+    dataIndex: "active",
+    key: "active",
+    render: (active) => <span>{active ? "Active" : "Deactivate"}</span>,
   },
 ];
 

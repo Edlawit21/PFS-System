@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { Button, Form } from "antd";
-import s from "../../../Assets/s.png"; // Ensure this path is correct
+import s from "../../../Assets/s.png";
+import PropTypes from "prop-types";
 
-const SignatureField = () => {
+const SignatureField = ({ form }) => {
   const [hasSigned, setHasSigned] = useState(false);
   const signatureRef = useRef(null);
 
@@ -11,11 +12,16 @@ const SignatureField = () => {
     if (signatureRef.current) {
       signatureRef.current.clear();
       setHasSigned(false);
+      form.setFieldsValue({ signature: "" }); // Clear the form field value
+      form.setFields([{ name: "signature", errors: [] }]); // Clear validation error
     }
   };
 
-  const handleBegin = () => {
-    setHasSigned(true);
+  const handleEnd = () => {
+    const signatureData = signatureRef.current.toDataURL();
+    setHasSigned(!!signatureData); // Check if there is a signature
+    form.setFieldsValue({ signature: signatureData }); // Update the form value
+    form.setFields([{ name: "signature", errors: [] }]); // Clear validation error
   };
 
   return (
@@ -46,7 +52,7 @@ const SignatureField = () => {
           ref={signatureRef}
           penColor="blue"
           canvasProps={{ width: 350, height: 150 }}
-          onBegin={handleBegin}
+          onEnd={handleEnd}
         />
         <div className="m-1 flex justify-end">
           <Button
@@ -60,6 +66,10 @@ const SignatureField = () => {
       </div>
     </Form.Item>
   );
+};
+
+SignatureField.propTypes = {
+  form: PropTypes.object.isRequired, // Define form prop validation
 };
 
 export default SignatureField;

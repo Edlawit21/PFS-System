@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Input } from "antd";
-import "./Table.css";
+//import "./Table.css";
 
 const Pin = () => {
   const [otpValue, setOtpValue] = useState("");

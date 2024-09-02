@@ -1,17 +1,37 @@
-import { Divider, Form, DatePicker, Input, Radio, Table } from "antd";
+import { useState } from "react";
+import { Divider, Form, DatePicker, Input, Radio, Table, Button } from "antd";
 import AddTable from "./AddTable";
 import { data } from "../../../Data/data";
 import { Column } from "../../../Components/Column";
 import "./Ant.css";
 import SignatureField from "./Sign";
 import Submit from "./Submit";
+import Head from "./Head";
 
 const { TextArea } = Input;
+
 const PrescriptionForm = () => {
+  const [form] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleSubmit = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        console.log("Form values:", values);
+        // Show the Submit component modal after form validation
+        setIsModalVisible(true);
+      })
+      .catch((errorInfo) => {
+        console.log("Validation Failed:", errorInfo);
+      });
+  };
+
   return (
     <div className="w-screen h-screen bg-[#F3F3FE] overflow-auto">
-      <div className="w-11/12 my-6 mx-auto bg-white shadow-md ">
-        <Form name="form" layout="vertical" requiredMark={false}>
+      <Head />
+      <div className="w-11/12 my-6 mx-auto bg-white shadow-md">
+        <Form form={form} name="form" layout="vertical" requiredMark={false}>
           <h1 className="text-center p-3 font-bold">Prescription Form</h1>
           <Divider style={{ borderColor: "#e0e0e0", borderWidth: "1px" }} />
           <div className="mx-16">
@@ -239,13 +259,32 @@ const PrescriptionForm = () => {
                 style={{ width: "16rem", borderWidth: "2px" }}
               />
             </Form.Item>
-            <SignatureField />
+            <SignatureField form={form} />
             <hr className="mt-16" />
             <Form.Item style={{ display: "flex", justifyContent: "center" }}>
-              <Submit />
+              <Button
+                size="large"
+                style={{
+                  margin: "40px",
+                  width: "200px",
+                  backgroundColor: "#4d4dff",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: "large",
+                }}
+                onClick={handleSubmit} // Handle form submission
+              >
+                Submit
+              </Button>
             </Form.Item>
           </div>
         </Form>
+
+        {/* Render Submit component modal here */}
+        <Submit
+          isVisible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+        />
       </div>
     </div>
   );

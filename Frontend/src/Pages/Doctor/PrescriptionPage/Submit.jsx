@@ -1,26 +1,28 @@
 import { useState } from "react";
 import ModalSubmit from "./ModalSubmit";
 import { Modal, Button, QRCode } from "antd";
+import PropTypes from "prop-types";
 import Pin from "./Pin";
 
-const Submit = () => {
-  const [open, setOpen] = useState(false);
+const Submit = ({ isVisible, onClose }) => {
   const [qrData, setQrData] = useState("");
   const [showQrCode, setShowQrCode] = useState(false);
-  const [showPin, setShowPin] = useState(false); // State to toggle visibility
-  const [qrGenerated, setQrGenerated] = useState(false); // New state to track QR code generation
+  const [showPin, setShowPin] = useState(false);
+  const [qrGenerated, setQrGenerated] = useState(false);
 
-  const showModal = () => {
-    setOpen(true);
-    setShowQrCode(false); // Reset the state when the modal is reopened
-    setQrGenerated(false); // Reset QR code generation state
+  // Function to reset modal state
+  const resetModalState = () => {
+    setShowQrCode(false);
+    setQrGenerated(false);
     setShowPin(false);
   };
 
+  // Handle Print button click
   const handlePrintClick = () => {
-    setShowPin(true); // Set to true to show the Pin component
+    setShowPin(true);
   };
 
+  // Generate QR Code
   const generateQRCode = () => {
     const formData = {
       prescriptionNo: "12345",
@@ -43,37 +45,27 @@ const Submit = () => {
 
     const qrCodeString = JSON.stringify(formData);
     setQrData(qrCodeString);
-    setShowQrCode(true); // Show the QR code
-    setQrGenerated(true); // Set to true to show the Print button
+    setShowQrCode(true);
+    setQrGenerated(true);
   };
+
+  // Handle Edit button click
   const handleEditClick = () => {
-    setShowQrCode(false); // Hide QR code
-    setQrGenerated(false); // Hide Print button
-    setShowPin(false); // Hide Pin component
-    setOpen(false);
+    // Close the modal when Edit is clicked
+    onClose();
+    resetModalState(); // Reset modal state
   };
 
   return (
     <div className="w-full">
-      <Button
-        size="large"
-        style={{
-          margin: "40px",
-          width: "200px",
-          backgroundColor: "#4d4dff",
-          color: "white",
-          fontWeight: "bold",
-          fontSize: "large",
-        }}
-        onClick={showModal}
-      >
-        Submit
-      </Button>
       <Modal
         className="submit-modal"
         footer={null}
-        open={open}
-        onCancel={() => setOpen(false)}
+        open={isVisible}
+        onCancel={() => {
+          onClose(); // Ensure parent component closes modal
+          resetModalState(); // Reset modal state when closed
+        }}
         centered
         width={900}
       >
@@ -91,7 +83,7 @@ const Submit = () => {
           </>
         )}
 
-        {qrGenerated && !showPin ? ( // Show Print button only if QR code is generated and Pin is not shown
+        {qrGenerated && !showPin ? (
           <div className="flex justify-center">
             <Button
               style={{
@@ -112,11 +104,17 @@ const Submit = () => {
             <div className="flex justify-center my-2">
               <Pin />
             </div>
-          ) // Render the Pin component when showPin is true
+          )
         )}
       </Modal>
     </div>
   );
+};
+
+// Define prop types for the component
+Submit.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default Submit;

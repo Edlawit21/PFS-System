@@ -64,6 +64,32 @@ const DocRegistration = ({ form }) => {
         >
           <UploadButton formType="doc" />
         </Form.Item>
+        <Form.Item
+          label="Set Your Pin:"
+          name="pin"
+          rules={[{ required: true, message: "Please set a pin!" }]}
+        >
+          <Input.Password placeholder="Enter a secure pin" />
+        </Form.Item>
+        <Form.Item
+          label="Confirm Pin:"
+          name="confirmPin"
+          dependencies={["pin"]}
+          hasFeedback
+          rules={[
+            { required: true, message: "Please confirm your pin!" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("pin") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error("The two pins do not match!"));
+              },
+            }),
+          ]}
+        >
+          <Input.Password placeholder="Confirm your pin" />
+        </Form.Item>
       </Form>
     </div>
   );
