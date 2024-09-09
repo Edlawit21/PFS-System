@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const registerPharmacistSchema = new mongoose.Schema(
   {
@@ -7,6 +8,15 @@ const registerPharmacistSchema = new mongoose.Schema(
       required: true,
     },
     lastname: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true, // Ensure unique usernames
+    },
+    password: {
       type: String,
       required: true,
     },
@@ -23,6 +33,7 @@ const registerPharmacistSchema = new mongoose.Schema(
       email: {
         type: String,
         required: true,
+        unique: true,
       },
     },
     residentialAddress: {
@@ -55,10 +66,42 @@ const registerPharmacistSchema = new mongoose.Schema(
     passportPhoto: {
       type: String,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PharmacyManager",
+      required: true,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-module.exports = mongoose.model("Pharmacist", registerPharmacistSchema);
+registerPharmacistSchema.pre("save", async function (next) {
+  if (this.isModified("password") || this.isNew) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    return next();
+  }
+});
+
+// Method to compare hashed password with provided password
+registerPharmacistSchema.methods.comparePassword = async function (
+  candidatePassword
+) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const Pharmacist = mongoose.model("Pharmacist", registerPharmacistSchema);
+
+module.exports = Pharmacist;

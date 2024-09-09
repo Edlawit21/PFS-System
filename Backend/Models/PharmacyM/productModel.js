@@ -46,10 +46,18 @@ const productSchema = new mongoose.Schema(
         return this.quantity - this.soldQty;
       },
     },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PharmacyManager", // Reference to the Pharmacy Manager who created this product
+      required: true,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-module.exports = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+
+module.exports = Product;

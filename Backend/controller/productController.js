@@ -1,0 +1,153 @@
+const Product = require("../Models/PharmacyM/productModel");
+
+// Create a new product
+exports.createProduct = async (req, res) => {
+  try {
+    const {
+      medname,
+      category,
+      subcategory,
+      actualPrice,
+      sellPrice,
+      quantity,
+      registerDate,
+      expireDate,
+    } = req.body;
+
+    const pharmacyManagerId = req.user._id; // Assuming the user's ID is attached to req.user (Pharmacy Manager)
+
+    // Create a new product and associate it with the pharmacy manager
+    const newProduct = new Product({
+      medname,
+      category,
+      subcategory,
+      actualPrice,
+      sellPrice,
+      quantity,
+      registerDate,
+      expireDate,
+      pharmacyManager: pharmacyManagerId, // Set the pharmacy manager ID
+    });
+
+    // Save the new product to the database
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct); // Respond with the created product
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Get all products for the logged-in pharmacy manager or pharmacist (under the same PM)
+exports.getProducts = async (req, res) => {
+  try {
+    const user = req.user; // Get the logged-in user's details
+
+    let pharmacyManagerId;
+
+    if (user.role === "pharmacyManager") {
+      // If the logged-in user is a Pharmacy Manager, fetch their own products
+      pharmacyManagerId = user._id;
+    } else if (user.role === "pharmacist") {
+      // If the logged-in user is a Pharmacist, get the associated Pharmacy Manager's ID
+      pharmacyManagerId = user.assignedPharmacyManager;
+    } else {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Find all products created by the pharmacy manager
+    const products = await Product.find({ pharmacyManager: pharmacyManagerId })
+      .populate("category", "category") // Populate category field
+      .populate("subcategory", "subcategory"); // Populate subcategory if needed
+
+    res.status(200).json(products); // Respond with the products
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Get a specific product by its ID for the logged-in pharmacy manager or pharmacist (under the same PM)
+exports.getProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const user = req.user;
+
+    let pharmacyManagerId;
+
+    if (user.role === "pharmacyManager") {
+      pharmacyManagerId = user._id;
+    } else if (user.role === "pharmacist") {
+      pharmacyManagerId = user.assignedPharmacyManager;
+    } else {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Find the product by ID and pharmacy manager
+    const product = await Product.findOne({
+      _id: productId,
+      pharmacyManager: pharmacyManagerId,
+    })
+      .populate("category", "category")
+      .populate("subcategory", "subcategory");
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json(product); // Respond with the product
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Update a product by its ID for the logged-in pharmacy manager only
+exports.updateProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const pharmacyManagerId = req.user._id;
+
+    if (req.user.role !== "pharmacyManager") {
+      return res
+        .status(403)
+        .json({ message: "Only the Pharmacy Manager can update products" });
+    }
+
+    // Find the product by ID and update it
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: productId, pharmacyManager: pharmacyManagerId },
+      req.body,
+      { new: true, runValidators: true } // Return the updated document and validate it
+    );
+
+    if (!updatedProduct)
+      return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json(updatedProduct); // Respond with the updated product
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Delete a product by its ID for the logged-in pharmacy manager only
+exports.deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const pharmacyManagerId = req.user._id;
+
+    if (req.user.role !== "pharmacyManager") {
+      return res
+        .status(403)
+        .json({ message: "Only the Pharmacy Manager can delete products" });
+    }
+
+    // Find the product by ID and delete it
+    const deletedProduct = await Product.findOneAndDelete({
+      _id: productId,
+      pharmacyManager: pharmacyManagerId,
+    });
+
+    if (!deletedProduct)
+      return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json({ message: "Product deleted successfully" }); // Respond with a success message
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

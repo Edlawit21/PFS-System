@@ -10,10 +10,17 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PharmacyManager",
+      required: true,
+    }, // Reference to the pharmacy manager
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-module.exports = mongoose.model("Category", categorySchema);
+const Category = mongoose.model("Category", categorySchema);
+
+module.exports = Category;

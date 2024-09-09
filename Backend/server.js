@@ -3,17 +3,31 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./Config/db");
-const authRoutes = require("./Routes/auth"); // Ensure authRoutes is imported
-const initializeDefaultAdmin = require("./Initialization/initializeDefaultAdmin"); // Path to your initialization script
-
+const initializeDefaultAdmin = require("./Initialization/initializeDefaultAdmin");
+const loginRoute = require("./Routes/loginRoute");
+const adminRoute = require("./Routes/adminRoute");
+const docRoute = require("./Routes/docRoute");
+const pmRoute = require("./Routes/pmRoute");
+const pharmacistRoute = require("./Routes/pharmacistRoute");
+const userRoute = require("./Routes/userRoute");
+const addressRoute = require("./Routes/addressRoute");
 // Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 
+// Apply CORS middleware
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Allow requests from this origin
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+    credentials: true, // Allow cookies and authentication headers
+  })
+);
+
 // Middleware
-app.use(cors());
 app.use(bodyParser.json());
+//app.use('/uploads', express.static('uploads')); // Serve uploaded files
 
 // Connect to MongoDB
 connectDB();
@@ -32,9 +46,14 @@ app.get("/", (req, res) => {
   res.send("Server is up and running");
 });
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
-
+//Routes
+app.use("/api/login", loginRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/user", userRoute);
+app.use("/api/doctor", docRoute);
+app.use("/api/pharmacy-manager", pmRoute);
+app.use("/api/pharmacist", pharmacistRoute);
+app.use("/api/address", addressRoute);
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

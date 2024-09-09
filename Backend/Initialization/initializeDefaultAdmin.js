@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Admin = require("../Models/User/adminModel"); // Adjust the path as needed
+const bcrypt = require("bcryptjs");
+const Admin = require("../Models/Userform/adminModel");
 
 const initializeDefaultAdmin = async () => {
   try {
@@ -10,12 +11,16 @@ const initializeDefaultAdmin = async () => {
       return;
     }
 
+    // Hash the admin password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash("@admin123", salt); // Use a secure password
+
     // Create a default admin
     const defaultAdmin = new Admin({
       username: "admin",
-      password: "@admin123", // Ensure you hash this password
+      password: hashedPassword,
       role: "admin",
-      // other fields if needed
+      status: "Active",
     });
 
     // Save the admin
