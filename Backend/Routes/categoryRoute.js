@@ -1,38 +1,38 @@
-// routes/categoryRoutes.js
 const express = require("express");
 const router = express.Router();
-const categoryController = require("../controllers/categoryController");
-const authenticate = require("../middleware/authMiddleware");
-const isPharmacyManager = require("../middleware/pharmacyManagerMiddleware");
+const categoryController = require("../controller/categoryController");
+const authMiddleware = require("../Middelware/authMiddleware");
+const { pmAuthorization } = require("../Middelware/ppAuthorizationMiddelware");
 
+// Routes for pharmacy manager
 router.post(
-  "/categories",
-  authenticate,
-  isPharmacyManager,
+  "/",
+  authMiddleware("pharmacyManager"),
+  pmAuthorization,
   categoryController.createCategory
 );
 router.get(
-  "/categories",
-  authenticate,
-  isPharmacyManager,
+  "/",
+  authMiddleware("pharmacyManager"),
+  pmAuthorization,
   categoryController.getCategories
 );
 router.get(
-  "/categories/:id",
-  authenticate,
-  isPharmacyManager,
+  "/:id",
+  authMiddleware("pharmacyManager"),
+  pmAuthorization,
   categoryController.getCategory
 );
 router.put(
-  "/categories/:id",
-  authenticate,
-  isPharmacyManager,
+  "/:id",
+  authMiddleware("pharmacyManager"),
+  pmAuthorization,
   categoryController.updateCategory
 );
 router.delete(
-  "/categories/:id",
-  authenticate,
-  isPharmacyManager,
+  "/:id",
+  authMiddleware("pharmacyManager"),
+  pmAuthorization,
   categoryController.deleteCategory
 );
 
