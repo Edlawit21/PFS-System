@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./Config/db");
 const initializeDefaultAdmin = require("./Initialization/initializeDefaultAdmin");
@@ -26,6 +27,8 @@ app.use(
 );
 
 // Middleware
+
+app.use(cookieParser());
 app.use(bodyParser.json());
 //app.use('/uploads', express.static('uploads')); // Serve uploaded files
 

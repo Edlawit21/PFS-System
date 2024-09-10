@@ -19,11 +19,9 @@ const makeSale = async (req, res) => {
       pharmacyManager: pharmacist.pharmacyManager, // Ensure the product belongs to the same PM
     });
     if (!product) {
-      return res
-        .status(404)
-        .json({
-          message: "Product not found or not authorized to sell this product",
-        });
+      return res.status(404).json({
+        message: "Product not found or not authorized to sell this product",
+      });
     }
 
     // Check if there is enough stock
@@ -57,6 +55,8 @@ const makeSale = async (req, res) => {
   }
 };
 
+module.exports = { makeSale };
+
 // Controller to fetch all sales transactions for a specific pharmacist
 const getSalesTransactions = async (req, res) => {
   try {
@@ -72,6 +72,8 @@ const getSalesTransactions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+module.exports = { getSalesTransactions };
 
 // Controller to delete a specific sales transaction
 const deleteTransaction = async (req, res) => {
@@ -90,6 +92,8 @@ const deleteTransaction = async (req, res) => {
     res.status(500).json({ message: "Error deleting transaction", error });
   }
 };
+
+module.exports = { deleteTransaction };
 
 // Controller to update a specific sales transaction
 const updateTransaction = async (req, res) => {
@@ -116,8 +120,5 @@ const updateTransaction = async (req, res) => {
 };
 
 module.exports = {
-  makeSale,
-  getSalesTransactions,
-  deleteTransaction,
   updateTransaction,
 };

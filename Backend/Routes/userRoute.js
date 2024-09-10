@@ -5,8 +5,6 @@ const {
   updateUserValidator,
   validate,
 } = require("../Validation/userValidation");
-//console.log(createUserValidator);
-//console.log(validate);
 const {
   registerUser,
   getUserById,
@@ -21,7 +19,7 @@ const { profileUpload } = require("../Config/multer");
 // Register a new user
 router.post(
   "/register",
-  authMiddleware("admin"),
+  authMiddleware(),
   profileUpload.single("profileImage"), // Handle file upload
   createUserValidator, // Validation middleware
   validate,

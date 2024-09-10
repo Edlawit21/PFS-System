@@ -2,7 +2,7 @@ const PharmacyManagerRegistration = require("../../Models/Userform/pmRegModel");
 const User = require("../../Models/Userform/userModel");
 
 // Create a new pharmacy manager's registration
-exports.createPharmacyManager = async (req, res) => {
+const createPharmacyManager = async (req, res) => {
   try {
     const { userId, pmName, pharmaName, experience } = req.body;
 
@@ -65,9 +65,10 @@ exports.createPharmacyManager = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { createPharmacyManager };
 
 // Update an existing pharmacy manager's registration
-exports.updatePharmacyManager = async (req, res) => {
+const updatePharmacyManager = async (req, res) => {
   try {
     const { id } = req.params;
     const { pmName, pharmaName, experience } = req.body;
@@ -111,9 +112,10 @@ exports.updatePharmacyManager = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { updatePharmacyManager };
 
 // Get a pharmacy manager registration by userId
-exports.getPharmacyManagerRegistration = async (req, res) => {
+const getPharmacyManagerRegistration = async (req, res) => {
   try {
     const { userId } = req.params;
     const pharmacyManagerRegistration =
@@ -130,9 +132,10 @@ exports.getPharmacyManagerRegistration = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getPharmacyManagerRegistration };
 
 // Get all pharmacy manager registrations
-exports.getAllPharmacyManagerRegistrations = async (req, res) => {
+const getAllPharmacyManagerRegistrations = async (req, res) => {
   try {
     const pharmacyManagerRegistrations =
       await PharmacyManagerRegistration.find();
@@ -141,9 +144,10 @@ exports.getAllPharmacyManagerRegistrations = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getAllPharmacyManagerRegistrations };
 
 // Delete a pharmacy manager registration by userId
-exports.deletePharmacyManagerRegistration = async (req, res) => {
+const deletePharmacyManagerRegistration = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -164,9 +168,10 @@ exports.deletePharmacyManagerRegistration = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { deletePharmacyManagerRegistration };
 
 // Get all users with pharmacy manager registration details
-exports.getAllUsersWithPharmacyManagerDetails = async (req, res) => {
+const getAllUsersWithPharmacyManagerDetails = async (req, res) => {
   try {
     // Fetch all users with the role 'pharmacyManager'
     const users = await User.find({ role: "pharmacyManager" });
@@ -191,3 +196,4 @@ exports.getAllUsersWithPharmacyManagerDetails = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getAllUsersWithPharmacyManagerDetails };

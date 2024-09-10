@@ -2,7 +2,7 @@ const DoctorRegistration = require("../../Models/Userform/doctorRegModel");
 const User = require("../../Models/Userform/userModel");
 
 // Create a new doctor's registration
-exports.createDoctor = async (req, res) => {
+const createDoctor = async (req, res) => {
   try {
     const {
       userId,
@@ -74,8 +74,10 @@ exports.createDoctor = async (req, res) => {
   }
 };
 
+module.exports = { createDoctor };
+
 // Update an existing doctor's registration
-exports.updateDoctor = async (req, res) => {
+const updateDoctor = async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -131,8 +133,10 @@ exports.updateDoctor = async (req, res) => {
   }
 };
 
+module.exports = { updateDoctor };
+
 // Get a doctor's registration details by userId
-exports.getDoctorRegistration = async (req, res) => {
+const getDoctorRegistration = async (req, res) => {
   try {
     const { userId } = req.params;
     const doctorRegistration = await DoctorRegistration.findOne({ userId });
@@ -149,8 +153,10 @@ exports.getDoctorRegistration = async (req, res) => {
   }
 };
 
+module.exports = { getDoctorRegistration };
+
 // Get all doctor registrations with pagination
-exports.getAllDoctorRegistrations = async (req, res) => {
+const getAllDoctorRegistrations = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Current page number
     const limit = parseInt(req.query.limit) || 10; // Number of records per page
@@ -174,8 +180,10 @@ exports.getAllDoctorRegistrations = async (req, res) => {
   }
 };
 
+module.exports = { getAllDoctorRegistrations };
+
 // Delete a doctor's registration by userId
-exports.deleteDoctorRegistration = async (req, res) => {
+const deleteDoctorRegistration = async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -198,8 +206,10 @@ exports.deleteDoctorRegistration = async (req, res) => {
   }
 };
 
+module.exports = { deleteDoctorRegistration };
+
 // Get all users with doctor registration details
-exports.getAllUsersWithDoctorDetails = async (req, res) => {
+const getAllUsersWithDoctorDetails = async (req, res) => {
   try {
     const users = await User.find({ role: "doctor" });
     const userIds = users.map((user) => user._id);
@@ -220,3 +230,5 @@ exports.getAllUsersWithDoctorDetails = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+module.exports = { getAllUsersWithDoctorDetails };

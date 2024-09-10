@@ -18,7 +18,7 @@ const authMiddleware = require("../Middelware/authMiddleware");
 
 router.post(
   "/",
-
+  authMiddleware("doctor"),
   documentUpload.fields([
     { name: "educationalInfo", maxCount: 1 },
     { name: "certificate", maxCount: 1 },
@@ -31,6 +31,7 @@ router.post(
 
 // Route to update an existing doctor's registration
 router.put(
+  authMiddleware("doctor"),
   "/:id",
   documentUpload.fields([
     { name: "educationalInfo", maxCount: 1 },
@@ -43,7 +44,7 @@ router.put(
 );
 
 // Route to get a doctor's registration details by userId
-router.get("/user/:userId", authMiddleware("doctor"), getDoctorRegistration);
+router.get("/user/:userId", authMiddleware("admin"), getDoctorRegistration);
 
 // Route to get all doctor registrations with pagination
 router.get("/", authMiddleware("admin"), getAllDoctorRegistrations);

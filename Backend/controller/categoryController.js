@@ -2,7 +2,7 @@
 const Category = require("../Models/PharmacyM/categoryModel");
 
 // Create a new category
-exports.createCategory = async (req, res) => {
+const createCategory = async (req, res) => {
   try {
     const { category, subcategory } = req.body;
     const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
@@ -21,8 +21,10 @@ exports.createCategory = async (req, res) => {
   }
 };
 
+module.exports = { createCategory };
+
 // Fetch all categories created by the logged-in pharmacy manager
-exports.getCategories = async (req, res) => {
+const getCategories = async (req, res) => {
   try {
     const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
 
@@ -36,8 +38,10 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+module.exports = { getCategories };
+
 // Fetch a single category by ID
-exports.getCategory = async (req, res) => {
+const getCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
@@ -55,8 +59,10 @@ exports.getCategory = async (req, res) => {
   }
 };
 
+module.exports = { getCategory };
+
 // Update a category by ID
-exports.updateCategory = async (req, res) => {
+const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { category, subcategory } = req.body;
@@ -84,8 +90,10 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
+module.exports = { updateCategory };
+
 // Delete a category by ID
-exports.deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
@@ -108,3 +116,5 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+module.exports = { deleteCategory };

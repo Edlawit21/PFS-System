@@ -2,7 +2,7 @@ const Pharmacist = require("../../Models/PharmacyM/pharmacistRegModel");
 const bcrypt = require("bcryptjs");
 
 // Create a new pharmacist
-exports.createPharmacist = async (req, res) => {
+const createPharmacist = async (req, res) => {
   try {
     const {
       firstname,
@@ -75,8 +75,10 @@ exports.createPharmacist = async (req, res) => {
   }
 };
 
+module.exports = { createPharmacist };
+
 // Update an existing pharmacist
-exports.updatePharmacist = async (req, res) => {
+const updatePharmacist = async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -163,8 +165,10 @@ exports.updatePharmacist = async (req, res) => {
   }
 };
 
+module.exports = { updatePharmacist };
+
 // Get all pharmacists with optional pharmacy manager details
-exports.getPharmacists = async (req, res) => {
+const getPharmacists = async (req, res) => {
   try {
     const { includeManager = "true" } = req.query; // Default to true
 
@@ -184,8 +188,10 @@ exports.getPharmacists = async (req, res) => {
   }
 };
 
+module.exports = { getPharmacists };
+
 // Get a pharmacist by ID with optional pharmacy manager details
-exports.getPharmacistById = async (req, res) => {
+const getPharmacistById = async (req, res) => {
   try {
     const { id } = req.params;
     const { includeManager = "true" } = req.query; // Default to true
@@ -211,8 +217,10 @@ exports.getPharmacistById = async (req, res) => {
   }
 };
 
+module.exports = { getPharmacistById };
+
 // Delete a pharmacist by ID
-exports.deletePharmacist = async (req, res) => {
+const deletePharmacist = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -228,8 +236,10 @@ exports.deletePharmacist = async (req, res) => {
   }
 };
 
+module.exports = { deletePharmacist };
+
 // Get all pharmacists under a specific manager
-exports.getPharmacistsUnderManager = async (managerId) => {
+const getPharmacistsUnderManager = async (managerId) => {
   try {
     // Fetch pharmacists where the 'createdBy' field matches the managerId
     const pharmacists = await Pharmacist.find({ createdBy: managerId });
@@ -243,3 +253,4 @@ exports.getPharmacistsUnderManager = async (managerId) => {
     throw new Error(error.message);
   }
 };
+module.exports = { getPharmacistsUnderManager };

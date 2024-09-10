@@ -1,14 +1,7 @@
 const Prescription = require("../Models/Doctor/prescriptionModel");
-const { validationResult } = require("express-validator"); // this is for the middelware validation part
 
 // Controller to create a new prescription
-exports.createPrescription = async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
+const createPrescription = async (req, res) => {
   try {
     // Create a new prescription instance using the request body
     const prescription = new Prescription(req.body);
@@ -29,7 +22,7 @@ exports.createPrescription = async (req, res) => {
 };
 
 // Controller to get all prescriptions
-exports.getAllPrescriptions = async (req, res) => {
+const getAllPrescriptions = async (req, res) => {
   try {
     // Fetch all prescriptions from the database
     const prescriptions = await Prescription.find();
@@ -45,7 +38,7 @@ exports.getAllPrescriptions = async (req, res) => {
 };
 
 // Controller to get a single prescription by ID
-exports.getPrescriptionById = async (req, res) => {
+const getPrescriptionById = async (req, res) => {
   try {
     // Fetch a prescription by its ID
     const prescription = await Prescription.findById(req.params.id);
@@ -66,7 +59,7 @@ exports.getPrescriptionById = async (req, res) => {
 };
 
 // Controller to update a prescription by ID
-exports.updatePrescriptionById = async (req, res) => {
+const updatePrescriptionById = async (req, res) => {
   // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -102,7 +95,7 @@ exports.updatePrescriptionById = async (req, res) => {
 };
 
 // Controller to delete a prescription by ID
-exports.deletePrescriptionById = async (req, res) => {
+const deletePrescriptionById = async (req, res) => {
   try {
     // Find and delete the prescription by its ID
     const prescription = await Prescription.findByIdAndDelete(req.params.id);
@@ -120,4 +113,11 @@ exports.deletePrescriptionById = async (req, res) => {
       .status(500)
       .json({ message: "Error deleting prescription", error: error.message });
   }
+};
+module.exports = {
+  deletePrescriptionById,
+  updatePrescriptionById,
+  getPrescriptionById,
+  getAllPrescriptions,
+  createPrescription,
 };

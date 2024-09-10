@@ -2,7 +2,7 @@ const User = require("../../Models/Userform/userModel");
 const bcrypt = require("bcryptjs");
 
 // Register a new user
-exports.registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
   try {
     const {
       firstname,
@@ -59,8 +59,10 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+module.exports = { registerUser };
+
 // Get user details by ID
-exports.getUserById = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id);
@@ -108,6 +110,7 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getUserById };
 
 {
   /*// Update user details
@@ -154,7 +157,7 @@ exports.updateUser = async (req, res) => {
 }
 
 // Delete user
-exports.deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedUser = await User.findByIdAndDelete(id);
@@ -169,8 +172,10 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+module.exports = { deleteUser };
+
 // Get all users
-exports.getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query; // Default to page 1 and 10 users per page
 
@@ -189,3 +194,5 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+module.exports = { getAllUsers };

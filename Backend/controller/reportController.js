@@ -56,7 +56,7 @@ module.exports = { generateSalesReport };
 //Fetch Sales: Queries the SalesTransaction model for transactions made by the pharmacist on the specified date.
 //Report Creation: Compiles the transactions into a report and calculates the total sales.
 
-exports.getSalesReport = async (req, res) => {
+const getSalesReport = async (req, res) => {
   try {
     const { startDate, endDate, pharmacistId, role, managerId } = req.query;
 
@@ -111,3 +111,4 @@ exports.getSalesReport = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+module.exports = { getSalesReport };

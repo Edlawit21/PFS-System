@@ -29,7 +29,7 @@ const findUserByUsername = async (username) => {
 };
 
 // Login function
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -86,3 +86,4 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+module.exports = { login };

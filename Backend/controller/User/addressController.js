@@ -3,7 +3,7 @@ const AddressRegistration = require("../../Models/Userform/addressModel");
 const PharmacyManagerRegistration = require("../../Models/Userform/pmRegModel");
 
 // Create Address Registration
-exports.createAddress = async (req, res) => {
+const createAddress = async (req, res) => {
   try {
     const {
       state,
@@ -61,8 +61,10 @@ exports.createAddress = async (req, res) => {
   }
 };
 
+module.exports = { createAddress };
+
 // Update Address Registration
-exports.updateAddress = async (req, res) => {
+const updateAddress = async (req, res) => {
   try {
     const {
       state,
@@ -110,8 +112,10 @@ exports.updateAddress = async (req, res) => {
   }
 };
 
+module.exports = { updateAddress };
+
 // Get Address Registration by ID
-exports.getAddressRegistration = async (req, res) => {
+const getAddressRegistration = async (req, res) => {
   try {
     const addressRegistration = await AddressRegistration.findOne({
       _id: req.params.addressId,
@@ -130,8 +134,10 @@ exports.getAddressRegistration = async (req, res) => {
   }
 };
 
+module.exports = { getAddressRegistration };
+
 // Get All Address Registrations for the authenticated pharmacy manager
-exports.getAllAddressRegistrations = async (req, res) => {
+const getAllAddressRegistrations = async (req, res) => {
   try {
     const addressRegistrations = await AddressRegistration.find({
       pharmacyManagerRegistrationId: req.user._id,
@@ -142,9 +148,10 @@ exports.getAllAddressRegistrations = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getAllAddressRegistrations };
 
 // Delete Address Registration
-exports.deleteAddressRegistration = async (req, res) => {
+const deleteAddressRegistration = async (req, res) => {
   try {
     const addressRegistration = await AddressRegistration.findOneAndDelete({
       _id: req.params.addressId,
@@ -165,8 +172,10 @@ exports.deleteAddressRegistration = async (req, res) => {
   }
 };
 
+module.exports = { deleteAddressRegistration };
+
 // Get All Users with Pharmacy Manager and Address Details
-exports.getAllUsersWithPharmacyManagerAndAddressDetails = async (req, res) => {
+const getAllUsersWithPharmacyManagerAndAddressDetails = async (req, res) => {
   try {
     const users = await User.find({ role: "pharmacyManager" });
     const userIds = users.map((user) => user._id);
@@ -202,3 +211,5 @@ exports.getAllUsersWithPharmacyManagerAndAddressDetails = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+module.exports = { getAllUsersWithPharmacyManagerAndAddressDetails };

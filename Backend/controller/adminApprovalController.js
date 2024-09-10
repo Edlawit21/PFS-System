@@ -7,8 +7,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: "your-email@gmail.com",
-    pass: "your-email-password",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -29,7 +29,7 @@ const sendNotificationEmail = async (email, status, role) => {
 };
 
 // Get all doctor registrations for review
-exports.getAllDoctorRegistrations = async (req, res) => {
+const getAllDoctorRegistrations = async (req, res) => {
   try {
     // Fetch doctor registrations
     const doctors = await DoctorRegistration.find();
@@ -50,8 +50,10 @@ exports.getAllDoctorRegistrations = async (req, res) => {
   }
 };
 
+module.exports = { getAllDoctorRegistrations };
+
 // Get all pharmacy manager registrations for review
-exports.getAllPharmacyManagerRegistrations = async (req, res) => {
+const getAllPharmacyManagerRegistrations = async (req, res) => {
   try {
     // Fetch pharmacy manager registrations
     const pharmacyManagers = await PharmacyManagerRegistration.find();
@@ -71,20 +73,19 @@ exports.getAllPharmacyManagerRegistrations = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+module.exports = { getAllPharmacyManagerRegistrations };
 
 // Approve or reject a doctor registration
-exports.updateDoctorRegistrationStatus = async (req, res) => {
+const updateDoctorRegistrationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, reviewerComments } = req.body;
 
     // Validate status
     if (!["Approved", "Rejected"].includes(status)) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid status value. Must be 'Approved' or 'Rejected'.",
-        });
+      return res.status(400).json({
+        message: "Invalid status value. Must be 'Approved' or 'Rejected'.",
+      });
     }
 
     // Update Doctor Registration
@@ -112,30 +113,28 @@ exports.updateDoctorRegistrationStatus = async (req, res) => {
       await sendNotificationEmail(user.email, status, "Doctor");
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Doctor Registration status updated successfully.",
-        registration: updatedRegistration,
-      });
+    res.status(200).json({
+      message: "Doctor Registration status updated successfully.",
+      registration: updatedRegistration,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
 
+module.exports = { updateDoctorRegistrationStatus };
+
 // Approve or reject a pharmacy manager registration
-exports.updatePharmacyManagerRegistrationStatus = async (req, res) => {
+const updatePharmacyManagerRegistrationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, reviewerComments } = req.body;
 
     // Validate status
     if (!["Approved", "Rejected"].includes(status)) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid status value. Must be 'Approved' or 'Rejected'.",
-        });
+      return res.status(400).json({
+        message: "Invalid status value. Must be 'Approved' or 'Rejected'.",
+      });
     }
 
     // Update Pharmacy Manager Registration
@@ -164,13 +163,13 @@ exports.updatePharmacyManagerRegistrationStatus = async (req, res) => {
       await sendNotificationEmail(user.email, status, "Pharmacy Manager");
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Pharmacy Manager Registration status updated successfully.",
-        registration: updatedRegistration,
-      });
+    res.status(200).json({
+      message: "Pharmacy Manager Registration status updated successfully.",
+      registration: updatedRegistration,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+module.exports = { updatePharmacyManagerRegistrationStatus };

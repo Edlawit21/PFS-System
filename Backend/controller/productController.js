@@ -1,7 +1,7 @@
 const Product = require("../Models/PharmacyM/productModel");
 
 // Create a new product
-exports.createProduct = async (req, res) => {
+const createProduct = async (req, res) => {
   try {
     const {
       medname,
@@ -37,8 +37,10 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+module.exports = { createProduct };
+
 // Get all products for the logged-in pharmacy manager or pharmacist (under the same PM)
-exports.getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
   try {
     const user = req.user; // Get the logged-in user's details
 
@@ -65,8 +67,10 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+module.exports = { getProducts };
+
 // Get a specific product by its ID for the logged-in pharmacy manager or pharmacist (under the same PM)
-exports.getProduct = async (req, res) => {
+const getProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const user = req.user;
@@ -96,9 +100,10 @@ exports.getProduct = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+module.exports = { getProduct };
 
 // Update a product by its ID for the logged-in pharmacy manager only
-exports.updateProduct = async (req, res) => {
+const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const pharmacyManagerId = req.user._id;
@@ -125,8 +130,10 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+module.exports = { updateProduct };
+
 // Delete a product by its ID for the logged-in pharmacy manager only
-exports.deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const pharmacyManagerId = req.user._id;
@@ -151,3 +158,4 @@ exports.deleteProduct = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+module.exports = { deleteProduct };
