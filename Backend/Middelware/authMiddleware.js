@@ -18,6 +18,9 @@ const authMiddleware =
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      // Determine which model to use based on the role
+      const role = decoded.role; // Ensure the role is included in the JWT payload
+
       // Get the user based on role
       let user;
       switch (role) {
@@ -50,7 +53,8 @@ const authMiddleware =
       req.user = user;
       next();
     } catch (err) {
-      res.status(401).json({ msg: "Token is not valid" });
+      console.error("Token verification error:", err); // Log the detailed error
+      res.status(401).json({ msg: "Token is not valid", error: err.message });
     }
   };
 

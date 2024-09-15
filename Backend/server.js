@@ -12,6 +12,8 @@ const pmRoute = require("./Routes/pmRoute");
 const pharmacistRoute = require("./Routes/pharmacistRoute");
 const userRoute = require("./Routes/userRoute");
 const addressRoute = require("./Routes/addressRoute");
+const statusRoute = require("./Routes/statusRoute");
+const adminApproveRoute = require("./Routes/adminApproveRoute");
 // Load environment variables from .env file
 dotenv.config();
 
@@ -30,7 +32,8 @@ app.use(
 
 app.use(cookieParser());
 app.use(bodyParser.json());
-//app.use('/uploads', express.static('uploads')); // Serve uploaded files
+app.use("/uploads/profile-image", express.static("Uploads/profile-image")); // Serve profile images
+app.use("/uploads/document", express.static("Uploads/document")); // Serve document
 
 // Connect to MongoDB
 connectDB();
@@ -50,16 +53,19 @@ app.get("/", (req, res) => {
 });
 
 //Routes
-app.use("/api/login", loginRoute);
+app.use("/api", loginRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/user", userRoute);
 app.use("/api/doctor", docRoute);
 app.use("/api/pharmacy-manager", pmRoute);
 app.use("/api/pharmacist", pharmacistRoute);
 app.use("/api/address", addressRoute);
+app.use("/api/approve", adminApproveRoute);
+app.use("/api/status", statusRoute);
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  console.error("Error Message:", err.message);
   res.status(500).send("Something broke!");
 });
 

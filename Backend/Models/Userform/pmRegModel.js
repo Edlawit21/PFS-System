@@ -20,7 +20,6 @@ const pharmacyManagerRegistrationSchema = new mongoose.Schema({
     index: true,
   },
   approvalDate: { type: Date },
-  reviewerComments: { type: String, trim: true },
 });
 
 const PharmacyManagerRegistration = mongoose.model(

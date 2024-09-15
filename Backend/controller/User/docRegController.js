@@ -14,10 +14,9 @@ const createDoctor = async (req, res) => {
       pin,
     } = req.body;
 
-    if (!req.files || req.files.length < 3) {
+    if (!req.files || req.files.length < 2) {
       return res.status(400).json({
-        message:
-          "All files (educationalInfo, certificate, medicalLicense) are required.",
+        message: "Educational Info and Medical License are required.",
       });
     }
 
@@ -26,7 +25,7 @@ const createDoctor = async (req, res) => {
       : null;
     const certificate = req.files["certificate"]
       ? req.files["certificate"][0].path
-      : null;
+      : null; // Optional
     const medicalLicense = req.files["medicalLicense"]
       ? req.files["medicalLicense"][0].path
       : null;
@@ -74,12 +73,9 @@ const createDoctor = async (req, res) => {
   }
 };
 
-module.exports = { createDoctor };
-
-// Update an existing doctor's registration
 const updateDoctor = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId } = req.params;
     const {
       docName,
       hospitalName,
@@ -111,9 +107,14 @@ const updateDoctor = async (req, res) => {
         : undefined;
     }
 
-    // Find and update the doctor registration
-    const updatedDoctor = await DoctorRegistration.findByIdAndUpdate(
-      id,
+    // Remove fields with undefined values
+    Object.keys(updateFields).forEach(
+      (key) => updateFields[key] === undefined && delete updateFields[key]
+    );
+
+    // Find and update the doctor registration by userId
+    const updatedDoctor = await DoctorRegistration.findOneAndUpdate(
+      { userId },
       updateFields,
       { new: true }
     );
@@ -129,11 +130,10 @@ const updateDoctor = async (req, res) => {
       doctor: updatedDoctor,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error updating doctor registration:", error); // Log the error to the server console
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
-module.exports = { updateDoctor };
 
 // Get a doctor's registration details by userId
 const getDoctorRegistration = async (req, res) => {
@@ -152,8 +152,6 @@ const getDoctorRegistration = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-module.exports = { getDoctorRegistration };
 
 // Get all doctor registrations with pagination
 const getAllDoctorRegistrations = async (req, res) => {
@@ -180,8 +178,6 @@ const getAllDoctorRegistrations = async (req, res) => {
   }
 };
 
-module.exports = { getAllDoctorRegistrations };
-
 // Delete a doctor's registration by userId
 const deleteDoctorRegistration = async (req, res) => {
   try {
@@ -206,29 +202,10 @@ const deleteDoctorRegistration = async (req, res) => {
   }
 };
 
-module.exports = { deleteDoctorRegistration };
-
-// Get all users with doctor registration details
-const getAllUsersWithDoctorDetails = async (req, res) => {
-  try {
-    const users = await User.find({ role: "doctor" });
-    const userIds = users.map((user) => user._id);
-
-    const doctorRegistrations = await DoctorRegistration.find({
-      userId: { $in: userIds },
-    });
-
-    const usersWithDoctorDetails = users.map((user) => {
-      const doctorRegistration = doctorRegistrations.find((reg) =>
-        reg.userId.equals(user._id)
-      );
-      return { ...user.toObject(), doctorRegistration };
-    });
-
-    res.status(200).json({ usersWithDoctorDetails });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
+module.exports = {
+  createDoctor,
+  updateDoctor,
+  getDoctorRegistration,
+  getAllDoctorRegistrations,
+  deleteDoctorRegistration,
 };
-
-module.exports = { getAllUsersWithDoctorDetails };

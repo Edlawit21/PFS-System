@@ -49,13 +49,13 @@ const createUserValidator = [
   body("gender")
     .notEmpty()
     .withMessage("Gender is required.")
-    .isIn(["male", "female", "other"])
+    .isIn(["male", "female"])
     .withMessage("Invalid gender."),
 
   body("role")
     .notEmpty()
     .withMessage("Role is required.")
-    .isIn(["admin", "doctor", "pmanager"])
+    .isIn(["doctor", "pharmacyManager"])
     .withMessage("Invalid role."),
 ];
 
@@ -100,12 +100,12 @@ const updateUserValidator = [
 
   body("gender")
     .optional()
-    .isIn(["male", "female", "other"])
+    .isIn(["male", "female"])
     .withMessage("Invalid gender."),
 
   body("role")
     .optional()
-    .isIn(["admin", "doctor", "pmanager"])
+    .isIn(["doctor", "pmanager"])
     .withMessage("Invalid role."),
 ];
 

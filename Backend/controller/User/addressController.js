@@ -61,8 +61,6 @@ const createAddress = async (req, res) => {
   }
 };
 
-module.exports = { createAddress };
-
 // Update Address Registration
 const updateAddress = async (req, res) => {
   try {
@@ -112,8 +110,6 @@ const updateAddress = async (req, res) => {
   }
 };
 
-module.exports = { updateAddress };
-
 // Get Address Registration by ID
 const getAddressRegistration = async (req, res) => {
   try {
@@ -134,8 +130,6 @@ const getAddressRegistration = async (req, res) => {
   }
 };
 
-module.exports = { getAddressRegistration };
-
 // Get All Address Registrations for the authenticated pharmacy manager
 const getAllAddressRegistrations = async (req, res) => {
   try {
@@ -148,7 +142,6 @@ const getAllAddressRegistrations = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-module.exports = { getAllAddressRegistrations };
 
 // Delete Address Registration
 const deleteAddressRegistration = async (req, res) => {
@@ -171,8 +164,6 @@ const deleteAddressRegistration = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-module.exports = { deleteAddressRegistration };
 
 // Get All Users with Pharmacy Manager and Address Details
 const getAllUsersWithPharmacyManagerAndAddressDetails = async (req, res) => {
@@ -212,4 +203,11 @@ const getAllUsersWithPharmacyManagerAndAddressDetails = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsersWithPharmacyManagerAndAddressDetails };
+module.exports = {
+  createAddress,
+  updateAddress,
+  getAddressRegistration,
+  getAllAddressRegistrations,
+  deleteAddressRegistration,
+  getAllUsersWithPharmacyManagerAndAddressDetails,
+};

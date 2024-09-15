@@ -46,7 +46,8 @@ const registerUser = async (req, res) => {
       gender,
       phoneNumber,
       role,
-      password: hashedPassword, // Save hashed password
+      password: hashedPassword,
+      status: "Pending",
     });
 
     // Save the user
@@ -58,8 +59,6 @@ const registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-module.exports = { registerUser };
 
 // Get user details by ID
 const getUserById = async (req, res) => {
@@ -78,56 +77,12 @@ const getUserById = async (req, res) => {
 };
 
 // Update user details
-exports.updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { firstname, lastname, username, email, gender, phoneNumber, role } =
       req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        firstname,
-        lastname,
-        profileImage: req.file ? req.file.path : undefined, // Update profileImage if a new file is uploaded
-        username,
-        email,
-        gender,
-        phoneNumber,
-        role,
-      },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    res
-      .status(200)
-      .json({ message: "User updated successfully.", user: updatedUser });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
-module.exports = { getUserById };
-
-{
-  /*// Update user details
-exports.updateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      firstname,
-      lastname,
-      username,
-      email,
-      gender,
-      phoneNumber,
-      role,
-    } = req.body;
-
-    // Ensure profile image is updated if it exists
     const updateFields = {
       firstname,
       lastname,
@@ -142,19 +97,21 @@ exports.updateUser = async (req, res) => {
       updateFields.profileImage = req.file.path;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, updateFields, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found.' });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    res.status(200).json({ message: 'User updated successfully.', user: updatedUser });
+    res
+      .status(200)
+      .json({ message: "User updated successfully.", user: updatedUser });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
- */
-}
 
 // Delete user
 const deleteUser = async (req, res) => {
@@ -171,8 +128,6 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-module.exports = { deleteUser };
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -195,4 +150,11 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { getAllUsers };
+// Export all functions together
+module.exports = {
+  registerUser,
+  getUserById,
+  updateUser,
+  deleteUser,
+  getAllUsers,
+};

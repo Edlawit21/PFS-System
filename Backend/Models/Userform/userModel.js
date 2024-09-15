@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   profileImage: { type: String, required: true }, // Store URL or path to the uploaded image
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
-  gender: { type: Number, enum: [1, 2], required: true }, // 1 for Male, 2 for Female
+  gender: { type: String, enum: ["male", "female"], required: true }, // 1 for Male, 2 for Female
   phoneNumber: { type: String, required: true },
   role: { type: String, enum: ["doctor", "pharmacyManager"], required: true },
   password: { type: String, required: true },
@@ -17,8 +17,6 @@ const userSchema = new mongoose.Schema({
     enum: ["Pending", "Active", "Inactive"],
     default: "Pending",
   },
-  passwordResetToken: { type: String },
-  passwordResetExpires: { type: Date },
 });
 
 // Pre-save hook to hash the password before saving
@@ -48,3 +46,8 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
+
+{
+  /* passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },*/
+}

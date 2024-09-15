@@ -31,28 +31,28 @@ const authMiddleware = require("../Middelware/authMiddleware");
 
 // Route to get all doctor registrations
 router.get(
-  "/doctors",
+  "/doc",
   authMiddleware("admin"), // Ensure the requester is an admin
   adminApprovalController.getAllDoctorRegistrations // Handle the request
 );
 
 // Route to update a specific doctor registration's status
 router.put(
-  "/doctors/:id",
+  "/doc/:id",
   authMiddleware("admin"), // Ensure the requester is an admin
   adminApprovalController.updateDoctorRegistrationStatus // Handle the request
 );
 
 // Route to get all pharmacy manager registrations
 router.get(
-  "/pharmacy-managers",
+  "/pm",
   authMiddleware("admin"), // Ensure the requester is an admin
   adminApprovalController.getAllPharmacyManagerRegistrations // Handle the request
 );
 
 // Route to update a specific pharmacy manager registration's status
 router.put(
-  "/pharmacy-managers/:id",
+  "/pm/:id",
   authMiddleware("admin"), // Ensure the requester is an admin
   adminApprovalController.updatePharmacyManagerRegistrationStatus // Handle the request
 );

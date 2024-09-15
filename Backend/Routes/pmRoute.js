@@ -21,8 +21,8 @@ const upload = documentUpload;
 
 // Create a new pharmacy manager's registration
 router.post(
-  "/pharmacy-manager",
-  authMiddleware("pharmacyManager"), // Assuming only admins can create pharmacy managers
+  "/create",
+  //authMiddleware("pharmacyManager"), // Assuming only admins can create pharmacy managers
   upload.fields([
     { name: "compliance", maxCount: 1 },
     { name: "licensePM", maxCount: 1 },
@@ -35,8 +35,8 @@ router.post(
 
 // Update an existing pharmacy manager's registration
 router.put(
-  "/pharmacy-manager/:id",
-  authMiddleware("pharmacyManager"), // Assuming only admins can update pharmacy managers
+  "/:id",
+  authMiddleware("pharmacyManager", "admin"), // Assuming only admins can update pharmacy managers
   upload.fields([
     { name: "compliance", maxCount: 1 },
     { name: "licensePM", maxCount: 1 },
@@ -49,28 +49,28 @@ router.put(
 
 // Get a pharmacy manager registration by userId
 router.get(
-  "/pharmacy-manager/:userId",
-  authMiddleware("admin"), // Assuming only admins can view details
+  "/:userId",
+  authMiddleware("admin", "pharmacyManager"), // Assuming only admins can view details
   getPharmacyManagerRegistration
 );
 
 // Get all pharmacy manager registrations
 router.get(
-  "/pharmacy-managers",
+  "/",
   authMiddleware("admin"), // Assuming only admins can view all registrations
   getAllPharmacyManagerRegistrations
 );
 
 // Delete a pharmacy manager registration by userId
 router.delete(
-  "/pharmacy-manager/:userId",
+  "/:userId",
   authMiddleware("admin"), // Assuming only admins can delete registrations
   deletePharmacyManagerRegistration
 );
 
 // Get all users with pharmacy manager registration details
 router.get(
-  "/users-with-pharmacy-manager-details",
+  "/users-with-pharmacy-manager-details/:userId",
   authMiddleware("admin"), // Assuming only admins can view this information
   getAllUsersWithPharmacyManagerDetails
 );

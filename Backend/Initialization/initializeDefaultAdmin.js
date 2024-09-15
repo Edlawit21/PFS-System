@@ -1,24 +1,18 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const Admin = require("../Models/Userform/adminModel");
 
 const initializeDefaultAdmin = async () => {
   try {
-    // Check if admin already exists
-    const existingAdmin = await Admin.findOne({ role: "admin" });
+    const existingAdmin = await Admin.findOne({ username: "admin" });
     if (existingAdmin) {
       console.log("Default admin already exists.");
       return;
     }
 
-    // Hash the admin password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash("@admin123", salt); // Use a secure password
-
     // Create a default admin
     const defaultAdmin = new Admin({
       username: "admin",
-      password: hashedPassword,
+      password: "admin123", // Use plain password, hashing is handled by the schema
       role: "admin",
       status: "Active",
     });

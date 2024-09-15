@@ -75,8 +75,6 @@ const createPharmacist = async (req, res) => {
   }
 };
 
-module.exports = { createPharmacist };
-
 // Update an existing pharmacist
 const updatePharmacist = async (req, res) => {
   try {
@@ -165,8 +163,6 @@ const updatePharmacist = async (req, res) => {
   }
 };
 
-module.exports = { updatePharmacist };
-
 // Get all pharmacists with optional pharmacy manager details
 const getPharmacists = async (req, res) => {
   try {
@@ -187,8 +183,6 @@ const getPharmacists = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { getPharmacists };
 
 // Get a pharmacist by ID with optional pharmacy manager details
 const getPharmacistById = async (req, res) => {
@@ -217,8 +211,6 @@ const getPharmacistById = async (req, res) => {
   }
 };
 
-module.exports = { getPharmacistById };
-
 // Delete a pharmacist by ID
 const deletePharmacist = async (req, res) => {
   try {
@@ -236,8 +228,6 @@ const deletePharmacist = async (req, res) => {
   }
 };
 
-module.exports = { deletePharmacist };
-
 // Get all pharmacists under a specific manager
 const getPharmacistsUnderManager = async (managerId) => {
   try {
@@ -253,4 +243,11 @@ const getPharmacistsUnderManager = async (managerId) => {
     throw new Error(error.message);
   }
 };
-module.exports = { getPharmacistsUnderManager };
+module.exports = {
+  createPharmacist,
+  updatePharmacist,
+  getPharmacists,
+  getPharmacistById,
+  deletePharmacist,
+  getPharmacistsUnderManager,
+};

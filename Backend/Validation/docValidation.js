@@ -2,12 +2,6 @@ const { check, body, validationResult } = require("express-validator");
 
 // Validator for creating a doctor
 const createDoctorValidator = [
-  check("userId")
-    .isMongoId()
-    .withMessage("Invalid User ID format")
-    .notEmpty()
-    .withMessage("User ID is required"),
-
   body("docName")
     .notEmpty()
     .withMessage("Doctor name is required")
@@ -27,8 +21,7 @@ const createDoctorValidator = [
     .withMessage("Hospital type must be a string"),
 
   body("specialization")
-    .notEmpty()
-    .withMessage("Specialization is required")
+    .optional()
     .isString()
     .withMessage("Specialization must be a string"),
 
@@ -47,11 +40,11 @@ const createDoctorValidator = [
 
 // Validator for updating a doctor
 const updateDoctorValidator = [
-  check("id")
-    .isMongoId()
-    .withMessage("Invalid Doctor ID format")
+  check("userId")
     .notEmpty()
-    .withMessage("User ID is required"),
+    .withMessage("User ID is required")
+    .isMongoId()
+    .withMessage("Invalid Doctor ID format"),
 
   body("docName")
     .optional()

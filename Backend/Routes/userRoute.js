@@ -19,7 +19,7 @@ const { profileUpload } = require("../Config/multer");
 // Register a new user
 router.post(
   "/register",
-  authMiddleware(),
+  // authMiddleware(), // Optional: remove if registration does not require authentication
   profileUpload.single("profileImage"), // Handle file upload
   createUserValidator, // Validation middleware
   validate,
@@ -27,7 +27,11 @@ router.post(
 );
 
 // Get user details by ID
-router.get("/:id", authMiddleware("admin"), getUserById);
+router.get(
+  "/:id",
+  authMiddleware("admin"), // Ensure only authorized users can access
+  getUserById
+);
 
 // Update user details
 router.put(
@@ -35,14 +39,22 @@ router.put(
   profileUpload.single("profileImage"), // Handle file upload
   updateUserValidator, // Validation middleware
   validate,
-  authMiddleware("admin"), // Ensure only authorized users can update
+  authMiddleware("admin", "doctor", "pharmacyManager"), // Ensure only authorized users can update
   updateUser
 );
 
 // Delete user
-router.delete("/:id", authMiddleware("admin"), deleteUser);
+router.delete(
+  "/:id",
+  authMiddleware("admin"), // Ensure only authorized users can delete
+  deleteUser
+);
 
 // Get all users with pagination
-router.get("/", authMiddleware("admin"), getAllUsers);
+router.get(
+  "/",
+  authMiddleware("admin"), // Ensure only authorized users can access
+  getAllUsers
+);
 
 module.exports = router;

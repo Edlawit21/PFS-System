@@ -4,7 +4,7 @@ const path = require("path");
 // Storage configuration for profile images
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "Uploads/profile-images/");
+    cb(null, path.join(__dirname, "../Uploads/profile-images/")); // Fixed the path
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -32,10 +32,11 @@ const profileUpload = multer({
     );
   },
 });
+
 // Storage configuration for documents
 const documentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "Uploads/documents/");
+    cb(null, path.join(__dirname, "../Uploads/documents/")); // Fixed the path
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
