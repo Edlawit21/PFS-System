@@ -1,5 +1,4 @@
 const User = require("../../Models/Userform/userModel");
-const bcrypt = require("bcryptjs");
 
 // Register a new user
 const registerUser = async (req, res) => {
@@ -32,10 +31,6 @@ const registerUser = async (req, res) => {
         .json({ message: "Email or username already exists." });
     }
 
-    // Hash the password before saving the user
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // Create a new user with the hashed password
     const newUser = new User({
       firstname,
@@ -46,7 +41,7 @@ const registerUser = async (req, res) => {
       gender,
       phoneNumber,
       role,
-      password: hashedPassword,
+      password,
       status: "Pending",
     });
 
@@ -132,18 +127,14 @@ const deleteUser = async (req, res) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query; // Default to page 1 and 10 users per page
-
-    const users = await User.find()
-      .limit(limit * 1) // Limit the number of users returned
-      .skip((page - 1) * limit); // Skip users based on current page
+    // Fetch all users from the database (no pagination)
+    const users = await User.find();
 
     const totalUsers = await User.countDocuments(); // Count total users
 
     res.status(200).json({
       users,
-      totalPages: Math.ceil(totalUsers / limit),
-      currentPage: page,
+      totalUsers,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });

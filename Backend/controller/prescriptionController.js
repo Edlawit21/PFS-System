@@ -1,10 +1,31 @@
 const Prescription = require("../Models/Doctor/prescriptionModel");
+const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 // Controller to create a new prescription
 const createPrescription = async (req, res) => {
   try {
-    // Create a new prescription instance using the request body
-    const prescription = new Prescription(req.body);
+    const { datePicker, patient, medications, physician, signature } = req.body;
+
+    // Get the token from cookies
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Create a new prescription instance using the request body and add the doctor's ID
+    const prescription = new Prescription({
+      datePicker,
+      patient,
+      medications,
+      physician,
+      signature,
+      createdBy: decoded.id, // Set the doctor ID from the JWT token
+    });
 
     // Save the prescription to the database
     await prescription.save();
@@ -15,9 +36,46 @@ const createPrescription = async (req, res) => {
       .json({ message: "Prescription created successfully", prescription });
   } catch (error) {
     // Handle errors during prescription creation
+    console.error(error); // Log the error for debugging
     res
       .status(500)
       .json({ message: "Error creating prescription", error: error.message });
+  }
+};
+
+// Controller to update a prescription by ID
+const updatePrescriptionById = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    // Find and update the prescription by its ID
+    const prescription = await Prescription.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Run schema validation on update
+      }
+    );
+
+    // If the prescription is not found, respond with a 404 error
+    if (!prescription) {
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+
+    // Respond with the updated prescription
+    res
+      .status(200)
+      .json({ message: "Prescription updated successfully", prescription });
+  } catch (error) {
+    // Handle errors during updating the prescription
+    res
+      .status(500)
+      .json({ message: "Error updating prescription", error: error.message });
   }
 };
 
@@ -58,42 +116,6 @@ const getPrescriptionById = async (req, res) => {
   }
 };
 
-// Controller to update a prescription by ID
-const updatePrescriptionById = async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  try {
-    // Find and update the prescription by its ID
-    const prescription = await Prescription.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true, // Return the updated document
-        runValidators: true, // Run schema validation on update
-      }
-    );
-
-    // If the prescription is not found, respond with a 404 error
-    if (!prescription) {
-      return res.status(404).json({ message: "Prescription not found" });
-    }
-
-    // Respond with the updated prescription
-    res
-      .status(200)
-      .json({ message: "Prescription updated successfully", prescription });
-  } catch (error) {
-    // Handle errors during updating the prescription
-    res
-      .status(500)
-      .json({ message: "Error updating prescription", error: error.message });
-  }
-};
-
 // Controller to delete a prescription by ID
 const deletePrescriptionById = async (req, res) => {
   try {
@@ -114,10 +136,11 @@ const deletePrescriptionById = async (req, res) => {
       .json({ message: "Error deleting prescription", error: error.message });
   }
 };
+
 module.exports = {
-  deletePrescriptionById,
-  updatePrescriptionById,
-  getPrescriptionById,
-  getAllPrescriptions,
   createPrescription,
+  getAllPrescriptions,
+  getPrescriptionById,
+  updatePrescriptionById,
+  deletePrescriptionById,
 };

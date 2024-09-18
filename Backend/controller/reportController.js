@@ -1,6 +1,8 @@
 const SalesTransaction = require("../Models/Pharmacist/salesModel");
 const SalesReport = require("../Models/Pharmacist/salesReportModel");
 const { getPharmacistsUnderManager } = require("./User/pharmacistController");
+const jwt = require("jsonwebtoken");
+const Pharmacist = require("../Models/PharmacyM/pharmacistRegModel");
 
 const generateSalesReport = async (req, res) => {
   try {
@@ -8,6 +10,13 @@ const generateSalesReport = async (req, res) => {
 
     // Extract pharmacistId from the authenticated user
     const pharmacistId = req.user._id; // or however you store the user's ID
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Ensure the pharmacist exists
     const pharmacist = await Pharmacist.findById(pharmacistId);
@@ -17,7 +26,7 @@ const generateSalesReport = async (req, res) => {
 
     // Fetch sales transactions for the given date
     const transactions = await SalesTransaction.find({
-      pharmacist: pharmacistId,
+      pharmacist: decoded.id,
       date: {
         $gte: new Date(date).setHours(0, 0, 0, 0),
         $lte: new Date(date).setHours(23, 59, 59, 999),
@@ -38,7 +47,7 @@ const generateSalesReport = async (req, res) => {
 
     // Generate and save the report
     const report = new SalesReport({
-      pharmacist: pharmacistId,
+      pharmacist: decoded.id,
       reportDate: date,
       transactions: transactions.map((tx) => tx._id),
       totalSales,
@@ -46,19 +55,42 @@ const generateSalesReport = async (req, res) => {
 
     await report.save();
 
-    res.status(201).json({ message: "Sales report generated", report });
+    // Fetch detailed transaction information for the report
+    const detailedTransactions = await SalesTransaction.find({
+      _id: { $in: transactions.map((tx) => tx._id) },
+    });
+
+    // Add detailed transaction information to the report
+    const reportWithDetails = {
+      ...report.toObject(), // Convert report to a plain JavaScript object
+      transactions: detailedTransactions, // Include detailed transactions
+    };
+
+    res
+      .status(201)
+      .json({ message: "Sales report generated", report: reportWithDetails });
   } catch (error) {
-    res.status(500).json({ message: "Error generating report", error });
+    console.error("Error generating report:", error); // Log the full error
+    res
+      .status(500)
+      .json({ message: "Error generating report", error: error.message });
   }
 };
 
-module.exports = { generateSalesReport };
 //Fetch Sales: Queries the SalesTransaction model for transactions made by the pharmacist on the specified date.
 //Report Creation: Compiles the transactions into a report and calculates the total sales.
 
 const getSalesReport = async (req, res) => {
   try {
-    const { startDate, endDate, pharmacistId, role, managerId } = req.query;
+    const { startDate, endDate } = req.body;
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Ensure dates are provided
     if (!startDate || !endDate) {
@@ -67,14 +99,20 @@ const getSalesReport = async (req, res) => {
         .json({ message: "Start date and end date are required." });
     }
 
+    // Extract role and userId from decoded token
+    const { role, id: userId } = decoded;
+
     if (role === "pharmacist") {
       // Fetch reports for the specific pharmacist
       const reports = await SalesReport.find({
-        pharmacist: pharmacistId,
+        pharmacist: userId,
         reportDate: {
           $gte: new Date(startDate).setHours(0, 0, 0, 0),
           $lte: new Date(endDate).setHours(23, 59, 59, 999),
         },
+      }).populate({
+        path: "transactions",
+        select: "medicineName quantity totalPrice date", // Include fields to populate
       });
 
       if (!reports.length) {
@@ -86,7 +124,7 @@ const getSalesReport = async (req, res) => {
       res.status(200).json({ reports });
     } else if (role === "pharmacyManager") {
       // Get pharmacist IDs under the manager
-      const pharmacistIds = await getPharmacistsUnderManager(managerId);
+      const pharmacistIds = await getPharmacistsUnderManager(userId);
 
       // Fetch reports for these pharmacists
       const reports = await SalesReport.find({
@@ -95,7 +133,15 @@ const getSalesReport = async (req, res) => {
           $gte: new Date(startDate).setHours(0, 0, 0, 0),
           $lte: new Date(endDate).setHours(23, 59, 59, 999),
         },
-      }).populate("pharmacist", "firstname lastname");
+      })
+        .populate({
+          path: "transactions",
+          select: "medicineName quantity totalPrice date", // Include fields to populate
+        })
+        .populate({
+          path: "pharmacist",
+          select: "username", // Populate pharmacist's username
+        });
 
       if (!reports.length) {
         return res
@@ -111,4 +157,5 @@ const getSalesReport = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-module.exports = { getSalesReport };
+
+module.exports = { generateSalesReport, getSalesReport };

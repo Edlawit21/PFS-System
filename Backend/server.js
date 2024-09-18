@@ -14,6 +14,12 @@ const userRoute = require("./Routes/userRoute");
 const addressRoute = require("./Routes/addressRoute");
 const statusRoute = require("./Routes/statusRoute");
 const adminApproveRoute = require("./Routes/adminApproveRoute");
+const productRoute = require("./Routes/productRoute");
+const categoryRoute = require("./Routes/categoryRoute");
+const prescriptionRoute = require("./Routes/prescriptionRoute");
+const reportRoute = require("./Routes/reportRoute");
+const salesRoute = require("./Routes/salesRoute");
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -55,13 +61,19 @@ app.get("/", (req, res) => {
 //Routes
 app.use("/api", loginRoute);
 app.use("/api/admin", adminRoute);
-app.use("/api/user", userRoute);
+app.use("/api/users", userRoute);
 app.use("/api/doctor", docRoute);
 app.use("/api/pharmacy-manager", pmRoute);
 app.use("/api/pharmacist", pharmacistRoute);
 app.use("/api/address", addressRoute);
 app.use("/api/approve", adminApproveRoute);
 app.use("/api/status", statusRoute);
+app.use("/api/product", productRoute);
+app.use("/api/prescription", prescriptionRoute);
+app.use("/api/report", reportRoute);
+app.use("/api/sales", salesRoute);
+app.use("/api/category", categoryRoute);
+
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

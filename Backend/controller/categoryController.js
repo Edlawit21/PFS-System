@@ -1,17 +1,25 @@
 // controllers/categoryController.js
 const Category = require("../Models/PharmacyM/categoryModel");
+const jwt = require("jsonwebtoken");
 
 // Create a new category
 const createCategory = async (req, res) => {
   try {
     const { category, subcategory } = req.body;
-    const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
+    const pharmacyManagerId = req.user._id; // The logged-in pharmacy manager
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Create a new category
     const newCategory = new Category({
       category,
       subcategory,
-      pharmacyManager: pharmacyManagerId,
+      createdBy: decoded.id,
     });
     await newCategory.save();
 
@@ -20,8 +28,6 @@ const createCategory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { createCategory };
 
 // Fetch all categories created by the logged-in pharmacy manager
 const getCategories = async (req, res) => {
@@ -37,8 +43,6 @@ const getCategories = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { getCategories };
 
 // Fetch a single category by ID
 const getCategory = async (req, res) => {
@@ -58,8 +62,6 @@ const getCategory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { getCategory };
 
 // Update a category by ID
 const updateCategory = async (req, res) => {
@@ -90,8 +92,6 @@ const updateCategory = async (req, res) => {
   }
 };
 
-module.exports = { updateCategory };
-
 // Delete a category by ID
 const deleteCategory = async (req, res) => {
   try {
@@ -117,4 +117,10 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-module.exports = { deleteCategory };
+module.exports = {
+  createCategory,
+  getCategories,
+  getCategory,
+  updateCategory,
+  deleteCategory,
+};

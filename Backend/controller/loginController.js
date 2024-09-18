@@ -15,6 +15,7 @@ const findUserByUsername = async (username) => {
   if (pharmacist) return { user: pharmacist, role: "pharmacist" };
 
   return null;
+  z;
 };
 
 const login = async (req, res) => {
@@ -24,34 +25,35 @@ const login = async (req, res) => {
 
   try {
     const { username, password } = req.body;
-
-    // Log the credentials received
     console.log("Received login request:");
     console.log("Username:", username);
-    console.log("Password provided:", password);
+    console.log("Password:", password);
 
     const result = await findUserByUsername(username);
     if (!result) return res.status(400).json({ msg: "Invalid credentials" });
 
     const { user } = result;
-
-    // Log the user retrieved from the database
+    const role = user.role; // Use role from user object
     console.log("User retrieved from database:", user);
-    console.log("Hashed password in DB:", user.password);
+    console.log("Stored password (hashed):", user.password);
 
-    // Compare provided password with hashed password
     const isMatch = await user.comparePassword(password);
-
-    // Log whether the passwords match
     console.log("Password match:", isMatch);
 
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-    // Continue with authentication if passwords match...
-    const payload = { id: user._id, role: user.role };
+    if (role === "admin" || role === "doctor" || role === "pharmacyManager") {
+      if (user.status !== "Active")
+        return res
+          .status(403)
+          .json({ msg: "Account is not active. Please contact support." });
+    }
+
+    const payload = { id: user._id, role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
+    console.log("Generated token:", token);
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -59,7 +61,14 @@ const login = async (req, res) => {
       sameSite: "strict",
     });
 
+    res.cookie("role", role, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
     res.json({
+      token,
       user: {
         _id: user._id,
         username: user.username,

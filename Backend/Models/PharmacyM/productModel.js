@@ -11,11 +11,6 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    subcategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category", // Reference the Category model again
-      required: true,
-    },
     actualPrice: {
       type: Number,
       required: true,

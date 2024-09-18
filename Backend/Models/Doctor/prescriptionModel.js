@@ -76,6 +76,11 @@ const prescriptionSchema = new mongoose.Schema(
       type: String, // Assuming this is stored as a base64 string
       required: true,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DoctorRegistration", // Reference to the Doctor model
+      required: true,
+    },
   },
   { timestamps: true }
 );

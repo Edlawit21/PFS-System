@@ -1,4 +1,5 @@
 const Product = require("../Models/PharmacyM/productModel");
+const jwt = require("jsonwebtoken");
 
 // Create a new product
 const createProduct = async (req, res) => {
@@ -15,6 +16,13 @@ const createProduct = async (req, res) => {
     } = req.body;
 
     const pharmacyManagerId = req.user._id; // Assuming the user's ID is attached to req.user (Pharmacy Manager)
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Create a new product and associate it with the pharmacy manager
     const newProduct = new Product({
@@ -26,7 +34,7 @@ const createProduct = async (req, res) => {
       quantity,
       registerDate,
       expireDate,
-      pharmacyManager: pharmacyManagerId, // Set the pharmacy manager ID
+      createdBy: decoded.id, // Set the pharmacy manager ID
     });
 
     // Save the new product to the database
@@ -36,8 +44,6 @@ const createProduct = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
-module.exports = { createProduct };
 
 // Get all products for the logged-in pharmacy manager or pharmacist (under the same PM)
 const getProducts = async (req, res) => {
@@ -66,8 +72,6 @@ const getProducts = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
-module.exports = { getProducts };
 
 // Get a specific product by its ID for the logged-in pharmacy manager or pharmacist (under the same PM)
 const getProduct = async (req, res) => {
@@ -100,7 +104,6 @@ const getProduct = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-module.exports = { getProduct };
 
 // Update a product by its ID for the logged-in pharmacy manager only
 const updateProduct = async (req, res) => {
@@ -130,8 +133,6 @@ const updateProduct = async (req, res) => {
   }
 };
 
-module.exports = { updateProduct };
-
 // Delete a product by its ID for the logged-in pharmacy manager only
 const deleteProduct = async (req, res) => {
   try {
@@ -158,4 +159,10 @@ const deleteProduct = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-module.exports = { deleteProduct };
+module.exports = {
+  createProduct,
+  updateProduct,
+  getProduct,
+  getProducts,
+  deleteProduct,
+};

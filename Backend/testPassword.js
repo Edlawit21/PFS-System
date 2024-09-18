@@ -35,9 +35,9 @@ generateHash();*/
 const bcrypt = require("bcryptjs");
 
 // Hardcoded plain password and hashed password from database
-const plainPassword = "@Bbb_12"; // Replace with the plain password you're testing
+const plainPassword = "admin123"; // Replace with the plain password you're testing
 const hashedPassword =
-  "$2a$10$Ssu8Byyo.H8s/lL.nJvaheIrulJExnIxtW/8gY/OqfdOM085Nd.T."; // Replace with the hashed password from your database
+  "$2a$10$EhwNg4ouOl.BA4CcOtdmje41XzJNSzkNLSqH/lnqa5OUBefjrJxGq"; // Replace with the hashed password from your database
 
 // Function to test password match
 async function testPasswordMatch(plainPassword, hashedPassword) {

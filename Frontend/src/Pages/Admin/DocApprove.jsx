@@ -1,15 +1,38 @@
-import { useState } from "react";
-import { Table, Modal, Select } from "antd";
+import { useState, useEffect } from "react";
+import { Table, Modal, Button, Select } from "antd";
 import { columnDoc } from "../../Components/Column";
-import { dataDoc } from "../../Data/data";
+//import { dataDoc } from "../../Data/data";
 import "../Doctor/PrescriptionPage/Ant.css";
+import Api from "../../api/axiosInstance";
 
 const { Option } = Select;
+//const { Title } = Typography;
 
 const DocApprove = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [selectedGender, setSelectedGender] = useState(""); // State for selected gender
+  const [doctorData, setDoctorData] = useState([]); // State for doctor data
+  const [currentPage, setCurrentPage] = useState(1);
+  const [viewingDocument, setViewingDocument] = useState(null);
+
+  useEffect(() => {
+    // Fetch doctor registrations from the backend
+    const fetchDoctorData = async () => {
+      try {
+        const response = await Api.get("/approve/doctors"); // Adjust the URL as needed
+        console.log(
+          "Fetched doctor data:",
+          response.data.doctorsWithUserDetails
+        );
+        setDoctorData(response.data.doctorsWithUserDetails);
+      } catch (error) {
+        console.error("Error fetching doctor data:", error);
+      }
+    };
+
+    fetchDoctorData();
+  }, []);
 
   const showModal = (record) => {
     setModalContent(record); // Set the content for the modal based on the clicked row
@@ -23,22 +46,22 @@ const DocApprove = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  const handleViewDocument = (url) => {
+    setViewingDocument(url); // Set the URL of the document to be viewed
+  };
 
   const handleGenderChange = (value) => {
     setSelectedGender(value);
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
-  const totalEntries = dataDoc.length;
 
   const pagination = {
     pageSizeOptions,
     showSizeChanger: true,
-
     defaultPageSize,
-    total: totalEntries,
+    total: doctorData.length, // Use the length of doctorData    ,
     current: currentPage,
     onChange: (page) => {
       setCurrentPage(page);
@@ -49,9 +72,39 @@ const DocApprove = () => {
   };
 
   // Filter data based on the selected gender
-  const filteredData = dataDoc.filter(
+  const filteredData = doctorData.filter(
     (item) => !selectedGender || item.gender === selectedGender
   );
+
+  const renderDocumentPreview = (url) => {
+    if (!url) {
+      return <div>No document available.</div>;
+    }
+
+    if (url.endsWith(".pdf")) {
+      return (
+        <iframe
+          src={url}
+          style={{ width: "100%", height: "500px", border: "none" }}
+          title="PDF Viewer"
+        />
+      );
+    }
+
+    if (url.endsWith(".doc") || url.endsWith(".docx")) {
+      // URL encoding
+      const encodedUrl = encodeURIComponent(url);
+      const viewerUrl = `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`;
+      return (
+        <iframe
+          src={viewerUrl}
+          style={{ width: "100%", height: "500px", border: "none" }}
+          title="Document Viewer"
+        />
+      );
+    }
+    return <div>Unsupported document type.</div>;
+  };
 
   return (
     <div className="w-full h-full">
@@ -105,15 +158,50 @@ const DocApprove = () => {
         {modalContent && (
           <div>
             <p>
-              <strong>Name:</strong> {modalContent.name}
+              <strong>Name:</strong> {modalContent.docName}
             </p>
             <p>
-              <strong>Username:</strong> {modalContent.username}
+              <strong>Username:</strong> {modalContent.user.username}
             </p>
             <p>
-              <strong>Email:</strong> {modalContent.email}
+              <strong>Email:</strong> {modalContent.user.email}
             </p>
-            {/* Add more details as needed */}
+            <p>
+              <strong>Educational Info:</strong>
+              <Button
+                type="link"
+                onClick={() => handleViewDocument(modalContent.educationalInfo)}
+              >
+                View Document
+              </Button>
+            </p>
+            <p>
+              <strong>Medical License:</strong>
+              <Button
+                type="link"
+                onClick={() => handleViewDocument(modalContent.medicalLicense)}
+              >
+                View Document
+              </Button>
+            </p>
+            <p>
+              <strong>Certificate:</strong>
+              {modalContent.certificate ? (
+                <Button
+                  type="link"
+                  onClick={() => handleViewDocument(modalContent.certificate)}
+                >
+                  View Document
+                </Button>
+              ) : (
+                "No certificate uploaded"
+              )}
+            </p>
+          </div>
+        )}
+        {viewingDocument && (
+          <div style={{ marginTop: 20 }}>
+            {renderDocumentPreview(viewingDocument)}
           </div>
         )}
       </Modal>

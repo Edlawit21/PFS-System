@@ -1,5 +1,6 @@
 const Pharmacist = require("../../Models/PharmacyM/pharmacistRegModel");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // Create a new pharmacist
 const createPharmacist = async (req, res) => {
@@ -44,9 +45,13 @@ const createPharmacist = async (req, res) => {
       return res.status(400).json({ message: "Username already exists." });
     }
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Create a new pharmacist instance
     const pharmacist = new Pharmacist({
@@ -63,15 +68,16 @@ const createPharmacist = async (req, res) => {
       licenseExpiryDate,
       experience,
       username,
-      password: hashedPassword, // Save hashed password
-      pharmacyManager: req.user._id, // Link the logged-in pharmacy manager to the pharmacist
+      password,
+      createdBy: decoded.id, // Link the logged-in pharmacy manager to the pharmacist
     });
 
     // Save the pharmacist to the database
     await pharmacist.save();
     res.status(201).json({ pharmacist });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error during registration:", error); // Log error details
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

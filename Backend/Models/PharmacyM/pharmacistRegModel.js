@@ -66,10 +66,15 @@ const registerPharmacistSchema = new mongoose.Schema(
     passportPhoto: {
       type: String,
     },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PharmacyManager",
       required: true,
+    },
+    role: {
+      type: String,
+      default: "pharmacist", // Default role for pharmacists
     },
   },
   {

@@ -8,42 +8,32 @@ const {
   deleteTransaction,
   updateTransaction,
 } = require("../controller/salesController");
-const {
-  pharmacistAuthorization,
-} = require("../Middelware/ppAuthorizationMiddelware");
+
 const authMiddleware = require("../Middelware/authMiddleware");
 
 // Routes
 
 // POST: Create a sale transaction (pharmacist only)
-router.post(
-  "/sales",
-  authMiddleware("pharmacist"),
-  pharmacistAuthorization,
-  makeSale
-);
+router.post("/createSales", authMiddleware("pharmacist"), makeSale);
 
 // GET: Fetch all sales transactions for a specific pharmacist (pharmacist only)
 router.get(
   "/sales/:pharmacistId",
-  authMiddleware("pharmacist"),
-  pharmacistAuthorization,
+  authMiddleware("pharmacist"), // Ensure pharmacist role is required
   getSalesTransactions
 );
 
 // DELETE: Delete a specific sales transaction (pharmacist only)
 router.delete(
   "/sales/:transactionId",
-  authMiddleware("pharmacist"),
-  pharmacistAuthorization,
+  authMiddleware("pharmacist"), // Ensure pharmacist role is required
   deleteTransaction
 );
 
 // PUT: Update a specific sales transaction (pharmacist only)
 router.put(
   "/sales/:transactionId",
-  authMiddleware("pharmacist"),
-  pharmacistAuthorization,
+  authMiddleware("pharmacist"), // Ensure pharmacist role is required
   updateTransaction
 );
 

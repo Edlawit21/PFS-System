@@ -233,7 +233,7 @@ const getAllDoctorRegistrations = async (req, res) => {
     // Fetch user details with only required fields
     const users = await User.find(
       { _id: { $in: userIds } },
-      "email role username" // Select only the fields you need
+      "email gender username phoneNumber" // Select only the fields you need
     );
 
     // Combine user and registration details
@@ -242,7 +242,12 @@ const getAllDoctorRegistrations = async (req, res) => {
       return {
         ...doc.toObject(),
         user: user
-          ? { email: user.email, role: user.role, username: user.username }
+          ? {
+              email: user.email,
+              gender: user.gender,
+              username: user.username,
+              phoneNumber: user.phoneNumber,
+            }
           : null,
       }; // Merge doctor registration details with user info
     });
@@ -266,7 +271,7 @@ const getAllPharmacyManagerRegistrations = async (req, res) => {
     // Fetch user details with only required fields
     const users = await User.find(
       { _id: { $in: userIds } },
-      "email role username" // Select only the fields you need
+      "email gender phoneNumber username" // Select only the fields you need
     );
 
     // Combine pharmacy manager registration details with selected user info
@@ -275,7 +280,12 @@ const getAllPharmacyManagerRegistrations = async (req, res) => {
       return {
         ...pm.toObject(), // Include all pharmacy manager registration details
         user: user
-          ? { email: user.email, role: user.role, username: user.username }
+          ? {
+              email: user.email,
+              gender: user.gender,
+              username: user.username,
+              phoneNumber: user.phoneNumber,
+            }
           : null,
       };
     });

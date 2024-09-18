@@ -20,12 +20,16 @@ const createPharmacistValidator = [
     .isString()
     .withMessage("Gender must be a string."),
 
-  body("contact")
+  body("contact.phone")
     .notEmpty()
-    .withMessage("Contact is required.")
+    .withMessage("Phone number is required.")
     .isMobilePhone()
-    .withMessage("Invalid contact number format."),
-
+    .withMessage("Invalid phone number format."),
+  body("contact.email")
+    .notEmpty()
+    .withMessage("Email is required.")
+    .isEmail()
+    .withMessage("Invalid email format."),
   body("residentialAddress")
     .notEmpty()
     .withMessage("Residential address is required.")

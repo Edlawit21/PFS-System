@@ -19,33 +19,37 @@ export const sideItems = {
       icon: <CheckCircleOutlined />,
       label: "Approval",
       children: [
-        { key: "1-1", label: "Doctors", path: "/doctors" },
-        { key: "1-2", label: "Pharmacy Managers", path: "/pmanagers" },
+        { key: "1-1", label: "Doctors", path: "/admin/dashboard/doctors" },
+        {
+          key: "1-2",
+          label: "Pharmacy Managers",
+          path: "/admin/dashboard/pmanagers",
+        },
       ],
     },
     {
       key: "2",
       icon: <TeamOutlined />,
       label: "View Users",
-      path: "/view-users",
+      path: "/admin/dashboard/view-users",
     },
     {
       key: "3",
       icon: <UserOutlined />,
       label: "View Pharmacist",
-      path: "/view-pharmacist",
+      path: "/admin/dashboard/view-pharmacist",
     },
     {
       key: "4",
       icon: <EnvironmentOutlined />,
       label: "App Track",
-      path: "/app-track",
+      path: "/admin/dashboard/app-track",
     },
     {
       key: "5",
       icon: <SolutionOutlined />,
       label: "User Support",
-      path: "/user-support",
+      path: "/admin/dashboard/user-support",
     },
   ],
   pharmacist: [
@@ -54,15 +58,15 @@ export const sideItems = {
       icon: <ScanOutlined />,
       label: "Process Prescription",
       children: [
-        { key: "1-1", label: "Scan", path: "/scan" },
-        { key: "1-2", label: "Search", path: "/search" },
+        { key: "1-1", label: "Scan", path: "/pharmacist/dashboard/scan" },
+        { key: "1-2", label: "Search", path: "/pharmacist/dashboard/search" },
       ],
     },
     {
       key: "2",
       icon: <FileProtectOutlined />,
       label: "Generate Report",
-      path: "/generate-report",
+      path: "/pharmacist/dashboard/generate-report",
     },
   ],
   pmanager: [
@@ -77,8 +81,8 @@ export const sideItems = {
       icon: <HomeOutlined />,
       label: " Inventory",
       children: [
-        { key: "1-1", label: "Category", path: "/category" },
-        { key: "1-2", label: "Products", path: "/products" },
+        { key: "1-1", label: "Category", path: "pmanager/dashboard/category" },
+        { key: "1-2", label: "Products", path: "pmanager/dashboard/products" },
       ],
     },
     {
@@ -86,15 +90,23 @@ export const sideItems = {
       icon: <UserAddOutlined />,
       label: " Pharmacist",
       children: [
-        { key: "2-1", label: "Register Pharmacist", path: "/register-p" },
-        { key: "2-2", label: "View Pharmacist", path: "/view-p" },
+        {
+          key: "2-1",
+          label: "Register Pharmacist",
+          path: "pmanager/dashboard/register-p",
+        },
+        {
+          key: "2-2",
+          label: "View Pharmacist",
+          path: "pmanager/dashboard/view-p",
+        },
       ],
     },
     {
       key: "4",
       icon: <LineChartOutlined />,
       label: "View Report",
-      path: "/view-report",
+      path: "pmanager/dashboard/view-report",
     },
   ],
 };

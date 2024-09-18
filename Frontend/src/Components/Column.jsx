@@ -43,40 +43,40 @@ export const Column = [
 export const columnDoc = (showModal) => [
   {
     title: "Name",
-    dataIndex: "name",
-    sorter: (a, b) => a.name.localeCompare(b.name), // Correctly sorts alphabetically by 'name'
+    dataIndex: "docName",
+    sorter: (a, b) => a.docName.localeCompare(b.docName), // Correct sorting for 'docName'
   },
   {
     title: "UserName",
-    dataIndex: "username",
-    sorter: (a, b) => a.username.localeCompare(b.username), // Correctly sorts alphabetically by 'username'
+    dataIndex: ["user", "username"], // Accessing nested 'username'
+    sorter: (a, b) => a.user.username.localeCompare(b.user.username),
   },
   {
     title: "Email",
-    dataIndex: "email",
-    sorter: (a, b) => a.email.localeCompare(b.email), // Correctly sorts alphabetically by 'email'
+    dataIndex: ["user", "email"], // Correctly accessing nested 'email'
+    sorter: (a, b) => a.user.email.localeCompare(b.user.email),
   },
   {
     title: "Gender",
-    dataIndex: "gender",
+    dataIndex: ["user", "gender"], // Adjusted to access nested 'gender'
   },
   {
     title: "Phone Number",
-    dataIndex: "phonenumber",
+    dataIndex: ["user", "phoneNumber"], // Adjusted to access nested 'phoneNumber'
     sorter: (a, b) => {
-      const numA = parseFloat(a.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      return numA - numB; // Sort numerically
+      const numA = parseFloat(a.user.phoneNumber.replace(/[^\d.-]/g, "")); // Adjusted to access nested 'phoneNumber'
+      const numB = parseFloat(b.user.phoneNumber.replace(/[^\d.-]/g, "")); // Adjusted to access nested 'phoneNumber'
+      return numA - numB;
     },
   },
   {
     title: "Hospital Details",
-    dataIndex: "hospitalDetails",
-    sorter: (a, b) => a.hospitalDetails.localeCompare(b.hospitalDetails), // Correctly sorts alphabetically by 'hospitalDetails'
+    dataIndex: "hospitalName", // Update if needed
+    sorter: (a, b) => a.hospitalName.localeCompare(b.hospitalName),
   },
   {
     title: "View Document",
-    dataIndex: "viewDocument",
+    dataIndex: "educationalInfo", // Update if needed
     render: (_, record) => (
       <Button type="link" onClick={() => showModal(record)}>
         View
@@ -103,36 +103,35 @@ export const columnDoc = (showModal) => [
 export const columnPm = (showModal) => [
   {
     title: "Name",
-    dataIndex: "name",
+    dataIndex: "pmName",
     sorter: (a, b) => a.name.localeCompare(b.name), // Correctly sorts alphabetically by 'name'
   },
   {
     title: "UserName",
-    dataIndex: "username",
-    sorter: (a, b) => a.username.localeCompare(b.username), // Correctly sorts alphabetically by 'username'
+    dataIndex: ["user", "username"], // Accessing nested 'username'
+    sorter: (a, b) => a.user.username.localeCompare(b.user.username),
   },
   {
     title: "Email",
-    dataIndex: "email",
-    sorter: (a, b) => a.email.localeCompare(b.email), // Correctly sorts alphabetically by 'email'
+    dataIndex: ["user", "email"], // Correctly accessing nested 'email'
+    sorter: (a, b) => a.user.email.localeCompare(b.user.email),
   },
   {
     title: "Gender",
-    dataIndex: "gender",
-    // No sorter provided, as this is likely categorical and might not need sorting
+    dataIndex: ["user", "gender"], // Adjusted to access nested 'gender'
   },
   {
     title: "Phone Number",
-    dataIndex: "phonenumber",
+    dataIndex: ["user", "phoneNumber"], // Adjusted to access nested 'phoneNumber'
     sorter: (a, b) => {
-      const numA = parseFloat(a.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      return numA - numB; // Sort numerically
+      const numA = parseFloat(a.user.phoneNumber.replace(/[^\d.-]/g, "")); // Adjusted to access nested 'phoneNumber'
+      const numB = parseFloat(b.user.phoneNumber.replace(/[^\d.-]/g, "")); // Adjusted to access nested 'phoneNumber'
+      return numA - numB;
     },
   },
   {
     title: "License Information",
-    dataIndex: "licenseInformation",
+    dataIndex: "licensePM",
     sorter: (a, b) => a.licenseInformation.localeCompare(b.licenseInformation), // Correctly sorts alphabetically by 'hospitalDetails'
   },
   {
@@ -210,7 +209,7 @@ export const columnUser = [
 
   {
     title: "Phone Number",
-    dataIndex: "phonenumber",
+    dataIndex: "phoneNumber",
     sorter: (a, b) => {
       const numA = parseFloat(a.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
       const numB = parseFloat(b.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters

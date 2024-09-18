@@ -6,7 +6,8 @@ const authMiddleware = require("../Middelware/authMiddleware");
 // Login route
 router.post("/login", login);
 
-// Example protected route for Admin
+{
+  /*// Example protected route for Admin
 router.get("/admin/dashboard", authMiddleware("admin"), (req, res) => {
   res.send("Admin Dashboard");
 });
@@ -31,6 +32,12 @@ router.get(
   (req, res) => {
     res.send("Pharmacist Dashboard");
   }
-);
+);*/
+}
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.clearCookie("role");
+  res.json({ success: true, msg: "Logged out successfully" });
+});
 
 module.exports = router;

@@ -42,9 +42,11 @@ const RegistrationPage = () => {
     },
   ].filter(Boolean);
 
-  const handleRoleChange = (selectedRole) => {
-    setRole(selectedRole);
-    setCurrent(0); // Reset to the first step when the role changes
+  const handleRoleChange = (value) => {
+    if (role !== value) {
+      setRole(value);
+      setCurrent(0); // Reset to the first step when the role changes
+    }
   };
 
   const validateForm = async () => {

@@ -7,19 +7,31 @@ const Pharmacist = require("../Models/PharmacyM/pharmacistRegModel");
 const authMiddleware =
   (...allowedRoles) =>
   async (req, res, next) => {
-    // Get token from cookies
-    const token = req.cookies.token;
+    let token;
 
-    if (!token) {
+    // Extract token from cookies or authorization header
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+      console.log("Token provided in cookie:", token);
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+      console.log("Token provided in Authorization header:", token);
+    } else {
+      console.log("No token provided");
       return res.status(401).json({ msg: "No token, authorization denied" });
     }
 
     try {
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Decoded token:", decoded);
 
       // Determine which model to use based on the role
       const role = decoded.role; // Ensure the role is included in the JWT payload
+      console.log("User role from token:", role);
 
       // Get the user based on role
       let user;
@@ -32,15 +44,14 @@ const authMiddleware =
           user = await User.findById(decoded.id);
           break;
         case "pharmacist":
-          user = await Pharmacist.findById(decoded.id).populate(
-            "pharmacyManager"
-          );
+          user = await Pharmacist.findById(decoded.id);
           break;
         default:
           return res.status(403).json({ msg: "Access denied" });
       }
 
       if (!user) {
+        console.log("User not found for ID:", decoded.id);
         return res.status(404).json({ msg: "User not found" });
       }
 
@@ -51,6 +62,7 @@ const authMiddleware =
 
       // Attach user to the request object
       req.user = user;
+      console.log("User authorized and attached to request:", user);
       next();
     } catch (err) {
       console.error("Token verification error:", err); // Log the detailed error

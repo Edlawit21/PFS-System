@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, Modal, Select } from "antd";
 import { columnPm } from "../../Components/Column";
-import { dataDoc } from "../../Data/data";
+//import { dataDoc } from "../../Data/data";
 import "../Doctor/PrescriptionPage/Ant.css";
+import Api from "../../api/axiosInstance";
 
 const { Option } = Select;
 
@@ -10,6 +11,26 @@ const PManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [selectedGender, setSelectedGender] = useState(""); // State for selected gender
+  const [pharmacyManagerData, setPharmacyManagerData] = useState([]); // State for doctor data
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    // Fetch doctor registrations from the backend
+    const fetchPharmacyManagerData = async () => {
+      try {
+        const response = await Api.get("/approve/pharmacy-managers"); // Adjust the URL as needed
+        console.log(
+          "Fetched doctor data:",
+          response.data.pharmacyManagersWithUserDetails
+        );
+        setPharmacyManagerData(response.data.pharmacyManagersWithUserDetails);
+      } catch (error) {
+        console.error("Error fetching doctor data:", error);
+      }
+    };
+
+    fetchPharmacyManagerData();
+  }, []);
 
   const showModal = (record) => {
     setModalContent(record); // Set the content for the modal based on the clicked row
@@ -28,17 +49,14 @@ const PManager = () => {
     setSelectedGender(value);
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
-  const totalEntries = dataDoc.length;
 
   const pagination = {
     pageSizeOptions,
     showSizeChanger: true,
-
     defaultPageSize,
-    total: totalEntries,
+    total: pharmacyManagerData.length, // Use the length of doctorData    ,
     current: currentPage,
     onChange: (page) => {
       setCurrentPage(page);
@@ -49,7 +67,7 @@ const PManager = () => {
   };
 
   // Filter data based on the selected gender
-  const filteredData = dataDoc.filter(
+  const filteredData = pharmacyManagerData.filter(
     (item) => !selectedGender || item.gender === selectedGender
   );
 

@@ -1,45 +1,35 @@
 const express = require("express");
-const productController = require("../controller/productController");
-const authMiddleware = require("../Middelware/authMiddleware");
+const {
+  createProduct,
+  getProducts,
+  getProduct,
+  updateProduct,
+  deleteProduct,
+} = require("../controller/productController"); // Ensure this path is correct
+const authMiddleware = require("../Middelware/authMiddleware"); // Ensure this path is correct
 const router = express.Router();
-const { pmAuthorization } = require("../Middelware/ppAuthorizationMiddelware");
 
 // Route to create a new product (restricted to Pharmacy Manager)
-router.post(
-  "/",
-  authMiddleware("pharmacyManager"),
-  pmAuthorization,
-  productController.createProduct
-);
+router.post("/createProduct", authMiddleware("pharmacyManager"), createProduct);
 
 // Route to get all products (accessible to Pharmacy Manager and Pharmacist)
 router.get(
-  "/",
+  "/getallProduct",
   authMiddleware("pharmacyManager", "pharmacist"),
-  productController.getProducts
+  getProducts
 );
 
 // Route to get a specific product by ID (accessible to Pharmacy Manager and Pharmacist)
 router.get(
-  "/:id",
+  "/product/:id",
   authMiddleware("pharmacyManager", "pharmacist"),
-  productController.getProduct
+  getProduct
 );
 
 // Route to update a product by ID (restricted to Pharmacy Manager)
-router.put(
-  "/:id",
-  authMiddleware("pharmacyManager"),
-  pmAuthorization,
-  productController.updateProduct
-);
+router.put("/product/:id", authMiddleware("pharmacyManager"), updateProduct);
 
 // Route to delete a product by ID (restricted to Pharmacy Manager)
-router.delete(
-  "/:id",
-  authMiddleware("pharmacyManager"),
-  pmAuthorization,
-  productController.deleteProduct
-);
+router.delete("/product/:id", authMiddleware("pharmacyManager"), deleteProduct);
 
 module.exports = router;

@@ -2,37 +2,35 @@ const express = require("express");
 const router = express.Router();
 const categoryController = require("../controller/categoryController");
 const authMiddleware = require("../Middelware/authMiddleware");
-const { pmAuthorization } = require("../Middelware/ppAuthorizationMiddelware");
 
 // Routes for pharmacy manager
 router.post(
-  "/",
+  "/createCategory",
   authMiddleware("pharmacyManager"),
-  pmAuthorization,
   categoryController.createCategory
 );
 router.get(
-  "/",
+  "/allCategory",
   authMiddleware("pharmacyManager"),
-  pmAuthorization,
+
   categoryController.getCategories
 );
 router.get(
-  "/:id",
+  "/category/:id",
   authMiddleware("pharmacyManager"),
-  pmAuthorization,
+
   categoryController.getCategory
 );
 router.put(
-  "/:id",
+  "/category/:id",
   authMiddleware("pharmacyManager"),
-  pmAuthorization,
+
   categoryController.updateCategory
 );
 router.delete(
-  "/:id",
+  "/category/:id",
   authMiddleware("pharmacyManager"),
-  pmAuthorization,
+
   categoryController.deleteCategory
 );
 

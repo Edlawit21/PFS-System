@@ -1,22 +1,35 @@
 const Product = require("../Models/PharmacyM/productModel");
 const SalesTransaction = require("../Models/Pharmacist/salesModel");
 const Pharmacist = require("../Models/PharmacyM/pharmacistRegModel");
-
+const jwt = require("jsonwebtoken");
 // Controller to handle making a sale
 const makeSale = async (req, res) => {
   try {
-    const { medicineId, quantity, pharmacistId } = req.body;
+    const { medicineId, quantity } = req.body;
 
-    // Fetch the pharmacist's details to get the associated Pharmacy Manager (PM)
+    // Verify JWT token
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Extract pharmacistId from the token
+    const pharmacistId = decoded.id;
+
+    // Fetch the pharmacist's details to get the associated Pharmacy Manager
     const pharmacist = await Pharmacist.findById(pharmacistId);
     if (!pharmacist) {
       return res.status(404).json({ message: "Pharmacist not found" });
     }
+    // Fetch the product, ensuring it belongs to the same PM who created the pharmacist
+    console.log("Medicine ID:", medicineId);
+    console.log("Pharmacy Manager:", pharmacist.pharmacyManager);
 
     // Fetch the product, ensuring it belongs to the same PM who created the pharmacist
     const product = await Product.findOne({
       _id: medicineId,
-      pharmacyManager: pharmacist.pharmacyManager, // Ensure the product belongs to the same PM
+      createdBy: pharmacist.createdBy, // Ensure the product belongs to the same PM
     });
     if (!product) {
       return res.status(404).json({
@@ -25,22 +38,23 @@ const makeSale = async (req, res) => {
     }
 
     // Check if there is enough stock
-    if (product.quantityInStock < quantity) {
+    if (product.quantity < quantity) {
       return res.status(400).json({ message: "Not enough stock available" });
     }
 
-    // Calculate total price for the transaction
-    const totalPrice = product.price * quantity;
+    // Calculate total price for the transaction using sellPrice
+    const totalPrice = product.sellPrice * quantity;
 
     // Deduct stock
-    product.quantityInStock -= quantity;
+    product.quantity -= quantity;
     await product.save();
 
     // Record the sale transaction
     const transaction = new SalesTransaction({
-      medicine: medicineId,
+      medicineName: medicineId,
       quantity,
       totalPrice,
+      date: new Date(), // Set the current date
       pharmacist: pharmacistId,
     });
 
@@ -54,8 +68,6 @@ const makeSale = async (req, res) => {
     res.status(500).json({ message: "Error processing the sale", error });
   }
 };
-
-module.exports = { makeSale };
 
 // Controller to fetch all sales transactions for a specific pharmacist
 const getSalesTransactions = async (req, res) => {
@@ -72,8 +84,6 @@ const getSalesTransactions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-module.exports = { getSalesTransactions };
 
 // Controller to delete a specific sales transaction
 const deleteTransaction = async (req, res) => {
@@ -92,8 +102,6 @@ const deleteTransaction = async (req, res) => {
     res.status(500).json({ message: "Error deleting transaction", error });
   }
 };
-
-module.exports = { deleteTransaction };
 
 // Controller to update a specific sales transaction
 const updateTransaction = async (req, res) => {
@@ -120,5 +128,8 @@ const updateTransaction = async (req, res) => {
 };
 
 module.exports = {
+  makeSale,
+  getSalesTransactions,
+  deleteTransaction,
   updateTransaction,
 };
