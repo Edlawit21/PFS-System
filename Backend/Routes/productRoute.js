@@ -20,16 +20,12 @@ router.get(
 );
 
 // Route to get a specific product by ID (accessible to Pharmacy Manager and Pharmacist)
-router.get(
-  "/product/:id",
-  authMiddleware("pharmacyManager", "pharmacist"),
-  getProduct
-);
+router.get("/:id", authMiddleware("pharmacyManager", "pharmacist"), getProduct);
 
 // Route to update a product by ID (restricted to Pharmacy Manager)
-router.put("/product/:id", authMiddleware("pharmacyManager"), updateProduct);
+router.put("/:id", authMiddleware("pharmacyManager"), updateProduct);
 
 // Route to delete a product by ID (restricted to Pharmacy Manager)
-router.delete("/product/:id", authMiddleware("pharmacyManager"), deleteProduct);
+router.delete("/:id", authMiddleware("pharmacyManager"), deleteProduct);
 
 module.exports = router;

@@ -5,7 +5,29 @@ const { validationResult } = require("express-validator");
 // Controller to create a new prescription
 const createPrescription = async (req, res) => {
   try {
-    const { datePicker, patient, medications, physician, signature } = req.body;
+    // Destructure directly and handle nested properties
+    const {
+      prescriptionDate,
+      signature,
+      patient = {}, // Default to empty object if patient is undefined
+      medications = [], // Default to empty array if medications is undefined
+      physician = {}, // Default to empty object if physician is undefined
+    } = req.body;
+    // Retrieve the file path from the request
+    // const signature = req.file ? req.file.path : null; // Get file path
+    const {
+      name: { first: patientFirst = "", last: patientLast = "" } = {},
+      age,
+      gender,
+      phonenumber,
+      allergies,
+      condition,
+    } = patient;
+
+    const {
+      name: { first: physicianFirst = "", last: physicianLast = "" } = {},
+      phonenumber: physicianPhonenumber,
+    } = physician;
 
     // Get the token from cookies
     const token = req.cookies.token;
@@ -18,28 +40,48 @@ const createPrescription = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Create a new prescription instance using the request body and add the doctor's ID
-    const prescription = new Prescription({
-      datePicker,
-      patient,
-      medications,
-      physician,
+    const newPrescription = new Prescription({
+      prescriptionDate,
+      patient: {
+        name: {
+          first: patientFirst,
+          last: patientLast,
+        },
+        age,
+        gender,
+        phonenumber,
+        allergies: allergies || "",
+        condition: condition || "",
+      },
+      medications: medications.map((med) => ({
+        medicationName: med.medicationName,
+        dosage: med.dosage,
+        frequency: med.frequency,
+        route: med.route,
+        purpose: med.purpose || "",
+      })),
+      physician: {
+        name: {
+          first: physicianFirst,
+          last: physicianLast,
+        },
+        phonenumber: physicianPhonenumber,
+      },
       signature,
-      createdBy: decoded.id, // Set the doctor ID from the JWT token
+      createdBy: decoded.id,
     });
+    console.log("Received request body:", req.body);
+    // Save the new prescription to the database
+    const savedPrescription = await newPrescription.save();
 
-    // Save the prescription to the database
-    await prescription.save();
-
-    // Respond with the newly created prescription
-    res
-      .status(201)
-      .json({ message: "Prescription created successfully", prescription });
+    // Respond with the saved prescription data
+    res.status(201).json({
+      message: "Prescription created successfully",
+      data: savedPrescription,
+    });
   } catch (error) {
-    // Handle errors during prescription creation
-    console.error(error); // Log the error for debugging
-    res
-      .status(500)
-      .json({ message: "Error creating prescription", error: error.message });
+    console.error(error.message);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

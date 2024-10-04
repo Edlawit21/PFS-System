@@ -12,21 +12,15 @@ const {
   updatePrescriptionValidation,
 } = require("../Validation/prescriptionValidator");
 const { validationResult } = require("express-validator"); // Import validationResult
+//const { signatureUpload } = require("../Config/multer");
 
 const router = express.Router();
 
 // Route to create a prescription (restricted to doctors)
 router.post(
   "/createPrescription",
-  [authMiddleware("doctor"), createPrescriptionValidation],
-  (req, res, next) => {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-  },
+  //signatureUpload.single("signature"),
+  [authMiddleware("doctor")],
   createPrescription
 );
 
@@ -38,15 +32,11 @@ router.get(
 );
 
 // Route to get a single prescription by ID
-router.get(
-  "/prescription/:id",
-  authMiddleware("doctor", "pharmacist"),
-  getPrescriptionById
-);
+router.get("/:id", authMiddleware("doctor", "pharmacist"), getPrescriptionById);
 
 // Route to update a prescription by ID (restricted to doctors)
 router.put(
-  "/prescription/:id",
+  "/:id",
   [authMiddleware("doctor"), updatePrescriptionValidation],
   (req, res, next) => {
     // Check for validation errors
@@ -60,10 +50,6 @@ router.put(
 );
 
 // Route to delete a prescription by ID (restricted to doctors)
-router.delete(
-  "/prescription/:id",
-  authMiddleware("doctor"),
-  deletePrescriptionById
-);
+router.delete("/:id", authMiddleware("doctor"), deletePrescriptionById);
 
 module.exports = router;

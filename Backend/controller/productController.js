@@ -7,7 +7,6 @@ const createProduct = async (req, res) => {
     const {
       medname,
       category,
-      subcategory,
       actualPrice,
       sellPrice,
       quantity,
@@ -28,7 +27,6 @@ const createProduct = async (req, res) => {
     const newProduct = new Product({
       medname,
       category,
-      subcategory,
       actualPrice,
       sellPrice,
       quantity,
@@ -63,9 +61,9 @@ const getProducts = async (req, res) => {
     }
 
     // Find all products created by the pharmacy manager
-    const products = await Product.find({ pharmacyManager: pharmacyManagerId })
-      .populate("category", "category") // Populate category field
-      .populate("subcategory", "subcategory"); // Populate subcategory if needed
+    const products = await Product.find({
+      createdBy: pharmacyManagerId,
+    }).populate("category", "category subcategory");
 
     res.status(200).json(products); // Respond with the products
   } catch (error) {
@@ -92,11 +90,8 @@ const getProduct = async (req, res) => {
     // Find the product by ID and pharmacy manager
     const product = await Product.findOne({
       _id: productId,
-      pharmacyManager: pharmacyManagerId,
-    })
-      .populate("category", "category")
-      .populate("subcategory", "subcategory");
-
+      createdBy: pharmacyManagerId,
+    }).populate("category", "category subcategory");
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     res.status(200).json(product); // Respond with the product
@@ -119,7 +114,7 @@ const updateProduct = async (req, res) => {
 
     // Find the product by ID and update it
     const updatedProduct = await Product.findOneAndUpdate(
-      { _id: productId, pharmacyManager: pharmacyManagerId },
+      { _id: productId, createdBy: pharmacyManagerId },
       req.body,
       { new: true, runValidators: true } // Return the updated document and validate it
     );
@@ -148,7 +143,7 @@ const deleteProduct = async (req, res) => {
     // Find the product by ID and delete it
     const deletedProduct = await Product.findOneAndDelete({
       _id: productId,
-      pharmacyManager: pharmacyManagerId,
+      createdBy: pharmacyManagerId,
     });
 
     if (!deletedProduct)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Select, Input } from "antd";
+import { Table, Select, Input, Button } from "antd";
 import { columnUser } from "../../Components/Column";
 import "../Doctor/PrescriptionPage/Ant.css";
 import Api from "../../api/axiosInstance";
@@ -27,6 +27,8 @@ const Users = () => {
     const fetchUsersData = async () => {
       try {
         const response = await Api.get("/users");
+        console.log("Fetched users data:", response.data); // This line logs the full response
+        console.log("Fetched users:", response.data.users);
         setUsersData(response.data.users);
       } catch (error) {
         console.error("Error fetching users data:", error);
@@ -35,6 +37,34 @@ const Users = () => {
 
     fetchUsersData();
   }, []);
+
+  const handleToggle = async (userId, currentStatus) => {
+    console.log("Toggling status for user ID:", userId);
+    if (!userId) {
+      console.error("User ID is undefined.");
+      return; // Exit the function if userId is not defined
+    }
+
+    const newStatus = currentStatus === "Active" ? "Inactive" : "Active"; // Toggle status
+    try {
+      await Api.patch(`/status/users/${userId}/activation`, {
+        status: newStatus,
+      });
+      // Update local state to reflect the change
+      setUsersData((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === userId ? { ...user, status: newStatus } : user
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Error toggling user status:",
+        error.message,
+        error.response
+      );
+      alert(`Error: ${error.message}`); // Optional alert to notify users
+    }
+  };
 
   // Combine firstname and lastname into one field 'name'
   const mappedUsersData = usersData.map((user) => ({
@@ -131,7 +161,36 @@ const Users = () => {
               );
             },
           }}
-          columns={columnUser}
+          columns={columnUser.map((col) => {
+            if (col.title === "Action") {
+              return {
+                ...col,
+                render: (text, record) => {
+                  if (record.status === "Active") {
+                    return (
+                      <Button
+                        onClick={() => handleToggle(record._id, record.status)}
+                      >
+                        Deactivate
+                      </Button>
+                    );
+                  } else if (record.status === "Inactive") {
+                    return (
+                      <Button
+                        onClick={() => handleToggle(record._id, record.status)}
+                      >
+                        Activate
+                      </Button>
+                    );
+                  } else if (record.status === "Pending") {
+                    return <span>Pending</span>; // Display pending without a button
+                  }
+                  return null; // Return null if no action is needed
+                },
+              };
+            }
+            return col; // Return original column for others
+          })}
           dataSource={filteredData}
           pagination={pagination}
           style={{

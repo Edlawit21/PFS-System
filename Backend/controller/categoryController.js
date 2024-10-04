@@ -32,14 +32,15 @@ const createCategory = async (req, res) => {
 // Fetch all categories created by the logged-in pharmacy manager
 const getCategories = async (req, res) => {
   try {
-    const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
+    const pharmacyManagerId = req.user._id; // The logged-in pharmacy manager
 
     // Fetch categories
     const categories = await Category.find({
-      pharmacyManager: pharmacyManagerId,
+      createdBy: pharmacyManagerId,
     });
     res.status(200).json(categories);
   } catch (error) {
+    console.error("Error fetching categories:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -68,26 +69,36 @@ const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { category, subcategory } = req.body;
-    const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
+    const pharmacyManagerId = req.user._id;
 
-    // Fetch category
+    console.log(`Updating category ID: ${id}, New Values:`, {
+      category,
+      subcategory,
+    });
+
     const categoryToUpdate = await Category.findById(id);
-    if (!categoryToUpdate)
+    if (!categoryToUpdate) {
+      console.error("Category not found");
       return res.status(404).json({ message: "Category not found" });
+    }
+
     if (
-      categoryToUpdate.pharmacyManager.toString() !==
-      pharmacyManagerId.toString()
+      categoryToUpdate.createdBy.toString() !== pharmacyManagerId.toString()
     ) {
+      console.error("Access denied");
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // Update category
-    categoryToUpdate.category = category || categoryToUpdate.category;
-    categoryToUpdate.subcategory = subcategory || categoryToUpdate.subcategory;
+    // Perform updates
+    if (category) categoryToUpdate.category = category;
+    if (subcategory) categoryToUpdate.subcategory = subcategory;
+
     await categoryToUpdate.save();
 
+    console.log("Updated category:", categoryToUpdate);
     res.status(200).json(categoryToUpdate);
   } catch (error) {
+    console.error("Error updating category:", error);
     res.status(500).json({ error: error.message });
   }
 };

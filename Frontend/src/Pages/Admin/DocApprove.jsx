@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Modal, Button, Select } from "antd";
+import { Table, Modal, Button, Select, message } from "antd";
 import { columnDoc } from "../../Components/Column";
 //import { dataDoc } from "../../Data/data";
 import "../Doctor/PrescriptionPage/Ant.css";
@@ -52,6 +52,37 @@ const DocApprove = () => {
 
   const handleGenderChange = (value) => {
     setSelectedGender(value);
+  };
+  const refreshDoctorData = async () => {
+    try {
+      const response = await Api.get("/approve/doctors");
+      setDoctorData(response.data.doctorsWithUserDetails);
+    } catch (error) {
+      console.error("Error refreshing doctor data:", error);
+      message.error("Failed to refresh doctor data.");
+    }
+  };
+
+  const handleApprove = async (doctorId) => {
+    try {
+      await Api.put(`/approve/doctors/${doctorId}`, { status: "Approved" });
+      message.success("Doctor approved successfully!");
+      await refreshDoctorData(); // Refresh the doctor data
+    } catch (error) {
+      console.error("Error approving doctor:", error);
+      message.error("Failed to approve doctor.");
+    }
+  };
+
+  const handleReject = async (doctorId) => {
+    try {
+      await Api.put(`/approve/doctors/${doctorId}`, { status: "Rejected" });
+      message.success("Doctor rejected successfully!");
+      await refreshDoctorData(); // Refresh the doctor data
+    } catch (error) {
+      console.error("Error rejecting doctor:", error);
+      message.error("Failed to reject doctor.");
+    }
   };
 
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
@@ -133,7 +164,7 @@ const DocApprove = () => {
               );
             },
           }}
-          columns={columnDoc(showModal)} // Pass showModal to columns
+          columns={columnDoc(showModal, handleApprove, handleReject)} // Pass showModal to columns
           dataSource={filteredData} // Use filtered data
           pagination={pagination}
           style={{

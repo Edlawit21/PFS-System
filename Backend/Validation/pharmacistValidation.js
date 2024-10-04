@@ -20,27 +20,25 @@ const createPharmacistValidator = [
     .isString()
     .withMessage("Gender must be a string."),
 
-  body("contact.phone")
-    .notEmpty()
-    .withMessage("Phone number is required.")
-    .isMobilePhone()
-    .withMessage("Invalid phone number format."),
-  body("contact.email")
-    .notEmpty()
-    .withMessage("Email is required.")
-    .isEmail()
-    .withMessage("Invalid email format."),
+  body("contact").notEmpty().withMessage("Phone number is required."),
+  // .isMobilePhone()
+  // .withMessage("Invalid phone number format."),
+  // body("contact.email")
+  //   .notEmpty()
+  //   .withMessage("Email is required.")
+  //   .isEmail()
+  //   .withMessage("Invalid email format."),
   body("residentialAddress")
     .notEmpty()
     .withMessage("Residential address is required.")
     .isString()
     .withMessage("Residential address must be a string."),
 
-  body("graduationDate")
-    .notEmpty()
-    .withMessage("Graduation date is required.")
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .withMessage("Invalid graduation date format. Use YYYY-MM-DD."),
+  // body("graduationDate")
+  //   .notEmpty()
+  //   .withMessage("Graduation date is required.")
+  //   .matches(/^\d{4}-\d{2}-\d{2}$/)
+  //   .withMessage("Invalid graduation date format. Use YYYY-MM-DD."),
 
   body("licenseNumber")
     .notEmpty()
@@ -48,11 +46,11 @@ const createPharmacistValidator = [
     .isString()
     .withMessage("License number must be a string."),
 
-  body("licenseExpiryDate")
-    .notEmpty()
-    .withMessage("License expiry date is required.")
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .withMessage("Invalid license expiry date format. Use YYYY-MM-DD."),
+  // body("licenseExpiryDate")
+  //   .notEmpty()
+  //   .withMessage("License expiry date is required.")
+  //   .matches(/^\d{4}-\d{2}-\d{2}$/)
+  //   .withMessage("Invalid license expiry date format. Use YYYY-MM-DD."),
 
   body("experience")
     .notEmpty()
@@ -81,30 +79,30 @@ const updatePharmacistValidator = [
 
   body("gender").optional().isString().withMessage("Gender must be a string."),
 
-  body("contact")
-    .optional()
-    .isMobilePhone()
-    .withMessage("Invalid contact number format."),
+  // body("contact")
+  //   .optional()
+  //   .isMobilePhone()
+  //   .withMessage("Invalid contact number format."),
 
   body("residentialAddress")
     .optional()
     .isString()
     .withMessage("Residential address must be a string."),
 
-  body("graduationDate")
-    .optional()
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .withMessage("Invalid graduation date format. Use YYYY-MM-DD."),
+  // body("graduationDate")
+  //   .optional()
+  //   .matches(/^\d{4}-\d{2}-\d{2}$/)
+  //   .withMessage("Invalid graduation date format. Use YYYY-MM-DD."),
 
   body("licenseNumber")
     .optional()
     .isString()
     .withMessage("License number must be a string."),
 
-  body("licenseExpiryDate")
-    .optional()
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .withMessage("Invalid license expiry date format. Use YYYY-MM-DD."),
+  // body("licenseExpiryDate")
+  //   .optional()
+  //   .matches(/^\d{4}-\d{2}-\d{2}$/)
+  //   .withMessage("Invalid license expiry date format. Use YYYY-MM-DD."),
 
   body("experience")
     .optional()

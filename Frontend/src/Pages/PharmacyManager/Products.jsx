@@ -1,15 +1,16 @@
 import { columnProduct } from "../../Components/Column";
-import { dataProduct } from "../../Data/data";
-import { useState } from "react";
-import { Button, Table, Select, Input } from "antd";
+import { dataProduct } from "../../Data/data"; // Default data
+import { useState, useEffect } from "react";
+import { Button, Table, Select, Input, message } from "antd";
 import ProductModal from "./ProductModal";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import Api from "../../api/axiosInstance";
 
 const { Option } = Select;
 
 const Products = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState(dataProduct);
+  const [data, setData] = useState([]); // Initialize as an empty array
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,12 +20,51 @@ const Products = () => {
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
 
-  const filteredData = data.filter(
-    (item) =>
+  // Fetch products from the backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await Api.get("/product/getallProduct");
+        console.log("Fetched products:", response.data);
+
+        // Ensure each product has a unique key
+        const productsWithKey = response.data.map((product) => ({
+          ...product,
+          key: product._id, // assuming _id is your unique identifier
+        }));
+
+        setData(productsWithKey); // Set the fetched data here
+      } catch (error) {
+        console.error(
+          "Fetch products Error:",
+          error.response ? error.response.data : error.message
+        );
+        message.error(error.response ? error.response.data : error.message);
+        setData(dataProduct); // Fallback to default data
+      }
+    };
+
+    fetchProducts();
+
+    console.log("loggg", data);
+  }, []);
+
+  const filteredData = data.filter((item) => {
+    const categoryMatches =
+      item.category &&
+      typeof item.category === "string" &&
+      item.category.toLowerCase().includes(searchText.toLowerCase());
+
+    const subcategoryMatches =
+      item.subcategory &&
+      typeof item.subcategory === "string" &&
+      item.subcategory.toLowerCase().includes(searchText.toLowerCase());
+
+    return (
       (!selectedSubCategory || item.category === selectedSubCategory) &&
-      (item.category.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.subcategory.toLowerCase().includes(searchText.toLowerCase()))
-  );
+      (categoryMatches || subcategoryMatches)
+    );
+  });
 
   const pagination = {
     pageSizeOptions,
@@ -48,19 +88,29 @@ const Products = () => {
     setEditingRecord(null);
   };
 
-  const handleAddProduct = (newProduct) => {
-    if (editingRecord) {
-      // Update existing category
+  const handleAddProduct = async (newProduct) => {
+    try {
+      const response = editingRecord
+        ? await Api.put(`/product/${editingRecord._id}`, newProduct)
+        : await Api.post("/product/createProduct", newProduct);
+
+      const savedProduct = response.data;
       setData((prevData) =>
-        prevData.map((item) =>
-          item.key === editingRecord.key ? { ...item, ...newProduct } : item
-        )
+        editingRecord
+          ? prevData.map((item) =>
+              item._id === editingRecord._id ? savedProduct : item
+            )
+          : [...prevData, savedProduct]
       );
-    } else {
-      // Add new category
-      setData((prevData) => [...prevData, { key: Date.now(), ...newProduct }]);
+      handleModalClose();
+      message.success(
+        `Product ${editingRecord ? "updated" : "added"} successfully`
+      );
+    } catch (error) {
+      console.log(error);
+
+      message.error(error.message);
     }
-    handleModalClose();
   };
 
   const handleSubCategoryChange = (value) => {
@@ -75,20 +125,38 @@ const Products = () => {
     setSelectedRowKeys(selectedKeys);
   };
 
-  const handleDeleteSelected = () => {
-    setData((prevData) =>
-      prevData.filter((item) => !selectedRowKeys.includes(item.key))
-    );
-    setSelectedRowKeys([]);
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(
+        selectedRowKeys.map(async (key) => {
+          await Api.delete(`/product/${key}`);
+        })
+      );
+
+      setData((prevData) =>
+        prevData.filter((item) => !selectedRowKeys.includes(item._id))
+      );
+      setSelectedRowKeys([]);
+      message.success("Selected products deleted successfully");
+    } catch (error) {
+      message.error(error.message);
+    }
   };
 
   const handleEdit = (record) => {
     handleModalOpen(record);
   };
 
-  const handleDelete = (key) => {
-    setData((prevData) => prevData.filter((item) => item.key !== key));
+  const handleDelete = async (key) => {
+    try {
+      await Api.delete(`/product/${key}`);
+      setData((prevData) => prevData.filter((item) => item._id !== key));
+      message.success("Product deleted successfully");
+    } catch (error) {
+      message.error(error.message);
+    }
   };
+
   return (
     <div>
       <h2 className="pb-2 font-semibold text-2xl">Products</h2>
@@ -145,7 +213,7 @@ const Products = () => {
             onChange: handleSelectChange,
           }}
           columns={columnProduct(handleEdit, handleDelete)}
-          dataSource={filteredData}
+          dataSource={data} // Filtered data
           pagination={pagination}
           style={{
             boxShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",

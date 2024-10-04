@@ -18,7 +18,6 @@ const authMiddleware = require("../Middelware/authMiddleware");
 // Route to create a new doctor registration
 router.post(
   "/register",
-  //authMiddleware("doctor"),
   documentUpload.fields([
     { name: "educationalInfo", maxCount: 1 },
     { name: "certificate", maxCount: 1 },

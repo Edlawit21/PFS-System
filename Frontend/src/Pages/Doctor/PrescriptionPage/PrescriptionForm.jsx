@@ -1,30 +1,96 @@
 import { useState } from "react";
 import { Divider, Form, DatePicker, Input, Radio, Table, Button } from "antd";
 import AddTable from "./AddTable";
-import { data } from "../../../Data/data";
 import { Column } from "../../../Components/Column";
 import "./Ant.css";
 import SignatureField from "./Sign";
 import Submit from "./Submit";
 import Head from "./Head";
+import Api from "../../../api/axiosInstance";
 
 const { TextArea } = Input;
 
 const PrescriptionForm = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm(); // Create a form instance
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [medications, setMedications] = useState([]);
+  const [editingMedication, setEditingMedication] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [modalForm] = Form.useForm();
 
-  const handleSubmit = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        console.log("Form values:", values);
-        // Show the Submit component modal after form validation
-        setIsModalVisible(true);
-      })
-      .catch((errorInfo) => {
-        console.log("Validation Failed:", errorInfo);
-      });
+  const handleAddMedication = (medication) => {
+    if (isEditing) {
+      setMedications((prevMedications) =>
+        prevMedications.map((med) =>
+          med.key === editingMedication.key
+            ? { ...medication, key: editingMedication.key }
+            : med
+        )
+      );
+    } else {
+      setMedications((prevMedications) => [
+        ...prevMedications,
+        { key: Date.now(), ...medication },
+      ]);
+    }
+    setEditingMedication(null);
+    setIsEditing(false);
+  };
+
+  const handleEditMedication = (medication) => {
+    setEditingMedication(medication);
+    setIsEditing(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await form.validateFields();
+      const values = form.getFieldsValue();
+
+      console.log(values);
+
+      console.log("Form Values Before Submission:", values);
+      const fullFormData = {
+        ...values,
+        prescriptionDate: values.datePicker,
+        medications: medications,
+        signature: form.getFieldValue("signature"),
+        physician: {
+          name: {
+            first: values.physician.name.first,
+            last: values.physician.name.last,
+          },
+          phonenumber: values.physician.phonenumber,
+        },
+        patient: {
+          name: {
+            first: values.patient.name.first,
+            last: values.patient.name.last,
+          },
+          phonenumber: values.patient.phonenumber,
+          gender: values.patient.gender,
+          age: values.patient.age,
+          allergies: values.patient.allergies || "",
+          condition: values.patient.condition || "",
+        },
+      };
+      console.log(fullFormData);
+
+      // API call
+      const response = await Api.post(
+        "/prescription/createPrescription",
+        fullFormData,
+        { withCredentials: true }
+      );
+
+      console.log(response.data);
+      setFormData(fullFormData);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("Error submitting prescription:", error);
+      // Optionally show a notification to the user
+    }
   };
 
   return (
@@ -42,12 +108,7 @@ const PrescriptionForm = () => {
                 </span>
               }
               name="datePicker"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input Date!",
-                },
-              ]}
+              rules={[{ required: true, message: "Please input Date!" }]}
             >
               <DatePicker
                 style={{
@@ -58,54 +119,44 @@ const PrescriptionForm = () => {
               />
             </Form.Item>
             <h2 className="font-semibold">Patient Information</h2>
-            <hr className=" mt-4 mb-7" />
-            <Form.Item
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Name :
-                </span>
-              }
-              name="name"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input Name!",
-                },
-              ]}
-            >
+            <hr className="mt-4 mb-7" />
+            <Form.Item label="Name :" required>
               <div className="flex justify-between w-3/4">
-                <div className=" flex flex-col ">
+                <Form.Item
+                  name={["patient", "name", "first"]}
+                  rules={[
+                    { required: true, message: "Please input First Name!" },
+                  ]}
+                  noStyle
+                >
                   <Input
-                    style={{
-                      width: "20rem",
-                      borderWidth: "2px",
-                    }}
-                    allowClear
-                  />
-                  <span className="my-2 text-[#a6a6a6]">First Name</span>
-                </div>
-                <div className="flex flex-col">
-                  <Input
+                    name="first"
+                    placeholder="First Name"
                     style={{ width: "20rem", borderWidth: "2px" }}
                     allowClear
                   />
-                  <span className="my-2 text-[#a6a6a6]">Last Name</span>
-                </div>
+                </Form.Item>
+
+                <Form.Item
+                  name={["patient", "name", "last"]}
+                  rules={[
+                    { required: true, message: "Please input Last Name!" },
+                  ]}
+                  noStyle
+                >
+                  <Input
+                    name="last"
+                    placeholder="Last Name"
+                    style={{ width: "20rem", borderWidth: "2px" }}
+                    allowClear
+                  />
+                </Form.Item>
               </div>
             </Form.Item>
             <Form.Item
-              name="age"
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Age :
-                </span>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Please input Age!",
-                },
-              ]}
+              name={["patient", "age"]}
+              label="Age :"
+              rules={[{ required: true, message: "Please input Age!" }]}
             >
               <Input
                 type="number"
@@ -113,18 +164,9 @@ const PrescriptionForm = () => {
               />
             </Form.Item>
             <Form.Item
-              name="gender"
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Gender :
-                </span>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Please select Gender!",
-                },
-              ]}
+              name={["patient", "gender"]}
+              label="Gender :"
+              rules={[{ required: true, message: "Please select Gender!" }]}
             >
               <Radio.Group
                 style={{
@@ -133,17 +175,13 @@ const PrescriptionForm = () => {
                   justifyContent: "space-around",
                 }}
               >
-                <Radio value={1}>Male</Radio>
-                <Radio value={2}>Female</Radio>
+                <Radio value="Male">Male</Radio>
+                <Radio value="Female">Female</Radio>
               </Radio.Group>
             </Form.Item>
             <Form.Item
-              name="phonenumber"
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Phone Number :
-                </span>
-              }
+              name={["patient", "phonenumber"]}
+              label="Phone Number :"
               rules={[
                 {
                   required: true,
@@ -152,12 +190,13 @@ const PrescriptionForm = () => {
               ]}
             >
               <Input
-                type="number"
+                type="text"
                 style={{ width: "16rem", borderWidth: "2px" }}
               />
             </Form.Item>
+
             <Form.Item
-              name="allergies"
+              name={["patient", "allergies"]}
               label={
                 <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
                   Allergies :
@@ -171,7 +210,7 @@ const PrescriptionForm = () => {
               />
             </Form.Item>
             <Form.Item
-              name="condition"
+              name={["patient", "condition"]}
               label={
                 <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
                   Notable Health Condition :
@@ -185,18 +224,28 @@ const PrescriptionForm = () => {
                 style={{ borderWidth: "2px" }}
               />
             </Form.Item>
-            <Form.Item
-              name="medications"
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  List of Prescribed Medications
-                </span>
-              }
-            >
-              <AddTable />
+            {/* Medications */}
+            <Form.Item label="List of Prescribed Medications">
+              <AddTable
+                form={modalForm}
+                onAdd={handleAddMedication}
+                medication={editingMedication}
+                isEditing={isEditing}
+              />
               <Table
-                columns={Column}
-                dataSource={data}
+                columns={[
+                  { title: "No.", render: (_, __, index) => index + 1 },
+                  ...Column,
+                  {
+                    title: "Actions",
+                    render: (_, record) => (
+                      <Button onClick={() => handleEditMedication(record)}>
+                        Edit
+                      </Button>
+                    ),
+                  },
+                ]}
+                dataSource={medications}
                 pagination={false}
                 className="custom-table"
                 size="small"
@@ -209,44 +258,48 @@ const PrescriptionForm = () => {
                 }}
               />
             </Form.Item>
-            <Form.Item
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Physician Name :
-                </span>
-              }
-              name="physicianName"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your Name!",
-                },
-              ]}
-            >
+
+            {/* Physician Information */}
+            <Form.Item label="Physician Name :" required>
               <div className="flex justify-between w-3/4">
-                <div className=" flex flex-col ">
+                <Form.Item
+                  name={["physician", "name", "first"]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input Physician First Name!",
+                    },
+                  ]}
+                  noStyle
+                >
                   <Input
+                    placeholder="First Name"
                     style={{ width: "20rem", borderWidth: "2px" }}
                     allowClear
                   />
-                  <span className="my-2 text-[#a6a6a6]">First Name</span>
-                </div>
-                <div className="flex flex-col">
+                </Form.Item>
+
+                <Form.Item
+                  name={["physician", "name", "last"]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input Physician Last Name!",
+                    },
+                  ]}
+                  noStyle
+                >
                   <Input
+                    placeholder="Last Name"
                     style={{ width: "20rem", borderWidth: "2px" }}
                     allowClear
                   />
-                  <span className="my-2 text-[#a6a6a6]">Last Name</span>
-                </div>
+                </Form.Item>
               </div>
             </Form.Item>
             <Form.Item
-              name="physicianPhonenumber"
-              label={
-                <span style={{ fontSize: "1.1rem", fontWeight: "400" }}>
-                  Physician Phone Number :
-                </span>
-              }
+              name={["physician", "phonenumber"]}
+              label="Physician Phone Number :"
               rules={[
                 {
                   required: true,
@@ -255,11 +308,14 @@ const PrescriptionForm = () => {
               ]}
             >
               <Input
-                type="number"
+                type="text"
                 style={{ width: "16rem", borderWidth: "2px" }}
               />
             </Form.Item>
+
+            {/* Signature Field */}
             <SignatureField form={form} />
+
             <hr className="mt-16" />
             <Form.Item style={{ display: "flex", justifyContent: "center" }}>
               <Button
@@ -272,7 +328,7 @@ const PrescriptionForm = () => {
                   fontWeight: "bold",
                   fontSize: "large",
                 }}
-                onClick={handleSubmit} // Handle form submission
+                onClick={handleSubmit}
               >
                 Submit
               </Button>
@@ -280,10 +336,10 @@ const PrescriptionForm = () => {
           </div>
         </Form>
 
-        {/* Render Submit component modal here */}
         <Submit
           isVisible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
+          formData={formData}
         />
       </div>
     </div>

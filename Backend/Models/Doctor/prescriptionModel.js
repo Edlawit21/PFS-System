@@ -2,38 +2,20 @@ const mongoose = require("mongoose");
 
 const prescriptionSchema = new mongoose.Schema(
   {
-    datePicker: {
+    prescriptionDate: {
       type: Date,
       required: true,
     },
     patient: {
-      firstName: {
-        type: String,
-        required: true,
+      name: {
+        first: { type: String, required: true },
+        last: { type: String, required: true },
       },
-      lastName: {
-        type: String,
-        required: true,
-      },
-      age: {
-        type: Number,
-        required: true,
-      },
-      gender: {
-        type: String,
-        enum: ["Male", "Female"],
-        required: true,
-      },
-      phonenumber: {
-        type: String,
-        required: true,
-      },
-      allergies: {
-        type: String,
-      },
-      condition: {
-        type: String,
-      },
+      age: { type: Number, required: true },
+      gender: { type: String, enum: ["Male", "Female"], required: true },
+      phonenumber: { type: String, required: true }, // Consider using String for phone numbers
+      allergies: { type: String },
+      condition: { type: String },
     },
     medications: [
       {
@@ -59,18 +41,11 @@ const prescriptionSchema = new mongoose.Schema(
       },
     ],
     physician: {
-      firstName: {
-        type: String,
-        required: true,
+      name: {
+        first: { type: String, required: true },
+        last: { type: String, required: true },
       },
-      lastName: {
-        type: String,
-        required: true,
-      },
-      phonenumber: {
-        type: String,
-        required: true,
-      },
+      phonenumber: { type: String, required: true },
     },
     signature: {
       type: String, // Assuming this is stored as a base64 string
@@ -80,6 +55,9 @@ const prescriptionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "DoctorRegistration", // Reference to the Doctor model
       required: true,
+    },
+    qr: {
+      type: String,
     },
   },
   { timestamps: true }

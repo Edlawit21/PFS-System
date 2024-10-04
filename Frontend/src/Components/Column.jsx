@@ -1,4 +1,4 @@
-import { Button, Avatar, Popconfirm } from "antd";
+import { Button, Popconfirm } from "antd";
 import {
   DeleteFilled,
   FormOutlined,
@@ -7,13 +7,6 @@ import {
 } from "@ant-design/icons";
 
 export const Column = [
-  {
-    title: "No.",
-    dataIndex: "key",
-    key: "key",
-    fixed: "left",
-    width: 10,
-  },
   {
     title: "Medication Name",
     dataIndex: "medicationName",
@@ -40,7 +33,7 @@ export const Column = [
     key: "frequency",
   },
 ];
-export const columnDoc = (showModal) => [
+export const columnDoc = (showModal, handleApprove, handleReject) => [
   {
     title: "Name",
     dataIndex: "docName",
@@ -78,7 +71,11 @@ export const columnDoc = (showModal) => [
     title: "View Document",
     dataIndex: "educationalInfo", // Update if needed
     render: (_, record) => (
-      <Button type="link" onClick={() => showModal(record)}>
+      <Button
+        type="link"
+        onClick={() => showModal(record)}
+        key={`view-${record.id}`}
+      >
         View
       </Button>
     ),
@@ -89,12 +86,18 @@ export const columnDoc = (showModal) => [
     render: (_, record) => (
       <div className="flex">
         <Button
-          onClick={() => handleApprove(record.key)}
+          onClick={() => handleApprove(record._id)}
+          key={`approve-${record.id}`} // Use record._id
           style={{ marginRight: 8 }}
         >
           Approve
         </Button>
-        <Button onClick={() => handleReject(record.key)}>Reject</Button>
+        <Button
+          onClick={() => handleReject(record._id)}
+          key={`reject-${record.id}`}
+        >
+          Reject
+        </Button>
       </div>
     ),
   },
@@ -171,6 +174,12 @@ export const columnPm = (showModal) => [
 
 export const columnUser = [
   {
+    title: "User ID",
+    dataIndex: "_id", // Ensure you have the correct key for user ID
+    key: "_id",
+  },
+
+  {
     title: "Name",
     dataIndex: "name",
     sorter: (a, b) => a.name.localeCompare(b.name), // Correctly sorts alphabetically by 'name'
@@ -190,6 +199,7 @@ export const columnUser = [
     dataIndex: "gender",
   },
   {
+    /*
     title: "Profile",
     dataIndex: "profile",
     render: (_, record) => (
@@ -205,6 +215,12 @@ export const columnUser = [
         alt="Profile Picture"
       />
     ),
+  */
+  },
+
+  {
+    title: "Status",
+    dataIndex: "status",
   },
 
   {
@@ -220,12 +236,34 @@ export const columnUser = [
     title: "Role",
     dataIndex: "role",
   },
-
   {
     title: "Action",
-    dataIndex: "active",
-    key: "active",
-    render: (active) => <span>{active ? "Active" : "Deactivate"}</span>,
+    dataIndex: "status",
+    key: "action",
+    render: (text, record) => {
+      console.log("Rendering record:", record); // Log the record for debugging
+
+      if (record.status === "Active") {
+        return (
+          <Button
+            onClick={() => handleToggle(record._id, record.status)} // Change from record.userId to record._id
+          >
+            Deactivate
+          </Button>
+        );
+      } else if (record.status === "Inactive") {
+        return (
+          <Button
+            onClick={() => handleToggle(record._id, record.status)} // Change from record.userId to record._id
+          >
+            Activate
+          </Button>
+        );
+      } else if (record.status === "Pending") {
+        return <span>Pending</span>; // Display pending without a button
+      }
+      return null; // Return null if no action is needed
+    },
   },
 ];
 
@@ -307,7 +345,8 @@ export const columnCategory = (
   },
 ];
 
-export const columnPurchase = (handleEdit, handleDelete) => [
+{
+  /*export const columnPurchase = (handleEdit, handleDelete) => [
   {
     title: "Medicine Name",
     dataIndex: "medName",
@@ -385,79 +424,59 @@ export const columnPurchase = (handleEdit, handleDelete) => [
       </div>
     ),
   },
-];
+];*/
+}
 
 export const columnProduct = (handleEdit, handleDelete) => [
   {
     title: "Medicine Name",
-    dataIndex: "medName",
-    sorter: (a, b) => a.medName.localeCompare(b.medName),
+    dataIndex: "medname",
+    sorter: (a, b) => a.medname.localeCompare(b.medname),
   },
   {
     title: "Category",
-    dataIndex: "category",
+    dataIndex: ["category", "category"],
     sorter: (a, b) => a.category.localeCompare(b.category),
   },
   {
     title: "Sub-Category",
-    dataIndex: "subcategory",
+    dataIndex: ["category", "subcategory"],
     sorter: (a, b) => a.subcategory.localeCompare(b.subcategory),
   },
   {
     title: "Actual Price",
-    dataIndex: "cost",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.cost.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.cost.replace(/[^\d.-]/g, ""));
-      return numA - numB;
-    },
+    dataIndex: "actualPrice", // Match the key from fetched data
+    sorter: (a, b) => a.actualPrice - b.actualPrice,
   },
   {
     title: "Selling Price",
-    dataIndex: "sellprice",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.sellprice.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.sellprice.replace(/[^\d.-]/g, ""));
-      return numA - numB;
-    },
+    dataIndex: "sellPrice", // Match the key from fetched data
+    sorter: (a, b) => a.sellPrice - b.sellPrice,
   },
   {
     title: "Quantity",
-    dataIndex: "quantity",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.quantity.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.quantity.replace(/[^\d.-]/g, ""));
-      return numA - numB;
-    },
+    dataIndex: "quantity", // Match the key from fetched data
+    sorter: (a, b) => a.quantity - b.quantity,
   },
-
   {
     title: "Registered-Date",
-    dataIndex: "registerdate",
-    sorter: (a, b) => new Date(a.registerdate) - new Date(b.registerdate),
+    dataIndex: "registerDate", // Match the key from fetched data
+    sorter: (a, b) => new Date(a.registerDate) - new Date(b.registerDate),
   },
   {
     title: "Expire-Date",
-    dataIndex: "expiredate",
-    sorter: (a, b) => new Date(a.expiredate) - new Date(b.expiredate),
+    dataIndex: "expireDate", // Match the key from fetched data
+    sorter: (a, b) => new Date(a.expireDate) - new Date(b.expireDate),
   },
   {
     title: "Sold-Qty",
-    dataIndex: "soldqty",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.soldqty.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.soldqty.replace(/[^\d.-]/g, ""));
-      return numA - numB;
-    },
+    dataIndex: "soldQty", // Match the key from fetched data
+    sorter: (a, b) => a.soldQty - b.soldQty,
   },
   {
     title: "Remain-Qty",
-    dataIndex: "remainqty",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.remainqty.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.remainqty.replace(/[^\d.-]/g, ""));
-      return numA - numB;
-    },
+    dataIndex: "remainQty", // Match the key from fetched data
+    sorter: (a, b) => a.remainQty - b.remainQty,
   },
   {
     title: "Actions",
@@ -497,9 +516,13 @@ export const columnProduct = (handleEdit, handleDelete) => [
 
 export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
   {
-    title: " Name",
+    title: "Name",
     dataIndex: "name",
-    sorter: (a, b) => a.name.localeCompare(b.name),
+    render: (_, record) => `${record.firstname} ${record.lastname}`, // Combine firstname and lastname
+    sorter: (a, b) =>
+      `${a.firstname} ${a.lastname}`.localeCompare(
+        `${b.firstname} ${b.lastname}`
+      ),
   },
   {
     title: "Gender",
@@ -507,22 +530,27 @@ export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
   },
   {
     title: "Phone Number",
-    dataIndex: "phonenumber",
+    dataIndex: ["contact", "phone"], // Accessing phone number from nested contact field
     sorter: (a, b) => {
-      const numA = parseFloat(a.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.phonenumber.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
+      const numA = parseFloat(a.contact.phone.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
+      const numB = parseFloat(b.contact.phone.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
       return numA - numB; // Sort numerically
     },
   },
   {
     title: "Email",
-    dataIndex: "email",
-    sorter: (a, b) => a.email.localeCompare(b.email),
+    dataIndex: ["contact", "email"], // Accessing email from nested contact field
+    sorter: (a, b) => a.contact.email.localeCompare(b.contact.email),
+  },
+  {
+    title: "Username",
+    dataIndex: "username",
+    sorter: (a, b) => a.username.localeCompare(b.username),
   },
   {
     title: "Address",
-    dataIndex: "address",
-    sorter: (a, b) => a.address.localeCompare(b.address),
+    dataIndex: "residentialAddress", // Assuming this is the field for the address
+    sorter: (a, b) => a.residentialAddress.localeCompare(b.residentialAddress),
   },
   {
     title: "View Document",
@@ -534,22 +562,20 @@ export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
     ),
   },
   {
-    title: "Registered-Date",
-    dataIndex: "registerdate",
-    sorter: (a, b) => new Date(a.registerdate) - new Date(b.registerdate),
+    title: "Registered Date",
+    dataIndex: "createdAt", // Use 'createdAt' which is the registration date
+    key: "createdAt",
+    sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt), // Sorting based on date
+    render: (date) => new Date(date).toLocaleDateString(), // Format date for display
   },
   {
     title: "License Number",
-    dataIndex: "license",
+    dataIndex: "licenseNumber", // Assuming this is the field for the license number
     sorter: (a, b) => {
-      const numA = parseFloat(a.license.replace(/[^\d.-]/g, ""));
-      const numB = parseFloat(b.license.replace(/[^\d.-]/g, ""));
+      const numA = parseFloat(a.licenseNumber.replace(/[^\d.-]/g, ""));
+      const numB = parseFloat(b.licenseNumber.replace(/[^\d.-]/g, ""));
       return numA - numB;
     },
-  },
-  {
-    title: "Profile",
-    dataIndex: "profile",
   },
   {
     title: "Actions",
@@ -565,11 +591,11 @@ export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
             borderRadius: "4px",
             cursor: "pointer",
           }}
-          onClick={() => handleEdit(record)}
+          onClick={() => handleEdit(record)} // Call handleEdit with the record
         />
         <Popconfirm
           title="Sure to delete?"
-          onConfirm={() => handleDelete(record.key)}
+          onConfirm={() => handleDelete(record.key)} // Call handleDelete with the record key
         >
           <DeleteFilled
             style={{
@@ -587,11 +613,64 @@ export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
   },
 ];
 
+export const columnAdminPharmacist = () => [
+  {
+    title: "Name",
+    dataIndex: "firstname", // Use firstname as dataIndex
+    render: (text, record) => `${record.firstname} ${record.lastname}`, // Concatenate first and last names
+    sorter: (a, b) => a.firstname.localeCompare(b.firstname), // Sort by firstname
+  },
+  {
+    title: "Gender",
+    dataIndex: "gender",
+    sorter: (a, b) => a.gender.localeCompare(b.gender), // Add sorting for gender if needed
+  },
+  {
+    title: "Phone Number",
+    dataIndex: ["contact", "phone"], // Access phone from the contact object
+    sorter: (a, b) => {
+      const numA = parseFloat(a.contact.phone.replace(/[^\d.-]/g, ""));
+      const numB = parseFloat(b.contact.phone.replace(/[^\d.-]/g, ""));
+      return numA - numB;
+    },
+  },
+  {
+    title: "Email",
+    dataIndex: ["contact", "email"], // Access email from the contact object
+    sorter: (a, b) => a.contact.email.localeCompare(b.contact.email),
+  },
+  {
+    title: "Address",
+    dataIndex: "residentialAddress", // Use residentialAddress as dataIndex
+    sorter: (a, b) => a.residentialAddress.localeCompare(b.residentialAddress),
+  },
+  {
+    title: "Registered-Date",
+    dataIndex: "createdAt", // Use createdAt timestamp for registration date
+    sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+  },
+  {
+    title: "License Number",
+    dataIndex: "licenseNumber", // Use licenseNumber as dataIndex
+    sorter: (a, b) => a.licenseNumber.localeCompare(b.licenseNumber),
+  },
+  {
+    title: "Created By",
+    dataIndex: "createdBy", // This assumes createdBy is populated correctly
+    render: (text, record) => {
+      const createdBy = record.createdBy?.firstname
+        ? `${record.createdBy.firstname} ${record.createdBy.lastname}`
+        : "Unknown"; // Fallback to 'Unknown' if createdBy is null
+      return createdBy;
+    },
+  },
+];
+
 export const columnReport = [
   {
     title: "Medicine Name",
-    dataIndex: "medname",
-    sorter: (a, b) => a.medname.localeCompare(b.medname),
+    dataIndex: "medicineName",
+    sorter: (a, b) => a.medicineName.localeCompare(b.medicineName),
   },
   {
     title: "Quantity",
@@ -604,10 +683,10 @@ export const columnReport = [
   },
   {
     title: "Total Price",
-    dataIndex: "totalprice",
+    dataIndex: "totalPrice",
     sorter: (a, b) => {
-      const numA = parseFloat(a.totalprice.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.totalprice.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
+      const numA = parseFloat(a.totalPrice); // Use totalPrice
+      const numB = parseFloat(b.totalPrice); // Use totalPrice
       return numA - numB; // Sort numerically
     },
   },

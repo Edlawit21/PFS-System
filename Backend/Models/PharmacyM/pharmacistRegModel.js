@@ -69,8 +69,12 @@ const registerPharmacistSchema = new mongoose.Schema(
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "PharmacyManager",
+      ref: "PharmacyManagerRegistration",
       required: true,
+    },
+    status: {
+      type: String,
+      default: "Active",
     },
     role: {
       type: String,

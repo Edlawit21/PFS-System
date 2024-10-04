@@ -44,7 +44,7 @@ router.put(
 );
 
 // Route to get all pharmacists
-router.get("/all", authMiddleware("pharmacyManager"), getPharmacists);
+router.get("/all", authMiddleware("pharmacyManager", "admin"), getPharmacists);
 
 // Route to get a specific pharmacist by ID
 router.get("/:id", authMiddleware("pharmacyManager"), getPharmacistById);

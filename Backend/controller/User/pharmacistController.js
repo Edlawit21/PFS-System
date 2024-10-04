@@ -5,11 +5,12 @@ const jwt = require("jsonwebtoken");
 // Create a new pharmacist
 const createPharmacist = async (req, res) => {
   try {
+    console.log(req.body);
+
     const {
       firstname,
       lastname,
       gender,
-      contact,
       residentialAddress,
       graduationDate,
       licenseNumber,
@@ -19,6 +20,7 @@ const createPharmacist = async (req, res) => {
       password,
     } = req.body;
 
+    const contact = JSON.parse(req.body.contact);
     // Ensure files are uploaded
     if (!req.files || req.files.length < 3) {
       return res.status(400).json({
@@ -28,15 +30,15 @@ const createPharmacist = async (req, res) => {
     }
 
     const educationFile = req.files["education"]
-      ? req.files["education"][0].path
+      ? "Uploads/documents" + req.files["education"][0].filename
       : null;
 
     const idDocumentFile = req.files["idDocument"]
-      ? req.files["idDocument"][0].path
+      ? "Uploads/documents" + req.files["idDocument"][0].filename
       : null;
 
     const passportPhotoFile = req.files["passportPhoto"]
-      ? req.files["passportPhoto"][0].path
+      ? "Uploads/documents" + req.files["passportPhoto"][0].filename
       : null;
 
     // Check if the username already exists
@@ -46,13 +48,13 @@ const createPharmacist = async (req, res) => {
     }
 
     const token = req.cookies.token;
-
+    console.log("Token from cookies:", token); // Add this for debugging
     if (!token) {
       return res.status(401).json({ msg: "No token, authorization denied" });
     }
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    console.log("Decoded Token:", decoded); // Log the decoded token
     // Create a new pharmacist instance
     const pharmacist = new Pharmacist({
       firstname,
@@ -148,7 +150,7 @@ const updatePharmacist = async (req, res) => {
     }
 
     // Ensure the logged-in pharmacy manager is the one who created the pharmacist
-    if (pharmacist.pharmacyManager.toString() !== req.user._id.toString()) {
+    if (pharmacist.createdBy.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ message: "You are not authorized to update this pharmacist." });
@@ -159,7 +161,6 @@ const updatePharmacist = async (req, res) => {
       updateFields,
       { new: true }
     );
-
     res.status(200).json({
       message: "Pharmacist updated successfully.",
       pharmacist: updatedPharmacist,
@@ -172,20 +173,23 @@ const updatePharmacist = async (req, res) => {
 // Get all pharmacists with optional pharmacy manager details
 const getPharmacists = async (req, res) => {
   try {
-    const { includeManager = "true" } = req.query; // Default to true
-
-    let query = Pharmacist.find();
-
-    if (includeManager === "true") {
-      query = query.populate({
-        path: "createdBy", // Assumes 'createdBy' is the field linking to the manager
-        select: "firstname lastname", // Customize the fields to include
-      });
+    const managerId = req.user.id;
+    // Fetch all pharmacists and populate the createdBy field to link to the pharmacy manager
+    const pharmacists = await Pharmacist.find({ createdBy: managerId })
+      .populate({
+        path: "createdBy", // Ensure this references the correct field and model
+        select: "firstname lastname", // Selecting only necessary fields
+      })
+      .exec();
+    if (!pharmacists.length) {
+      return res
+        .status(404)
+        .json({ message: "No pharmacists found for this manager." });
     }
 
-    const pharmacists = await query.exec();
     res.status(200).json({ pharmacists });
   } catch (error) {
+    console.error("Error fetching pharmacists:", error); // Log the error
     res.status(500).json({ error: error.message });
   }
 };
@@ -200,7 +204,7 @@ const getPharmacistById = async (req, res) => {
 
     if (includeManager === "true") {
       query = query.populate({
-        path: "pharmacyManager",
+        path: "createdBy",
         select: "firstname lastname",
       });
     }

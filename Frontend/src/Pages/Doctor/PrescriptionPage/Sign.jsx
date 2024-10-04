@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { Button, Form } from "antd";
-import s from "../../../Assets/s.png";
+import s from "../../../Assets/s.png"; // Make sure this path is correct
 import PropTypes from "prop-types";
 
 const SignatureField = ({ form }) => {
@@ -19,9 +19,10 @@ const SignatureField = ({ form }) => {
 
   const handleEnd = () => {
     const signatureData = signatureRef.current.toDataURL();
-    setHasSigned(!!signatureData); // Check if there is a signature
-    form.setFieldsValue({ signature: signatureData }); // Update the form value
-    form.setFields([{ name: "signature", errors: [] }]); // Clear validation error
+    if (signatureData) {
+      setHasSigned(true);
+      form.setFieldsValue({ signature: signatureData }); // Update form with signature data
+    }
   };
 
   return (
@@ -32,12 +33,7 @@ const SignatureField = ({ form }) => {
           Physician Signature
         </span>
       }
-      rules={[
-        {
-          required: true,
-          message: "Please enter your Signature!",
-        },
-      ]}
+      rules={[{ required: true, message: "Please enter your Signature!" }]}
     >
       <div
         className="w-[350px] h-[150px] border-2 border-[#E5EAF4] rounded flex flex-col"
@@ -69,7 +65,7 @@ const SignatureField = ({ form }) => {
 };
 
 SignatureField.propTypes = {
-  form: PropTypes.object.isRequired, // Define form prop validation
+  form: PropTypes.object.isRequired, // Validate form prop
 };
 
 export default SignatureField;

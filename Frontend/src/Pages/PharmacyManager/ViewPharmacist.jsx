@@ -1,9 +1,10 @@
 import { columnPharmacist } from "../../Components/Column";
-import { dataProduct } from "../../Data/data";
-import { useState } from "react";
-import { Button, Table, Select, Input, Modal } from "antd";
+// import { dataProduct } from "../../Data/data"; // Commented out as not used
+import { useState, useEffect } from "react";
+import { Button, Table, Select, Input, Modal, message, Form } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import Api from "../../api/axiosInstance";
 
 const { Option } = Select;
 
@@ -11,25 +12,61 @@ const ViewPharmacist = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
-  const [data, setData] = useState(dataProduct);
-  const [selectedGender, setSelectedGender] = useState(""); // State for selected category
+  const [data, setData] = useState([]);
+  const [selectedGender, setSelectedGender] = useState("");
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingPharmacist, setEditingPharmacist] = useState(null);
+  const [form] = Form.useForm();
+
+  const token = localStorage.getItem("token");
+
+  // Fetch pharmacists data
+
+  const fetchPharmacists = async () => {
+    try {
+      const response = await Api.get("/pharmacist/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response.data);
+      setData(
+        response.data.pharmacists.map((pharmacist) => ({
+          key: pharmacist._id,
+          ...pharmacist,
+        }))
+      );
+    } catch (error) {
+      console.error(
+        "Fetch Pharmacist Error:",
+        error.response ? error.response.data : error.message
+      );
+      message.error("Failed to fetch Pharmacist. Check console for details.");
+    }
+  };
+
+  useEffect(() => {
+    fetchPharmacists();
+  }, [token]);
 
   const handleRegisterClick = () => {
-    navigate("/register-p");
+    navigate("/pmanager/dashboard/pmanager/dashboard/register-p");
   };
 
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
 
-  const filteredData = data.filter(
-    (item) =>
-      (!selectedGender || item.category === selectedGender) &&
-      (!searchText ||
-        item.name.toLowerCase().includes(searchText.toLowerCase()))
-  );
+  const filteredData = Array.isArray(data)
+    ? data.filter(
+        (item) =>
+          (!selectedGender || item.gender === selectedGender) &&
+          (!searchText ||
+            item.name.toLowerCase().includes(searchText.toLowerCase()))
+      )
+    : [];
 
   const pagination = {
     pageSizeOptions,
@@ -44,7 +81,7 @@ const ViewPharmacist = () => {
   };
 
   const showModal = (record) => {
-    setModalContent(record); // Set the content for the modal based on the clicked row
+    setModalContent(record);
     setIsModalOpen(true);
   };
 
@@ -56,8 +93,56 @@ const ViewPharmacist = () => {
     setIsModalOpen(false);
   };
 
-  const handleEdit = () => {
-    navigate("/register-p");
+  const handleEdit = (record) => {
+    setEditingPharmacist(record);
+    form.setFieldsValue({
+      firstname: record.firstname,
+      lastname: record.lastname,
+      gender: record.gender,
+      username: record.username,
+      phone: record.contact.phone, // Accessing phone from nested contact field
+      email: record.contact.email,
+      residentialAddress: record.residentialAddress,
+    }); // Populate the form with the record's data
+    setIsModalVisible(true); // Show the modal
+  };
+
+  const handleEditSubmit = async (values) => {
+    try {
+      await Api.put(`/pharmacist/update/${editingPharmacist.key}`, values, {
+        headers: {
+          Authorization: `Bearer ${token}`, // include your token here
+        },
+      });
+      message.success("Pharmacist updated successfully");
+      // Refresh the data
+      fetchPharmacists();
+      setIsModalVisible(false);
+    } catch (error) {
+      message.error("Failed to update pharmacist. Check console for details.");
+      console.error(
+        "Update Pharmacist Error:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
+  const handleDelete = async (key) => {
+    try {
+      await Api.delete(`/pharmacist/${key}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setData((prevData) => prevData.filter((item) => item.key !== key));
+      message.success("Pharmacist deleted successfully");
+    } catch (error) {
+      console.error(
+        "Delete Pharmacist Error:",
+        error.response ? error.response.data : error.message
+      );
+      message.error("Failed to delete Pharmacist. Check console for details.");
+    }
   };
 
   const handleSelectedGender = (value) => {
@@ -79,10 +164,6 @@ const ViewPharmacist = () => {
     setSelectedRowKeys([]);
   };
 
-  const handleDelete = (key) => {
-    setData((prevData) => prevData.filter((item) => item.key !== key));
-  };
-
   return (
     <div>
       <h2 className="pb-2 font-semibold text-2xl">View Pharmacists</h2>
@@ -94,7 +175,7 @@ const ViewPharmacist = () => {
           onChange={handleSearch}
         />
         <Select
-          placeholder="Filter by category"
+          placeholder="Filter by gender"
           size="large"
           style={{ width: "260px" }}
           onChange={handleSelectedGender}
@@ -145,8 +226,10 @@ const ViewPharmacist = () => {
           }}
         />
       </div>
+
+      {/* Modal for Viewing Details */}
       <Modal
-        title="Document Details"
+        title="Pharmacist Details"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -154,17 +237,72 @@ const ViewPharmacist = () => {
         {modalContent && (
           <div>
             <p>
-              <strong>Name:</strong> {modalContent.name}
+              <strong>Name:</strong> {modalContent.firstName}{" "}
+              {modalContent.lastName}
             </p>
             <p>
               <strong>Username:</strong> {modalContent.username}
             </p>
             <p>
+              <strong>Phone:</strong> {modalContent.phone}
+            </p>
+            <p>
               <strong>Email:</strong> {modalContent.email}
             </p>
-            {/* Add more details as needed */}
+            <p>
+              <strong>Address:</strong> {modalContent.address}
+            </p>
+            <p>
+              <strong>Gender:</strong> {modalContent.gender}
+            </p>
           </div>
         )}
+      </Modal>
+
+      {/* Modal for Editing Pharmacist */}
+      <Modal
+        title="Edit Pharmacist"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} layout="vertical" onFinish={handleEditSubmit}>
+          <Form.Item name="firstname" label="First Name">
+            <Input />
+          </Form.Item>
+          <Form.Item name="lastname" label="Last Name">
+            <Input />
+          </Form.Item>
+          <Form.Item name="gender" label="Gender">
+            <Select allowClear>
+              <Option value="Male">Male</Option>
+              <Option value="Female">Female</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="username" label="Username">
+            <Input />
+          </Form.Item>
+          <Form.Item name="phone" label="Phone">
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" label="Email">
+            <Input type="email" />
+          </Form.Item>
+          <Form.Item name="residentialAddress" label="Address">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Update
+            </Button>
+            <Button
+              style={{ marginLeft: "8px" }}
+              onClick={() => setIsModalVisible(false)}
+            >
+              Cancel
+            </Button>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

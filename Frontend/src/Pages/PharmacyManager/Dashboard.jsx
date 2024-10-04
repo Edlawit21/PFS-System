@@ -12,6 +12,7 @@ import "../Doctor/PrescriptionPage/Ant.css";
 import Products from "./Products";
 import RegisterPharmacist from "./RegisterPharmacist";
 import ViewPharmacist from "./ViewPharmacist";
+import ViewReport from "./ViewReport";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -96,10 +97,26 @@ const PMDashboard = () => {
             }}
           >
             <Routes>
-              <Route path="/category" element={<Category />} />
-              <Route path="/Products" element={<Products />} />
-              <Route path="/register-p" element={<RegisterPharmacist />} />
-              <Route path="/view-p" element={<ViewPharmacist />} />
+              <Route
+                path="/pmanager/dashboard/category"
+                element={<Category />}
+              />
+              <Route
+                path="/pmanager/dashboard/products"
+                element={<Products />}
+              />
+              <Route
+                path="/pmanager/dashboard/register-p"
+                element={<RegisterPharmacist />}
+              />
+              <Route
+                path="/pmanager/dashboard/view-p"
+                element={<ViewPharmacist />}
+              />
+              <Route
+                path="/pmanager/dashboard/view-report"
+                element={<ViewReport />}
+              />
             </Routes>
           </Content>
         </div>

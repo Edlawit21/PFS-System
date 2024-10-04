@@ -67,11 +67,11 @@ const LoginForm = ({ onForgetPassword, onBack }) => {
       form.setFields([
         {
           name: "username",
-          errors: ["Invalid username"],
+          errors: ["Invalid credential"],
         },
         {
           name: "password",
-          errors: ["Invalid password"],
+          errors: ["Invalid credential"],
         },
       ]);
     }

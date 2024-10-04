@@ -5,15 +5,16 @@ import UploadButton from "../Components/UploadButton";
 const PMRegistration = ({ form }) => {
   return (
     <div className="px-6">
-      <h1 className="flex justify-center mb-4 font-medium">PMregistration</h1>
+      <h1 className="flex justify-center mb-4 font-medium">PM Registration</h1>
       <Form layout="vertical" form={form} requiredMark={false}>
         <Form.Item
-          label="PharmacyManager Name :"
+          label="Pharmacy Manager Name :"
           name="pmName"
           rules={[{ required: true, message: "Enter your name!" }]}
         >
           <Input placeholder="Owner name" />
         </Form.Item>
+
         <Form.Item
           label="Pharmacy Name :"
           name="pharmaName"
@@ -21,17 +22,19 @@ const PMRegistration = ({ form }) => {
             { required: true, message: "Please input the pharmacy name!" },
           ]}
         >
-          <Input placeholder="Name of pharmacy :" />
+          <Input placeholder="Name of pharmacy" />
         </Form.Item>
+
         <Form.Item
-          label="License Information : "
+          label="License Information :"
           name="licensePM"
           rules={[{ required: true, message: "Please upload your license!" }]}
         >
           <UploadButton formType="pmanager" />
         </Form.Item>
+
         <Form.Item
-          label="Business Registration : "
+          label="Business Registration :"
           name="businessR"
           rules={[
             {
@@ -42,8 +45,9 @@ const PMRegistration = ({ form }) => {
         >
           <UploadButton formType="pmanager" />
         </Form.Item>
+
         <Form.Item
-          label="Compliance Certificates : "
+          label="Compliance Certificates :"
           name="compliance"
           rules={[
             {
@@ -54,7 +58,8 @@ const PMRegistration = ({ form }) => {
         >
           <UploadButton formType="pmanager" />
         </Form.Item>
-        <Form.Item label=" Experience(optional) : " name="experience">
+
+        <Form.Item label="Experience (optional) :" name="experience">
           <Input placeholder="0-10 years" />
         </Form.Item>
       </Form>

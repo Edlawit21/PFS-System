@@ -1,17 +1,45 @@
-import { Modal, Input, Button, Form } from "antd";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import PropTypes from "prop-types";
+import { Button, Modal, Form, Input } from "antd";
 
-const AddTable = () => {
+const AddTable = ({ onAdd, medication, isEditing, form }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const showModal = () => {
+
+  const showModal = useCallback(() => {
     setIsModalOpen(true);
+    if (isEditing && medication) {
+      form.setFieldsValue(medication);
+    }
+  }, [isEditing, medication, form]);
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      onAdd(values);
+      form.resetFields();
+      setIsModalOpen(false);
+    } catch (info) {
+      console.log("Validation failed:", info);
+      console.log("Error Fields:", info.errorFields);
+      info.errorFields.forEach((field) => {
+        console.error(`Field: ${field.name[0]}, Errors: ${field.errors}`);
+      });
+    }
   };
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
+
   const handleCancel = () => {
     setIsModalOpen(false);
+    form.resetFields(); // Reset fields on cancel
   };
+
+  useEffect(() => {
+    if (isEditing && medication) {
+      showModal();
+    } else if (!isEditing) {
+      setIsModalOpen(false); // Close modal if not editing
+    }
+  }, [isEditing, medication, showModal]);
+
   return (
     <div>
       <Button
@@ -32,7 +60,7 @@ const AddTable = () => {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
           <Form.Item
             label="Medication Name"
             name="medicationName"
@@ -74,6 +102,13 @@ const AddTable = () => {
       </Modal>
     </div>
   );
+};
+
+AddTable.propTypes = {
+  onAdd: PropTypes.func.isRequired,
+  medication: PropTypes.object,
+  isEditing: PropTypes.bool.isRequired,
+  form: PropTypes.object.isRequired,
 };
 
 export default AddTable;

@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   firstname: { type: String, required: true, trim: true },
   lastname: { type: String, required: true, trim: true },
-  profileImage: { type: String, required: true }, // Store URL or path to the uploaded image
+  // profileImage: { type: String, required: true }, // Store URL or path to the uploaded image
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   gender: { type: String, enum: ["male", "female"], required: true }, // 1 for Male, 2 for Female

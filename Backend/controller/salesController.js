@@ -2,6 +2,7 @@ const Product = require("../Models/PharmacyM/productModel");
 const SalesTransaction = require("../Models/Pharmacist/salesModel");
 const Pharmacist = require("../Models/PharmacyM/pharmacistRegModel");
 const jwt = require("jsonwebtoken");
+
 // Controller to handle making a sale
 const makeSale = async (req, res) => {
   try {
@@ -17,20 +18,18 @@ const makeSale = async (req, res) => {
     // Extract pharmacistId from the token
     const pharmacistId = decoded.id;
 
-    // Fetch the pharmacist's details to get the associated Pharmacy Manager
+    // Fetch the pharmacist's details
     const pharmacist = await Pharmacist.findById(pharmacistId);
     if (!pharmacist) {
       return res.status(404).json({ message: "Pharmacist not found" });
     }
-    // Fetch the product, ensuring it belongs to the same PM who created the pharmacist
-    console.log("Medicine ID:", medicineId);
-    console.log("Pharmacy Manager:", pharmacist.pharmacyManager);
 
-    // Fetch the product, ensuring it belongs to the same PM who created the pharmacist
+    // Fetch the product
     const product = await Product.findOne({
       _id: medicineId,
-      createdBy: pharmacist.createdBy, // Ensure the product belongs to the same PM
+      createdBy: pharmacist.createdBy,
     });
+    console.log(">>>>product is >>>>>>>>", product.medname);
     if (!product) {
       return res.status(404).json({
         message: "Product not found or not authorized to sell this product",
@@ -42,28 +41,44 @@ const makeSale = async (req, res) => {
       return res.status(400).json({ message: "Not enough stock available" });
     }
 
-    // Calculate total price for the transaction using sellPrice
+    // Calculate total price
     const totalPrice = product.sellPrice * quantity;
 
     // Deduct stock
     product.quantity -= quantity;
     await product.save();
 
+    console.log(">>>>Saved product is>>>>>.", product);
+
     // Record the sale transaction
     const transaction = new SalesTransaction({
-      medicineName: medicineId,
+      medicineId: product._id, // Store the product ID
+      medicineName: product.medname, // Store the product name
       quantity,
       totalPrice,
-      date: new Date(), // Set the current date
+      date: new Date(),
       pharmacist: pharmacistId,
     });
 
+    console.log(">>>>>TRansaction>>>>", transaction);
     // Save the transaction
-    await transaction.save();
+    const savedTransaction = await transaction.save();
+    console.log("Saved transaction:", savedTransaction);
+    // Save the transaction
+    //await transaction.save();
 
-    res
-      .status(201)
-      .json({ message: "Sale recorded successfully", transaction });
+    res.status(201).json({
+      message: "Sale recorded successfully",
+      transaction: {
+        medicineId: savedTransaction.medicineId,
+        medicineName: savedTransaction.medicineName, // Include the medicine name
+        quantity: savedTransaction.quantity,
+        totalPrice: savedTransaction.totalPrice,
+        date: savedTransaction.date,
+        pharmacist: savedTransaction.pharmacist,
+        _id: savedTransaction._id,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Error processing the sale", error });
   }
@@ -73,13 +88,22 @@ const makeSale = async (req, res) => {
 const getSalesTransactions = async (req, res) => {
   try {
     const { pharmacistId } = req.params;
+    console.log("Fetching transactions for pharmacist:", pharmacistId);
 
-    // Fetch all sales transactions for the pharmacist
+    // Fetch all sales transactions for the pharmacist and populate medicineName
     const transactions = await SalesTransaction.find({
       pharmacist: pharmacistId,
-    });
+    }).populate("medicineName"); // Populate to get the medicine name
 
-    res.status(200).json(transactions);
+    console.log("Raw transactions:", transactions); // Debugging line
+
+    // Format transactions to include medicine name
+    const formattedTransactions = transactions.map((transaction) => ({
+      ...transaction.toObject(),
+      medicineName: transaction.medname ? transaction.medname : null, // Access the actual medicine name
+    }));
+
+    res.status(200).json(formattedTransactions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -108,6 +132,7 @@ const updateTransaction = async (req, res) => {
   try {
     const { transactionId } = req.params;
     const updates = req.body;
+
     // Find the transaction and update it
     const transaction = await SalesTransaction.findByIdAndUpdate(
       transactionId,

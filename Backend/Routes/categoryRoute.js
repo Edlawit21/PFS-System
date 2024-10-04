@@ -16,19 +16,19 @@ router.get(
   categoryController.getCategories
 );
 router.get(
-  "/category/:id",
+  "/:id",
   authMiddleware("pharmacyManager"),
 
   categoryController.getCategory
 );
 router.put(
-  "/category/:id",
+  "/:id",
   authMiddleware("pharmacyManager"),
 
   categoryController.updateCategory
 );
 router.delete(
-  "/category/:id",
+  "/:id",
   authMiddleware("pharmacyManager"),
 
   categoryController.deleteCategory

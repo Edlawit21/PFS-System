@@ -12,7 +12,7 @@ const categorySchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "PharmacyManager",
+      ref: "PharmacyManagerRe",
       required: true,
     }, // Reference to the pharmacy manager
   },

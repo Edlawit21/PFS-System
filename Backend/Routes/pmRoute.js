@@ -21,7 +21,7 @@ const upload = documentUpload;
 
 // Create a new pharmacy manager's registration
 router.post(
-  "/create",
+  "/register",
   //authMiddleware("pharmacyManager"), // Assuming only admins can create pharmacy managers
   upload.fields([
     { name: "compliance", maxCount: 1 },

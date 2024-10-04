@@ -11,6 +11,7 @@ import DocApprove from "./DocApprove";
 import "../Doctor/PrescriptionPage/Ant.css";
 import PManager from "./PManager";
 import Users from "./Users";
+import ViewPharmacist from "./ViewPharmacist";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -98,6 +99,7 @@ const AdminDashboard = () => {
               <Route path="doctors" element={<DocApprove />} />
               <Route path="pmanagers" element={<PManager />} />
               <Route path="view-users" element={<Users />} />
+              <Route path="view-pharmacist" element={<ViewPharmacist />} />
             </Routes>
           </Content>
         </div>

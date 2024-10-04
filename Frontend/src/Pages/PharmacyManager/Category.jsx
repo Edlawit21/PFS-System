@@ -1,16 +1,16 @@
-import { Button, Table, Select, Input } from "antd";
+import { Button, Table, Select, Input, message } from "antd";
 import "../Doctor/PrescriptionPage/Ant.css";
 import { columnCategory } from "../../Components/Column";
-import { useState } from "react";
-import { dataCat } from "../../Data/data";
+import { useState, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import CategoryModal from "./CategoryModal";
+import Api from "../../api/axiosInstance";
 
 const { Option } = Select;
 
 const Category = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState(dataCat);
+  const [data, setData] = useState([]); // Start with an empty array
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +20,21 @@ const Category = () => {
 
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await Api.get("/category/allCategory");
+        setData(response.data);
+      } catch (error) {
+        console.error("Fetch Categories Error:", error); // Log the detailed error
+        message.error("Failed to fetch categories. Check console for details.");
+      }
+    };
+
+    fetchCategories();
+    console.log("cat", data);
+  }, []); // Run this effect only once on component mount
 
   const filteredData = data.filter(
     (item) =>
@@ -50,19 +65,35 @@ const Category = () => {
     setEditingRecord(null);
   };
 
-  const handleAddCategory = (newCategory) => {
-    if (editingRecord) {
-      // Update existing category
-      setData((prevData) =>
-        prevData.map((item) =>
-          item.key === editingRecord.key ? { ...item, ...newCategory } : item
-        )
-      );
-    } else {
-      // Add new category
-      setData((prevData) => [...prevData, { key: Date.now(), ...newCategory }]);
+  const handleAddCategory = async (newCategory) => {
+    try {
+      if (editingRecord) {
+        // Update existing category
+        const response = await Api.put(
+          `/category/${editingRecord._id}`,
+          newCategory
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item._id === editingRecord._id
+              ? { ...item, ...response.data }
+              : item
+          )
+        );
+      } else {
+        // Add new category
+        const response = await Api.post(
+          "/category/createCategory",
+          newCategory
+        );
+        setData((prevData) => [...prevData, response.data]);
+      }
+      message.success("Category saved successfully!");
+    } catch (error) {
+      message.error("Failed to save category.");
+    } finally {
+      handleModalClose();
     }
-    handleModalClose();
   };
 
   const handleSubCategoryChange = (value) => {
@@ -77,11 +108,19 @@ const Category = () => {
     setSelectedRowKeys(selectedKeys);
   };
 
-  const handleDeleteSelected = () => {
-    setData((prevData) =>
-      prevData.filter((item) => !selectedRowKeys.includes(item.key))
-    );
-    setSelectedRowKeys([]);
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(
+        selectedRowKeys.map((key) => Api.delete(`/category/${key}`))
+      );
+      setData((prevData) =>
+        prevData.filter((item) => !selectedRowKeys.includes(item._id))
+      );
+      setSelectedRowKeys([]);
+      message.success("Selected categories deleted successfully!");
+    } catch (error) {
+      message.error("Failed to delete selected categories.");
+    }
   };
 
   const handleExpand = (key) => {
@@ -92,8 +131,14 @@ const Category = () => {
     handleModalOpen(record);
   };
 
-  const handleDelete = (key) => {
-    setData((prevData) => prevData.filter((item) => item.key !== key));
+  const handleDelete = async (key) => {
+    try {
+      await Api.delete(`/category/${key}`);
+      setData((prevData) => prevData.filter((item) => item._id !== key));
+      message.success("Category deleted successfully!");
+    } catch (error) {
+      message.error("Failed to delete category.");
+    }
   };
 
   return (
@@ -114,18 +159,12 @@ const Category = () => {
           allowClear
         >
           <Option value="">All</Option>
-          <Option value="Prescription Medication">
-            Prescription Medication
-          </Option>
-          <Option value="Over-the-Counter (OTC) Medications">
-            Over-the-Counter (OTC) Medications
-          </Option>
-          <Option value="Controlled Substances">Controlled Substances</Option>
-          <Option value="Specialty Medications">Specialty Medications</Option>
-          <Option value="Medical Supplies">Medical Supplies</Option>
-          <Option value="Health and Wellness Products">
-            Health and Wellness Products
-          </Option>
+          {data.map((category) => (
+            <Option key={category.id} value={category.id}>
+              {category.name}{" "}
+              {/* Adjust keys based on your actual data structure */}
+            </Option>
+          ))}
         </Select>
       </div>
       <div className="bg-white p-6 rounded-xl">
@@ -174,6 +213,7 @@ const Category = () => {
         onClose={handleModalClose}
         onAdd={handleAddCategory}
         initialValues={editingRecord}
+        categories={data}
       />
     </div>
   );

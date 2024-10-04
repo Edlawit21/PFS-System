@@ -20,7 +20,7 @@ const checkAddressOwnership = require("../Middelware/addressMiddleware");
 
 // Create Address Registration
 router.post(
-  "/address",
+  "/",
   authMiddleware("pharmacyManager"), // Ensure only pharmacy managers can access this route
   createAddressValidator,
   validate,
@@ -29,7 +29,7 @@ router.post(
 
 // Update Address Registration
 router.put(
-  "/address/:addressId",
+  "/:addressId",
   authMiddleware("pharmacyManager"), // Ensure only pharmacy managers can access this route
   updateAddressValidator,
   checkAddressOwnership,
@@ -39,7 +39,7 @@ router.put(
 
 // Get Address Registration by ID
 router.get(
-  "/address/:pharmacyManagerRegistrationId",
+  "/:pharmacyManagerRegistrationId",
   authMiddleware("pharmacyManager"), // Ensure only pharmacy managers can access this route
   getAddressRegistration,
   checkAddressOwnership
@@ -55,7 +55,7 @@ router.get(
 
 // Delete Address Registration
 router.delete(
-  "/address/:pharmacyManagerRegistrationId",
+  "/:pharmacyManagerRegistrationId",
   authMiddleware("pharmacyManager"), // Ensure only pharmacy managers can access this route
   deleteAddressRegistration,
   checkAddressOwnership

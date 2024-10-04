@@ -1,188 +1,305 @@
-import { Form, Input, Button, DatePicker, Upload, Radio, Row, Col } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import Api from "../../api/axiosInstance";
 
 const RegisterPharmacist = () => {
+  const [formValues, setFormValues] = useState({
+    firstname: "",
+    lastname: "",
+    gender: "",
+    contact: { phone: "", email: "" },
+    residentialAddress: "",
+    education: null,
+    idDocument: null,
+    graduationDate: "",
+    licenseNumber: "",
+    licenseExpiryDate: "",
+    experience: "",
+    passportPhoto: null,
+    username: "",
+    password: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes("contact.")) {
+      setFormValues((prevState) => ({
+        ...prevState,
+        contact: {
+          ...prevState.contact,
+          [name.split(".")[1]]: value,
+        },
+      }));
+    } else {
+      setFormValues((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const { name } = e.target;
+    const file = e.target.files[0];
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: file,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+
+    for (const key in formValues) {
+      if (
+        key === "education" ||
+        key === "idDocument" ||
+        key === "passportPhoto"
+      ) {
+        formData.append(key, formValues[key]); // Append files or other fields
+      } else if (key === "contact") {
+        // Stringify contact object and append as a single JSON field
+        formData.append("contact", JSON.stringify(formValues.contact));
+      } else {
+        formData.append(key, formValues[key]); // Append other fields normally
+      }
+    }
+
+    // Debugging: Print formData entries
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await Api.post("/pharmacist/create", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert("Pharmacist registered successfully!");
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error registering pharmacist:", error);
+      alert("Failed to register pharmacist. Please try again.");
+    }
+  };
+
   return (
-    <div>
-      <h2>Register Pharmacist</h2>
-      <div className="bg-white mt-6 rounded-lg py-4">
-        <Form layout="vertical" requiredMark={false} style={{ margin: "30px" }}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Firstname :"
-                name="firstname"
-                rules={[
-                  { required: true, message: "Please input your firstname!" },
-                ]}
-              >
-                <Input placeholder="Firstname" allowClear />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Lastname :"
-                name="lastname"
-                rules={[
-                  { required: true, message: "Please input your lastname!" },
-                ]}
-              >
-                <Input placeholder="Lastname" allowClear />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item
-            label="Gender"
-            name="gender"
-            rules={[{ required: true, message: "Please select your gender" }]}
-          >
-            <Radio.Group>
-              <Radio value={1}>Male</Radio>
-              <Radio value={2}>Female</Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item
-            label="Contact Information"
-            name="contact"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your contact information",
-              },
-            ]}
-          >
-            <div className="flex gap-8">
-              <Input addonBefore="Phone" type="number" />
-              <Input addonBefore="Email" type="email" />
-            </div>
-          </Form.Item>
-          <Form.Item
-            label="Residential Address"
-            name="residentialAddress"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your residential address",
-              },
-            ]}
-          >
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Educational Information"
-                name="education"
-                layout="horizontal"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e && e.fileList}
-                extra="Upload educational info"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter your degree information",
-                  },
-                ]}
-              >
-                <Upload action="/upload" listType="picture">
-                  <Button icon={<UploadOutlined />}>
-                    Upload Educational Document
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Government-Issued ID"
-                name="idDocument"
-                layout="horizontal"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => e && e.fileList}
-                extra="Upload a copy of government-issued ID"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please upload file",
-                  },
-                ]}
-              >
-                <Upload action="/upload" listType="picture">
-                  <Button icon={<UploadOutlined />}>Upload ID</Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-          </Row>
-          <div className="flex justify-between ">
-            <Form.Item
-              label="Graduation Date"
-              name="graduationDate"
-              rules={[
-                {
-                  required: true,
-                  message: "Please select your graduation date",
-                },
-              ]}
-            >
-              <DatePicker />
-            </Form.Item>
-            <Form.Item
-              label="License Number"
-              name="licenseNumber"
-              rules={[
-                { required: true, message: "Please enter your license number" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="License Expiry Date"
-              name="licenseExpiryDate"
-              rules={[
-                {
-                  required: true,
-                  message: "Please select your license expiry date",
-                },
-              ]}
-            >
-              <DatePicker />
-            </Form.Item>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6">Register Pharmacist</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Firstname:
+          </label>
+          <input
+            type="text"
+            name="firstname"
+            value={formValues.firstname}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Lastname:
+          </label>
+          <input
+            type="text"
+            name="lastname"
+            value={formValues.lastname}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Gender:
+          </label>
+          <div className="flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="Male"
+              checked={formValues.gender === "Male"}
+              onChange={handleInputChange}
+              required
+              className="mr-2"
+            />
+            <label className="mr-4">Male</label>
+            <input
+              type="radio"
+              name="gender"
+              value="Female"
+              checked={formValues.gender === "Female"}
+              onChange={handleInputChange}
+              required
+              className="mr-2"
+            />
+            <label>Female</label>
           </div>
-          <Form.Item label="Experiance" name="experiance">
-            <Input.TextArea rows={2} />
-          </Form.Item>
-
-          <Form.Item
-            label="Passport-Size Photo"
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Contact Information:
+          </label>
+          <input
+            type="text"
+            name="contact.phone"
+            placeholder="Phone"
+            value={formValues.contact.phone}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+          <input
+            type="email"
+            name="contact.email"
+            placeholder="Email"
+            value={formValues.contact.email}
+            onChange={handleInputChange}
+            required
+            className="mt-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Residential Address:
+          </label>
+          <textarea
+            name="residentialAddress"
+            value={formValues.residentialAddress}
+            onChange={handleInputChange}
+            rows="3"
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Username:
+          </label>
+          <input
+            type="text"
+            name="username"
+            value={formValues.username}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Password:
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={formValues.password}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Educational Information:
+          </label>
+          <input
+            type="file"
+            name="education"
+            onChange={handleFileChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Government-Issued ID:
+          </label>
+          <input
+            type="file"
+            name="idDocument"
+            onChange={handleFileChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Graduation Date:
+          </label>
+          <input
+            type="date"
+            name="graduationDate"
+            value={formValues.graduationDate}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            License Number:
+          </label>
+          <input
+            type="text"
+            name="licenseNumber"
+            value={formValues.licenseNumber}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            License Expiry Date:
+          </label>
+          <input
+            type="date"
+            name="licenseExpiryDate"
+            value={formValues.licenseExpiryDate}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Experience:
+          </label>
+          <input
+            type="text"
+            name="experience"
+            value={formValues.experience}
+            onChange={handleInputChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Passport Photo:
+          </label>
+          <input
+            type="file"
             name="passportPhoto"
-            layout="horizontal"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e && e.fileList}
-            extra="Upload a passport-size photo"
-          >
-            <Upload action="/upload" listType="picture">
-              <Button icon={<UploadOutlined />}>Upload Photo</Button>
-            </Upload>
-          </Form.Item>
-
-          <Form.Item
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "30px",
-            }}
-          >
-            <Button
-              type="primary"
-              htmlType="submit"
-              size="large"
-              style={{ width: "300px" }}
-            >
-              Register
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
+            onChange={handleFileChange}
+            required
+            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full py-2 mt-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700"
+        >
+          Register Pharmacist
+        </button>
+      </form>
     </div>
   );
 };

@@ -20,9 +20,14 @@ const { profileUpload } = require("../Config/multer");
 router.post(
   "/register",
   // authMiddleware(), // Optional: remove if registration does not require authentication
-  profileUpload.single("profileImage"), // Handle file upload
-  createUserValidator, // Validation middleware
-  validate,
+  // profileUpload.single("profileImage"), // Handle file upload
+  (req, res, next) => {
+    if (!req.file) {
+      return res.status(400).send({ error: "File upload failed." });
+    }
+    next(); // Proceed to the next middleware if the file is present
+  },
+
   registerUser
 );
 

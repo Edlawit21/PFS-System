@@ -4,7 +4,7 @@ import { Modal, Button, QRCode } from "antd";
 import PropTypes from "prop-types";
 import Pin from "./Pin";
 
-const Submit = ({ isVisible, onClose }) => {
+const Submit = ({ isVisible, onClose, formData }) => {
   const [qrData, setQrData] = useState("");
   const [showQrCode, setShowQrCode] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -24,25 +24,6 @@ const Submit = ({ isVisible, onClose }) => {
 
   // Generate QR Code
   const generateQRCode = () => {
-    const formData = {
-      prescriptionNo: "12345",
-      prescriptionDate: "2024-07-25",
-      patientInfo: {
-        name: "John Doe",
-        gender: "Male",
-        allergies: "None",
-        age: 30,
-        phoneNumber: "123-456-7890",
-        notableHealthCondition: "None",
-      },
-      physicianInfo: {
-        name: "Dr. Smith",
-        signature: "Signature",
-        phoneNumber: "098-765-4321",
-      },
-      prescribedMedication: "Medication List",
-    };
-
     const qrCodeString = JSON.stringify(formData);
     setQrData(qrCodeString);
     setShowQrCode(true);
@@ -75,7 +56,7 @@ const Submit = ({ isVisible, onClose }) => {
           </div>
         ) : (
           <>
-            <ModalSubmit />
+            <ModalSubmit formData={formData} />
             <div className="flex justify-center gap-6 pb-4">
               <Button onClick={generateQRCode}>Generate QR Code</Button>
               <Button onClick={handleEditClick}>Edit</Button>
@@ -115,6 +96,7 @@ const Submit = ({ isVisible, onClose }) => {
 Submit.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  formData: PropTypes.func.isRequired,
 };
 
 export default Submit;

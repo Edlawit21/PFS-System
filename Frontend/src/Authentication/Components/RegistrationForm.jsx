@@ -1,23 +1,82 @@
 import { Form, Input, Radio, Select, Row, Col } from "antd";
 import PropTypes from "prop-types";
-import UploadButton from "./UploadButton";
+import { PlusOutlined } from "@ant-design/icons";
+import { Upload, Image } from "antd";
+import { useState } from "react";
 
-const RegistrationForm = ({ form, onRoleChange }) => {
-  const handleRoleChange = (value) => {
-    // Call the callback with the selected role
-    onRoleChange(value);
+const RegistrationForm = ({ form, onRoleChange, onChange }) => {
+  {
+    /*const [fileList, setFileList] = useState([]);
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [validationMessage, setValidationMessage] = useState("");
+
+  const handlePreview = async (file) => {
+    setPreviewImage(file.url || file.thumbUrl);
+    setPreviewOpen(true);
   };
 
-  const handleFileChange = (fileList) => {
-    // Update the form field value
-    form.setFieldsValue({
-      "profile-image": fileList,
-    });
+  const handleChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    if (onChange) {
+      onChange(newFileList); // Pass updated fileList to parent component
+    }
+    if (newFileList.length === 0) {
+      setValidationMessage("Please upload your profile image!"); // Set validation message if no files
+    } else {
+      setValidationMessage(""); // Clear message if files are present
+    }
+  };
+
+  const beforeUpload = (file) => {
+    const isSupportedType =
+      file.type === "image/png" || file.type === "image/jpeg";
+    const isLessThanLimit = file.size / 1024 / 1024 < 5;
+
+    if (!isSupportedType) {
+      setValidationMessage(
+        "File type not supported. Only PNG and JPEG are allowed."
+      );
+      return Upload.LIST_IGNORE; // Ignore this file
+    }
+
+    if (!isLessThanLimit) {
+      setValidationMessage("File size exceeds 5MB.");
+      return Upload.LIST_IGNORE; // Ignore this file
+    }
+
+    setValidationMessage(""); // Clear validation message
+    return true; // Allow upload
+  };
+
+  const customRequest = ({ file, onSuccess }) => {
+    setTimeout(() => {
+      setValidationMessage(`${file.name} uploaded successfully.`);
+      // Set the profileImage field value to the actual File object
+      form.setFieldsValue({
+        profileImage: file, // Set the profile image to the File object
+      });
+      onSuccess("ok");
+    }, 0);
+  };
+
+  const uploadButton = (
+    <button type="button" className="border rounded-md w-40 p-1">
+      <PlusOutlined />
+      <div>Upload</div>
+    </button>
+  );*/
+  }
+
+  const handleRoleChange = (value) => {
+    onRoleChange(value);
   };
 
   return (
     <div className="px-6">
-      <h1 className="flex justify-center mb-4 font-medium">RegistrationForm</h1>
+      <h1 className="flex justify-center mb-4 font-medium">
+        Registration Form
+      </h1>
       <Form layout="vertical" form={form} requiredMark={false}>
         <Row gutter={16}>
           <Col span={12}>
@@ -43,14 +102,48 @@ const RegistrationForm = ({ form, onRoleChange }) => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item
-          label="Profile Image "
+        {/* <Form.Item
+          label="Profile Image :"
           name="profileImage"
-          rules={[{ required: true, message: "Please upload your profile!" }]}
-          layout="horizontal"
+          rules={[
+            { required: true, message: "Please upload your profile image!" },
+          ]}
         >
-          <UploadButton formType="registration" onChange={handleFileChange} />
-        </Form.Item>
+          <div>
+            <Upload
+              customRequest={customRequest}
+              listType="picture"
+              fileList={fileList}
+              onPreview={handlePreview}
+              onChange={handleChange}
+              beforeUpload={beforeUpload}
+            >
+              {fileList.length >= 1 ? null : uploadButton}
+            </Upload>
+            <Image
+              preview={{
+                visible: previewOpen,
+                onVisibleChange: (visible) => setPreviewOpen(visible),
+                afterOpenChange: (visible) => !visible && setPreviewImage(""),
+              }}
+              src={previewImage}
+              style={{ display: previewImage ? "block" : "none" }} // Show the preview image only when available
+            />
+            {validationMessage && (
+              <div
+                style={{
+                  color: validationMessage.includes("successfully")
+                    ? "green"
+                    : "red",
+                  marginTop: 8,
+                }}
+              >
+                {validationMessage}
+              </div>
+            )}
+          </div>
+        </Form.Item> */}
+
         <Form.Item
           label="Username :"
           name="username"
@@ -76,28 +169,27 @@ const RegistrationForm = ({ form, onRoleChange }) => {
           <Radio.Group
             style={{ display: "flex", justifyContent: "space-evenly" }}
           >
-            <Radio value={1}>Male</Radio>
-            <br />
-            <Radio value={2}>Female</Radio>
+            <Radio value="male">Male</Radio>
+            <Radio value="female">Female</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item
           label="Phone Number :"
-          name="phonenumber"
+          name="phoneNumber"
           rules={[
             { required: true, message: "Please input your phone number!" },
           ]}
         >
-          <Input type="number" placeholder="(+251-900-000-000)" />
+          <Input placeholder="(+251-900-000-000)" />
         </Form.Item>
         <Form.Item
           label="Role :"
           name="role"
-          rules={[{ required: true, message: "Please Choose your role!" }]}
+          rules={[{ required: true, message: "Please choose your role!" }]}
         >
           <Select
             placeholder="Select your role"
-            onChange={handleRoleChange} // Update role on change
+            onChange={handleRoleChange}
             options={[
               { value: "doctor", label: "Doctor" },
               { value: "pharmacyManager", label: "Pharmacy Manager" },
@@ -137,7 +229,7 @@ const RegistrationForm = ({ form, onRoleChange }) => {
                 }),
               ]}
             >
-              <Input.Password />
+              <Input.Password placeholder="Confirm your password" />
             </Form.Item>
           </Col>
         </Row>
@@ -149,6 +241,7 @@ const RegistrationForm = ({ form, onRoleChange }) => {
 RegistrationForm.propTypes = {
   form: PropTypes.object.isRequired,
   onRoleChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func, // onChange is optional now
 };
 
 export default RegistrationForm;

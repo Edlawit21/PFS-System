@@ -1,11 +1,21 @@
 const DoctorRegistration = require("../../Models/Userform/doctorRegModel");
 const User = require("../../Models/Userform/userModel");
 
-// Create a new doctor's registration
 const createDoctor = async (req, res) => {
   try {
+    console.log("Request body:", req.body); // Log the request body
+
+    // Destructure the basic info and professional details from the request body
     const {
-      userId,
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+      password,
+
       docName,
       hospitalName,
       hospitalType,
@@ -14,6 +24,46 @@ const createDoctor = async (req, res) => {
       pin,
     } = req.body;
 
+    console.log("Basic info received:", {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+    });
+
+    // Check if the email or username already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Email or username already exists." });
+    }
+
+    // Create a new user with the hashed password
+    const newUser = new User({
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+      password,
+      status: "Pending", // Set the initial status to "Pending"
+    });
+
+    // Save the user first
+    const savedUser = await newUser.save(); // Save the new user to the database
+
+    console.log("User created and saved with ID:", savedUser._id);
+
+    // Now handle the doctor registration details
     if (!req.files || req.files.length < 2) {
       return res.status(400).json({
         message: "Educational Info and Medical License are required.",
@@ -30,27 +80,9 @@ const createDoctor = async (req, res) => {
       ? req.files["medicalLicense"][0].path
       : null;
 
-    // Ensure the user exists
-    const userExists = await User.findById(userId);
-    if (!userExists) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    if (userExists.role !== "doctor") {
-      return res.status(400).json({ message: "User is not a Doctor." });
-    }
-
-    // Check if user registration is completed
-    if (!userExists.firstname || !userExists.lastname) {
-      return res.status(400).json({
-        message:
-          "User registration must be completed before doctor registration.",
-      });
-    }
-
-    // Create a new doctor registration
+    // Create a new doctor registration with the saved user's _id (userId)
     const newDoctorRegistration = new DoctorRegistration({
-      userId,
+      userId: savedUser._id, // Use the newly created user's _id
       docName,
       educationalInfo,
       hospitalName,
@@ -62,6 +94,7 @@ const createDoctor = async (req, res) => {
       pin,
     });
 
+    // Save the doctor registration
     await newDoctorRegistration.save();
 
     res.status(201).json({
@@ -69,6 +102,7 @@ const createDoctor = async (req, res) => {
       doctorRegistration: newDoctorRegistration,
     });
   } catch (error) {
+    console.error("Error in createDoctor:", error); // Log the error details
     res.status(500).json({ message: "Server error", error });
   }
 };
@@ -97,13 +131,13 @@ const updateDoctor = async (req, res) => {
 
     if (req.files) {
       updateFields.educationalInfo = req.files["educationalInfo"]
-        ? req.files["educationalInfo"][0].path
+        ? req.files["educationalInfo"][0].filename
         : undefined;
       updateFields.certificate = req.files["certificate"]
-        ? req.files["certificate"][0].path
+        ? req.files["certificate"][0].filename
         : undefined;
       updateFields.medicalLicense = req.files["medicalLicense"]
-        ? req.files["medicalLicense"][0].path
+        ? req.files["medicalLicense"][0].filename
         : undefined;
     }
 

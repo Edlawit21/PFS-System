@@ -5,7 +5,13 @@ const doctorRegistrationSchema = new mongoose.Schema({
   docName: { type: String, required: true, trim: true },
   educationalInfo: { type: String, required: true }, // URL or path to the educational information file
   hospitalName: { type: String, required: true, trim: true },
-  hospitalType: { type: String, enum: ["Private", "Public"], required: true },
+  hospitalType: {
+    type: [String], // Array of strings for multiple selections
+    required: true,
+    message: "Please choose a hospital type!",
+    validate: (value) => value.length > 0, // Custom validation
+  },
+
   specialization: { type: String, trim: true },
   certificate: { type: String }, // URL or path to the certificate file
   experience: { type: String, required: true, trim: true },

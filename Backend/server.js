@@ -29,7 +29,7 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:3000", // Allow requests from this origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allowed methods
     credentials: true, // Allow cookies and authentication headers
   })
 );
@@ -38,8 +38,8 @@ app.use(
 
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use("/uploads/profile-image", express.static("Uploads/profile-image")); // Serve profile images
-app.use("/uploads/document", express.static("Uploads/document")); // Serve document
+app.use("/uploads/profile-image", express.static("Uploads/profile-images")); // Serve profile images
+app.use("/uploads/document", express.static("Uploads/documents")); // Serve document
 
 // Connect to MongoDB
 connectDB();
@@ -78,7 +78,7 @@ app.use("/api/category", categoryRoute);
 app.use((err, req, res, next) => {
   console.error(err.stack);
   console.error("Error Message:", err.message);
-  res.status(500).send("Something broke!");
+  res.status(500).send(err);
 });
 
 // Start the server

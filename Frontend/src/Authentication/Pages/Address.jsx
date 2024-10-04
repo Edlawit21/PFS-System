@@ -60,6 +60,7 @@ const Address = ({ form }) => {
             ))}
           </Select>
         </Form.Item>
+
         <Form.Item
           label="City :"
           name="city"
@@ -67,55 +68,23 @@ const Address = ({ form }) => {
         >
           <Input placeholder="Enter your city" allowClear />
         </Form.Item>
+
         <Form.Item
           label="Contact Number :"
-          name="contactnumber"
+          name="contactNumber"
           rules={[
             { required: true, message: "Please input your contact number!" },
           ]}
         >
-          <Input type="number" placeholder="Enter contact number" />
+          <Input type="tel" placeholder="Enter contact number" allowClear />
         </Form.Item>
 
         <Form.List name="branches">
           {(fields, { add, remove }) => (
             <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                rowGap: 16,
-              }}
+              style={{ display: "flex", flexDirection: "column", rowGap: 16 }}
             >
-              {/* Render the first branch by default */}
-              {fields.length === 0 && (
-                <Card size="small" title="Branch 1">
-                  <Form.Item
-                    label="Branch Name :"
-                    name={[0, "branchName"]}
-                    rules={[
-                      { required: true, message: "Enter the branch name!" },
-                    ]}
-                  >
-                    <Input placeholder="Branch Name" allowClear />
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Branch Address :"
-                    name={[0, "branchAddress"]}
-                    rules={[
-                      { required: true, message: "Enter the branch address!" },
-                    ]}
-                  >
-                    <Input.TextArea
-                      placeholder="123 Haile Gebrselassie Road, Addis Ketema, Kebele 10, Addis Ababa, Ethiopia"
-                      rows={3}
-                      allowClear
-                    />
-                  </Form.Item>
-                </Card>
-              )}
-
-              {/* Render additional branches */}
+              {/* Render branches */}
               {fields.map((field) => (
                 <Card
                   size="small"
@@ -144,7 +113,7 @@ const Address = ({ form }) => {
                       { required: true, message: "Enter the branch address!" },
                     ]}
                   >
-                    <Input.TextArea
+                    <TextArea
                       placeholder="123 Haile Gebrselassie Road, Addis Ketema, Kebele 10, Addis Ababa, Ethiopia"
                       rows={3}
                       allowClear

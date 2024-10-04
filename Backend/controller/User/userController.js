@@ -14,11 +14,11 @@ const registerUser = async (req, res) => {
       password,
     } = req.body;
 
-    // Ensure that profileImage is included in the request
-    if (!req.file) {
-      return res.status(400).json({ message: "Profile image is required." });
-    }
-    const profileImage = req.file.path; // File path or URL
+    // // Ensure that profileImage is included in the request
+    // if (!req.file) {
+    //   return res.status(400).json({ message: "Profile image is required." });
+    // }
+    //const profileImage = req.file.path; // File path or URL
 
     // Check if the email or username already exists
     const existingUser = await User.findOne({
@@ -35,7 +35,7 @@ const registerUser = async (req, res) => {
     const newUser = new User({
       firstname,
       lastname,
-      profileImage,
+      // profileImage,
       username,
       email,
       gender,
