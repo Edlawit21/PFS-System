@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Modal, Button, Select, message } from "antd";
 import { columnDoc } from "../../Components/Column";
-//import { dataDoc } from "../../Data/data";
 import "../Doctor/PrescriptionPage/Ant.css";
 import Api from "../../api/axiosInstance";
 

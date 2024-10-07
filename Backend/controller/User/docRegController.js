@@ -1,6 +1,6 @@
 const DoctorRegistration = require("../../Models/Userform/doctorRegModel");
 const User = require("../../Models/Userform/userModel");
-
+const jwt = require("jsonwebtoken");
 const createDoctor = async (req, res) => {
   try {
     console.log("Request body:", req.body); // Log the request body
@@ -190,7 +190,13 @@ const updateDoctor = async (req, res) => {
 // Get a doctor's registration details by userId
 const getDoctorRegistration = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token:", decoded);
+
+    // Determine which model to use based on the role
+    const userId = decoded.id; // Ensure the role is included in the JWT payload
+    console.log("User id:", userId);
 
     // Fetch the doctor registration using the userId
     const doctorRegistration = await DoctorRegistration.findOne({ userId });

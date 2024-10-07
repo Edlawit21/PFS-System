@@ -6,7 +6,8 @@ const {
   getPharmacyManagerRegistration,
   getAllPharmacyManagerRegistrations,
   deletePharmacyManagerRegistration,
-  getAllUsersWithPharmacyManagerDetails,
+  getAllPharmacy,
+  fetchAllPharmacyManagers,
 } = require("../controller/User/pmController");
 const {
   createPharmacyManagerValidator,
@@ -33,26 +34,19 @@ router.post(
   createPharmacyManager
 );
 
-// Update an existing pharmacy manager's registration
+//Update an existing pharmacy manager's registration
 router.put(
-  "/:id",
-  authMiddleware("pharmacyManager", "admin"), // Assuming only admins can update pharmacy managers
-  upload.fields([
-    { name: "compliance", maxCount: 1 },
-    { name: "licensePM", maxCount: 1 },
-    { name: "businessR", maxCount: 1 },
-  ]),
-  updatePharmacyManagerValidator,
-  validate,
+  "/update/:id",
+  authMiddleware("pharmacyManager", "admin"),
   updatePharmacyManager
 );
 
 // Get a pharmacy manager registration by userId
-router.get(
-  "/:userId",
-  authMiddleware("admin", "pharmacyManager"), // Assuming only admins can view details
-  getPharmacyManagerRegistration
-);
+// router.get(
+//   "/:userId",
+//   authMiddleware("admin", "pharmacyManager"), // Assuming only admins can view details
+//   getPharmacyManagerRegistration
+// );
 
 // Get all pharmacy manager registrations
 router.get(
@@ -61,18 +55,12 @@ router.get(
   getAllPharmacyManagerRegistrations
 );
 
+router.get("/all", fetchAllPharmacyManagers);
 // Delete a pharmacy manager registration by userId
-router.delete(
-  "/:userId",
-  authMiddleware("admin"), // Assuming only admins can delete registrations
-  deletePharmacyManagerRegistration
-);
-
-// Get all users with pharmacy manager registration details
-router.get(
-  "/users-with-pharmacy-manager-details/:userId",
-  authMiddleware("admin"), // Assuming only admins can view this information
-  getAllUsersWithPharmacyManagerDetails
-);
+// router.delete(
+//   "/:userId",
+//   authMiddleware("admin"), // Assuming only admins can delete registrations
+//   deletePharmacyManagerRegistration
+// );
 
 module.exports = router;

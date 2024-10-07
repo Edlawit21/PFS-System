@@ -1,114 +1,115 @@
-import { Button, DatePicker, Table, message } from "antd";
-import { useState } from "react";
-import { columnReport } from "../../Components/Column";
-import Api from "../../api/axiosInstance";
+import { useEffect, useState } from "react";
+import Api from "../../api/axiosInstance"; // Ensure this is the correct path to your API instance
+import { Table, Spin, message } from "antd"; // Using Ant Design for UI components
 
-const { RangePicker } = DatePicker;
+const PharmacyManagerList = () => {
+  const [pharmacyManagers, setPharmacyManagers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const ViewReport = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [data, setData] = useState([]); // Start with an empty array
-  const [dateRange, setDateRange] = useState([null, null]);
-  const pageSizeOptions = ["5", "10", "30", "40", "50"];
-  const defaultPageSize = 5;
-
-  const pagination = {
-    pageSizeOptions,
-    showSizeChanger: true,
-    defaultPageSize,
-    total: data.length,
-    current: currentPage,
-    onChange: (page) => {
-      setCurrentPage(page);
-    },
-    showTotal: (total, range) =>
-      `Showing ${range[0]}-${range[1]} of ${total} items`,
-    position: ["bottomCenter"],
-  };
-
-  const fetchReports = async () => {
-    const [startDate, endDate] = dateRange;
-    if (!startDate || !endDate) {
-      message.error("Please select a date range.");
-      return;
-    }
-    const token = localStorage.getItem("token");
-    try {
-      const formattedStartDate = startDate.format("YYYY-MM-DD");
-      const formattedEndDate = endDate.format("YYYY-MM-DD");
-
-      const response = await Api.post(
-        "/report/sales-reports",
-        { startDate: formattedStartDate, endDate: formattedEndDate },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data && response.data.reports) {
-        const reportsWithKeys = response.data.reports.map((report) => ({
-          ...report,
-          key: report._id || Math.random(), // Use a unique key
-        }));
-        setData(reportsWithKeys);
-        console.log("Fetched Reports Data:", reportsWithKeys);
-      } else {
-        message.error("Unexpected response format.");
+  useEffect(() => {
+    const fetchPharmacyManagers = async () => {
+      try {
+        const response = await Api.get("/pharmacy-manager/all"); // Adjust the URL as per your API
+        console.log("Fetched Pharmacy Managers:", response.data); // Log the fetched data
+        setPharmacyManagers(response.data.pharmacyManagers);
+      } catch (err) {
+        console.error("Error fetching pharmacy managers:", err);
+        setError(err.message || "An error occurred while fetching data.");
+        message.error("Failed to fetch pharmacy managers.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("API Error:", error);
-      message.error(
-        "Failed to fetch reports. Please check the console for details."
-      );
-    }
-  };
+    };
 
+    fetchPharmacyManagers();
+  }, []);
+
+  // Define columns for the Ant Design table
+  const columns = [
+    {
+      title: "First Name",
+      dataIndex: ["user", "firstname"],
+      key: "firstname",
+    },
+    {
+      title: "Last Name",
+      dataIndex: ["user", "lastname"],
+      key: "lastname",
+    },
+    {
+      title: "Username",
+      dataIndex: ["user", "username"],
+      key: "username",
+    },
+    {
+      title: "Email",
+      dataIndex: ["user", "email"],
+      key: "email",
+    },
+    {
+      title: "Phone Number",
+      dataIndex: ["user", "phoneNumber"],
+      key: "phoneNumber",
+    },
+    {
+      title: "Pharmacy Name",
+      dataIndex: "pharmaName",
+      key: "pharmaName",
+    },
+    {
+      title: "PM Name",
+      dataIndex: "pmName",
+      key: "pmName",
+    },
+    {
+      title: "Experience",
+      dataIndex: "experience",
+      key: "experience",
+    },
+    {
+      title: "City",
+      dataIndex: ["addressDetails", "city"], // Changed from address to addressDetails
+      key: "city",
+    },
+    {
+      title: "State",
+      dataIndex: ["addressDetails", "state"], // Changed from address to addressDetails
+      key: "state",
+    },
+    {
+      title: "Operating Days",
+      dataIndex: ["addressDetails", "operatingDays"], // Changed from address to addressDetails
+      key: "operatingDays",
+    },
+    {
+      title: "Services Offered",
+      dataIndex: ["addressDetails", "servicesOffered"], // Changed from address to addressDetails
+      key: "servicesOffered",
+    },
+  ];
+
+  // Render loading spinner or error message
+  if (loading) {
+    return <Spin size="large" />;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  // Render the table with the fetched pharmacy manager data
   return (
     <div>
-      <h2 className="mb-4">Report</h2>
-      <div className="flex flex-col gap-2 py-2 bg-white rounded-xl">
-        <h3 className="py-3 font-semibold text-xl text-center">Choose Date</h3>
-        <div className="font-semibold text-lg flex flex-col items-center gap-8">
-          <span>
-            Date Range:{" "}
-            <RangePicker
-              size="large"
-              onChange={(dates) => {
-                console.log("Selected Dates:", dates);
-                setDateRange(dates);
-              }}
-            />
-          </span>
-          <Button
-            size="large"
-            style={{
-              width: "200px",
-              backgroundColor: "blue",
-              color: "white",
-              fontSize: "large",
-            }}
-            onClick={fetchReports}
-          >
-            Submit
-          </Button>
-        </div>
-
-        <div className="mx-6">
-          <Table
-            columns={columnReport}
-            dataSource={data}
-            pagination={pagination}
-            style={{
-              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
-              borderRadius: "8px",
-              marginTop: "16px",
-              background: "white",
-              border: "1px solid #E3E6EB",
-            }}
-            showSorterTooltip={false}
-          />
-        </div>
-      </div>
+      <h1>Pharmacy Managers List</h1>
+      <Table
+        dataSource={pharmacyManagers}
+        columns={columns}
+        rowKey="pmName" // You can use a unique identifier here
+        pagination={{ pageSize: 10 }}
+      />
     </div>
   );
 };
 
-export default ViewReport;
+export default PharmacyManagerList;

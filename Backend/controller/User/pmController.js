@@ -1,6 +1,7 @@
 const PharmacyManagerRegistration = require("../../Models/Userform/pmRegModel");
 const User = require("../../Models/Userform/userModel");
 const AddressRegistration = require("../../Models/Userform/addressModel");
+const Product = require("../../Models/PharmacyM/productModel");
 
 // Create a new pharmacy manager's registration
 const createPharmacyManager = async (req, res) => {
@@ -89,6 +90,7 @@ const createPharmacyManager = async (req, res) => {
     // Create a new pharmacy manager registration
     const newPharmacyManagerRegistration = new PharmacyManagerRegistration({
       userId: savedUser._id,
+
       pmName,
       pharmaName,
       compliance,
@@ -122,35 +124,77 @@ const createPharmacyManager = async (req, res) => {
 };
 
 // Update an existing pharmacy manager's registration
+// Update an existing pharmacy manager's registration
 const updatePharmacyManager = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { pmName, pharmaName, experience } = req.body;
+    const { id } = req.params; // Get the ID from the route parameters
 
-    // Ensure document fields are updated if they exist
-    const updateFields = {
+    // Destructure the necessary fields from the request body
+    const {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+      password,
+      pmName,
+      pharmaName,
+      experience,
+      state,
+      city,
+      contactNumber,
+      operatingDays,
+      servicesOffered,
+      latitude,
+      longitude,
+    } = req.body;
+
+    // Prepare the update fields object
+    const updateUserFields = {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+    };
+
+    // Prepare the pharmacy manager specific fields
+    const updateManagerFields = {
       pmName,
       pharmaName,
       experience,
     };
 
+    // Check if files are uploaded and include them in the updateManagerFields
     if (req.files) {
-      updateFields.compliance = req.files["compliance"]
-        ? req.files["compliance"][0].filename
-        : undefined;
-      updateFields.licensePM = req.files["licensePM"]
-        ? req.files["licensePM"][0].filename
-        : undefined;
-      updateFields.businessR = req.files["businessR"]
-        ? req.files["businessR"][0].filename
-        : undefined;
+      if (req.files["compliance"]) {
+        updateManagerFields.compliance =
+          "Uploads/documents/" + req.files["compliance"][0].filename;
+      }
+      if (req.files["licensePM"]) {
+        updateManagerFields.licensePM =
+          "Uploads/documents/" + req.files["licensePM"][0].filename;
+      }
+      if (req.files["businessR"]) {
+        updateManagerFields.businessR =
+          "Uploads/documents/" + req.files["businessR"][0].filename;
+      }
     }
 
-    // Find and update the pharmacy manager registration
+    // Find the pharmacy manager registration and update it
     const updatedPharmacyManager =
-      await PharmacyManagerRegistration.findByIdAndUpdate(id, updateFields, {
-        new: true,
-      });
+      await PharmacyManagerRegistration.findByIdAndUpdate(
+        id,
+        updateManagerFields,
+        {
+          new: true, // Return the updated document
+          runValidators: true, // Validate the update operation
+        }
+      );
 
     if (!updatedPharmacyManager) {
       return res
@@ -158,12 +202,40 @@ const updatePharmacyManager = async (req, res) => {
         .json({ message: "Pharmacy Manager registration not found." });
     }
 
+    // Update the associated user details
+    const updatedUser = await User.findByIdAndUpdate(
+      updatedPharmacyManager.userId,
+      updateUserFields,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    // If there's an address that needs to be updated, update it as well
+    const updatedAddress = await AddressRegistration.findOneAndUpdate(
+      { pharmacyManagerRegistrationId: id }, // Match by registration ID
+      {
+        state,
+        city,
+        contactNumber,
+        operatingDays,
+        servicesOffered,
+        latitude,
+        longitude,
+      },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       message: "Pharmacy Manager registration updated successfully.",
       pharmacyManager: updatedPharmacyManager,
+      user: updatedUser,
+      address: updatedAddress,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error updating pharmacy manager:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -197,6 +269,37 @@ const getAllPharmacyManagerRegistrations = async (req, res) => {
   }
 };
 
+const getAllPharmacy = async (req, res) => {
+  try {
+    console.log("Incoming request for all pharmacy managers");
+
+    // Find all pharmacy manager registrations and populate address and products
+    const pharmacyManagerRegistrations =
+      await PharmacyManagerRegistration.find()
+        .populate({
+          path: "address", // Reference the address from the Address model
+          model: "Address", // Specify the model explicitly
+        })
+        .populate({
+          path: "products", // Reference the products from the Product model
+          model: "Product", // Specify the model explicitly
+        });
+
+    // Log the retrieved pharmacy manager registrations
+    console.log(
+      "Retrieved pharmacy manager registrations:",
+      pharmacyManagerRegistrations
+    );
+
+    // Return the combined details
+    res.status(200).json({ pharmacyManagerRegistrations });
+  } catch (error) {
+    // Log the error for debugging
+    console.error("Error fetching pharmacy managers:", error);
+    res.status(500).json({ message: "get all pharmacy", error });
+  }
+};
+
 // Delete a pharmacy manager registration by userId
 const deletePharmacyManagerRegistration = async (req, res) => {
   try {
@@ -221,36 +324,82 @@ const deletePharmacyManagerRegistration = async (req, res) => {
 };
 
 // Get all users with pharmacy manager registration details
-const getAllUsersWithPharmacyManagerDetails = async (req, res) => {
+const fetchAllPharmacyManagers = async (req, res) => {
   try {
-    // Fetch all users with the role 'pharmacyManager'
-    const users = await User.find({ role: "pharmacyManager" });
-    const userIds = users.map((user) => user._id);
-
-    // Fetch all pharmacy manager registration details where userId matches
-    const pharmacyManagerRegistrations = await PharmacyManagerRegistration.find(
-      { userId: { $in: userIds } }
+    console.log("Fetching all pharmacy managers...");
+    // Fetch all pharmacy manager registrations and populate user details
+    const pharmacyManagers = await PharmacyManagerRegistration.find().populate(
+      "userId",
+      "firstname lastname username email phoneNumber role"
     );
 
-    // Combine user data with their pharmacy manager registration details
-    const usersWithPharmacyManagerDetails = users.map((user) => {
-      const pharmacyManagerRegistration = pharmacyManagerRegistrations.find(
-        (reg) => reg.userId.equals(user._id)
-      );
-      return { ...user.toObject(), pharmacyManagerRegistration };
+    // Fetch address registrations based on the pharmacy manager registration IDs
+    const addressRegistrations = await AddressRegistration.find({
+      pharmacyManagerRegistrationId: {
+        $in: pharmacyManagers.map((pm) => pm._id),
+      },
     });
 
-    // Send response
-    res.status(200).json({ usersWithPharmacyManagerDetails });
+    // Create a mapping of address registrations for easy lookup
+    const addressMap = addressRegistrations.reduce((acc, address) => {
+      acc[address.pharmacyManagerRegistrationId] = address;
+      return acc;
+    }, {});
+
+    // Combine pharmacy manager details with address details
+    const results = pharmacyManagers.map((pm) => ({
+      ...pm.toObject(), // Convert Mongoose document to a plain object
+      addressDetails: addressMap[pm._id] || null, // Attach address details
+    }));
+
+    // Check if any pharmacy managers are found
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No pharmacy managers found." });
+    }
+
+    console.log("Fetched Pharmacy Managers:", results);
+
+    // Structure the response to include user, pharmacy manager, and address details
+    const formattedResponse = results.map((pm) => ({
+      user: pm.userId,
+      pmName: pm.pmName,
+      pharmaName: pm.pharmaName,
+      experience: pm.experience,
+      addressDetails: pm.addressDetails
+        ? {
+            state: pm.addressDetails.state,
+            city: pm.addressDetails.city,
+            contactNumber: pm.addressDetails.contactNumber,
+            operatingDays: pm.addressDetails.operatingDays,
+            servicesOffered: pm.addressDetails.servicesOffered,
+            latitude: pm.addressDetails.latitude,
+            longitude: pm.addressDetails.longitude,
+          }
+        : null,
+      compliance: pm.compliance,
+      licensePM: pm.licensePM,
+      businessR: pm.businessR,
+    }));
+
+    // Send the response
+    res.status(200).json({
+      message: "Pharmacy managers fetched successfully.",
+      pharmacyManagers: formattedResponse,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error fetching pharmacy managers:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// Get all pharmacy managers along with their addresses
+
 module.exports = {
   createPharmacyManager,
   updatePharmacyManager,
   getPharmacyManagerRegistration,
   getAllPharmacyManagerRegistrations,
   deletePharmacyManagerRegistration,
-  getAllUsersWithPharmacyManagerDetails,
+  getAllPharmacy,
+  fetchAllPharmacyManagers,
 };

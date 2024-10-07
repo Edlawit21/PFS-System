@@ -1,5 +1,5 @@
 import { Drawer, Button, Avatar, Input, Form, message, Spin } from "antd";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Api from "../api/axiosInstance"; // Import your Axios instance
 
@@ -19,8 +19,7 @@ const UpdateProfileDoc = () => {
 
     setLoading(true); // Start loading when fetching data
     try {
-      const token = localStorage.getItem("token");
-      const response = await Api.get("/doctor/${userId}", {
+      const response = await Api.get(`/doctor/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }); // Use the existing Axios instance
       console.log("Fetched Profile Data:", response.data);
@@ -65,8 +64,7 @@ const UpdateProfileDoc = () => {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      const decoded = jwt_decode(token); // Decode the token to get the user ID
-      const userId = decoded.userId; // Adjust this based on your token's structure
+      const userId = document.cookie.split("=")[1]; // Retrieve the userId from the cookie
 
       const response = await Api.put(`/doctor/update/${userId}`, profileData);
       message.success("Profile updated successfully!");

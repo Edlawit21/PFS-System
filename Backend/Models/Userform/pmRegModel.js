@@ -7,6 +7,7 @@ const pharmacyManagerRegistrationSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+
   pmName: { type: String, required: true, trim: true },
   pharmaName: { type: String, required: true, trim: true },
   licensePM: { type: String, required: true, trim: true }, // URL or path to the license file
