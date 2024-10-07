@@ -8,6 +8,7 @@ const UpdateProfileDoc = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm(); // Form instance to control the form values
 
   // Function to fetch profile data
   const fetchProfileData = async () => {
@@ -17,13 +18,15 @@ const UpdateProfileDoc = () => {
       return; // If token is not available, do not proceed
     }
 
+    const userId = document.cookie.split("=")[1]; // Retrieve userId from cookies
+
     setLoading(true); // Start loading when fetching data
     try {
       const response = await Api.get(`/doctor/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      }); // Use the existing Axios instance
-      console.log("Fetched Profile Data:", response.data);
+      });
       setProfileData(response.data); // Set the fetched profile data
+      form.setFieldsValue(response.data.userInfo); // Set the form's initial values
     } catch (error) {
       console.error(
         "Error fetching profile data:",
@@ -43,6 +46,8 @@ const UpdateProfileDoc = () => {
   const onClose = () => {
     setOpen(false); // Close the drawer
     setIsEditing(false); // Reset editing state when closing
+    form.resetFields(); // Reset form fields when closing
+    setProfileData(null); // Reset profile data
   };
 
   const handleEdit = () => {
@@ -53,23 +58,26 @@ const UpdateProfileDoc = () => {
     setIsEditing(false);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
+  // Handle form submission to update profile
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      const userId = document.cookie.split("=")[1]; // Retrieve the userId from the cookie
+      console.log(token);
 
-      const response = await Api.put(`/doctor/update/${userId}`, profileData);
+      // Validate the form fields before submission
+      const updatedProfile = await form.validateFields(); // Get the updated form values after validation
+      console.log(updatedProfile); // Check the updated profile data
+
+      // Call the API to update profile information
+      const response = await Api.put(
+        `/doctor/update`, // Ensure this is the correct endpoint
+        updatedProfile
+      );
+
       message.success("Profile updated successfully!");
-      console.log("Updated Profile Data:", response.data);
-      setIsEditing(false); // Close the editing mode
+      setProfileData(response.data); // Update the profileData with the new data
+      setIsEditing(false); // Exit editing mode
+      await fetchProfileData();
     } catch (error) {
       console.error("Error updating profile:", error);
       message.error("Failed to update profile.");
@@ -98,63 +106,66 @@ const UpdateProfileDoc = () => {
                     icon={<ArrowLeftOutlined />}
                     onClick={handleBack}
                   />
-                  <Form layout="vertical">
+                  <Form
+                    form={form} // Associate form instance
+                    layout="vertical"
+                    initialValues={profileData?.userInfo} // Initial form values from profileData
+                  >
                     <Button>Change Picture</Button>
-                    <Form.Item label="First Name" name="firstname">
-                      <Input
-                        value={profileData?.firstname}
-                        name="firstname"
-                        onChange={handleChange}
-                      />
+                    <Form.Item
+                      label="First Name"
+                      name="firstname"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please input your first name!",
+                        },
+                      ]}
+                    >
+                      <Input name="firstname" />
                     </Form.Item>
-                    <Form.Item label="Last Name" name="lastname">
-                      <Input
-                        value={profileData?.lastname}
-                        name="lastname"
-                        onChange={handleChange}
-                      />
+                    <Form.Item
+                      label="Last Name"
+                      name="lastname"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please input your last name!",
+                        },
+                      ]}
+                    >
+                      <Input name="lastname" />
                     </Form.Item>
-                    <Form.Item label="Email" name="email">
-                      <Input
-                        value={profileData?.email}
-                        name="email"
-                        onChange={handleChange}
-                      />
+                    <Form.Item
+                      label="Email"
+                      name="email"
+                      rules={[
+                        {
+                          required: true,
+                          type: "email",
+                          message: "Please enter a valid email!",
+                        },
+                      ]}
+                    >
+                      <Input name="email" />
                     </Form.Item>
-                    <Form.Item label="Phone Number" name="phoneNumber">
-                      <Input
-                        value={profileData?.phoneNumber}
-                        name="phoneNumber"
-                        onChange={handleChange}
-                      />
-                    </Form.Item>
-                    <Form.Item label="Password" name="password">
-                      <Input.Password
-                        value={profileData?.password}
-                        name="password"
-                        onChange={handleChange}
-                      />
+                    <Form.Item
+                      label="Phone Number"
+                      name="phoneNumber"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please input your phone number!",
+                        },
+                      ]}
+                    >
+                      <Input name="phoneNumber" />
                     </Form.Item>
                     <Form.Item label="Hospital Name" name="hospitalName">
-                      <Input
-                        value={profileData?.hospitalName}
-                        name="hospitalName"
-                        onChange={handleChange}
-                      />
-                    </Form.Item>
-                    <Form.Item label="Hospital Type" name="hospitalType">
-                      <Input
-                        value={profileData?.hospitalType}
-                        name="hospitalType"
-                        onChange={handleChange}
-                      />
+                      <Input name="hospitalName" />
                     </Form.Item>
                     <Form.Item label="Specialization" name="specialization">
-                      <Input
-                        value={profileData?.specialization}
-                        name="specialization"
-                        onChange={handleChange}
-                      />
+                      <Input name="specialization" />
                     </Form.Item>
                     <Form.Item>
                       <Button type="primary" onClick={handleSave}>
@@ -165,13 +176,18 @@ const UpdateProfileDoc = () => {
                 </div>
               ) : (
                 <div>
-                  <h2>First Name: {profileData?.firstname}</h2>
-                  <h2>Last Name: {profileData?.lastname}</h2>
-                  <h2>Email: {profileData?.email}</h2>
-                  <h2>Phone Number: {profileData?.phoneNumber}</h2>
-                  <h2>Hospital Name: {profileData?.hospitalName}</h2>
-                  <h2>Hospital Type: {profileData?.hospitalType}</h2>
-                  <h2>Specialization: {profileData?.specialization}</h2>
+                  <h2>First Name: {profileData?.userInfo?.firstname}</h2>
+                  <h2>Last Name: {profileData?.userInfo?.lastname}</h2>
+                  <h2>Email: {profileData?.userInfo?.email}</h2>
+                  <h2>Phone Number: {profileData?.userInfo?.phoneNumber}</h2>
+                  <h2>
+                    Hospital Name:{" "}
+                    {profileData?.doctorRegistration?.hospitalName}
+                  </h2>
+                  <h2>
+                    Specialization:{" "}
+                    {profileData?.doctorRegistration?.specialization}
+                  </h2>
                 </div>
               )}
             </>

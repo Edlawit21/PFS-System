@@ -19,6 +19,7 @@ const categoryRoute = require("./Routes/categoryRoute");
 const prescriptionRoute = require("./Routes/prescriptionRoute");
 const reportRoute = require("./Routes/reportRoute");
 const salesRoute = require("./Routes/salesRoute");
+const { logout } = require("./controller/loginController");
 
 // Load environment variables from .env file
 dotenv.config();

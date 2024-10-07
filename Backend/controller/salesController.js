@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 // Controller to handle making a sale
 const makeSale = async (req, res) => {
   try {
-    const { medicineId, quantity } = req.body;
+    const { medicineId, quantity, prescriptionId } = req.body; // Accept prescriptionId
 
     // Verify JWT token
     const token = req.cookies.token;
@@ -29,7 +29,6 @@ const makeSale = async (req, res) => {
       _id: medicineId,
       createdBy: pharmacist.createdBy,
     });
-    console.log(">>>>product is >>>>>>>>", product.medname);
     if (!product) {
       return res.status(404).json({
         message: "Product not found or not authorized to sell this product",
@@ -48,8 +47,6 @@ const makeSale = async (req, res) => {
     product.remainQty -= quantity; // Deduct the quantity from the remaining stock
     await product.save(); // Save the updated product
 
-    console.log(">>>>Saved product is>>>>>.", product);
-
     // Record the sale transaction
     const transaction = new SalesTransaction({
       medicineId: product._id, // Store the product ID
@@ -61,17 +58,26 @@ const makeSale = async (req, res) => {
       pharmacist: pharmacistId,
     });
 
-    console.log(">>>>>Transaction>>>>", transaction);
-
     // Save the transaction
     const savedTransaction = await transaction.save();
-    console.log("Saved transaction:", savedTransaction);
+
+    // If a prescriptionId is provided, update the purchase status
+    if (prescriptionId) {
+      const prescription = await Prescription.findById(prescriptionId);
+      if (prescription) {
+        prescription.purchased = true; // Set purchased status to true
+        await prescription.save(); // Save the updated prescription
+        console.log(`Updated prescription ${prescriptionId} to purchased.`);
+      } else {
+        console.log(`Prescription not found with ID: ${prescriptionId}`);
+      }
+    }
 
     res.status(201).json({
       message: "Sale recorded successfully",
       transaction: {
         medicineId: savedTransaction.medicineId,
-        medicineName: savedTransaction.medicineName, // Include the medicine name
+        medicineName: savedTransaction.medicineName,
         remainQty: savedTransaction.remainQty,
         quantity: savedTransaction.quantity,
         totalPrice: savedTransaction.totalPrice,
@@ -81,9 +87,12 @@ const makeSale = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error processing the sale:", error);
     res.status(500).json({ message: "Error processing the sale", error });
   }
 };
+
+module.exports = { makeSale };
 
 // Controller to fetch all sales transactions for a specific pharmacist
 const getSalesTransactions = async (req, res) => {

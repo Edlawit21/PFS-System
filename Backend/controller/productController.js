@@ -98,10 +98,10 @@ const searchProducts = async (req, res) => {
 // Get all products for the logged-in pharmacy manager or pharmacist (under the same PM)
 const getAll = async (req, res) => {
   try {
-    const pharmace = await Pharmacist.find();
+    const pharmacy = await Pharmacist.find();
     // Find all products created by the pharmacy manager
     const products = await Product.findOne({
-      pharmacyManager: pharmacyManagerId,
+      createdBy: pharmacyManagerId,
     })
       .populate("category", "category") // Populate category field
       .populate("subcategory", "subcategory"); // Populate subcategory if needed

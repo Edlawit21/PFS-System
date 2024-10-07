@@ -18,6 +18,7 @@ import MedicationSearch from "./Pages/Pharmacist/SearchMed";
 import PrescriptionQrSearch from "./Pages/Pharmacist/PrescriptionQrSearch";
 import UpdateProfileDoc from "./Components/UpdateProfileDoc";
 import UpdateProfilepm from "./Components/UpdateProfilepm";
+import Logout from "./Components/Logout";
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<RegistrationPage />} />
-
+          <Route path="/logout" element={Logout} />
           <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
           <Route path="/doctor/dashboard" element={<PrescriptionForm />} />
           <Route path="/pmanager/dashboard/*" element={<PMDashboard />} />

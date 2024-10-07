@@ -16,7 +16,7 @@ router.post("/createProduct", authMiddleware("pharmacyManager"), createProduct);
 // Route to get all products (accessible to Pharmacy Manager and Pharmacist)
 router.get(
   "/getallProduct",
-  //authMiddleware("pharmacyManager", "pharmacist"),
+  authMiddleware("pharmacyManager", "pharmacist"),
   searchProducts
 );
 

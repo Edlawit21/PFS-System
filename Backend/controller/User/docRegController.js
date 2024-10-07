@@ -110,7 +110,13 @@ const createDoctor = async (req, res) => {
 //Update
 const updateDoctor = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token:", decoded);
+
+    // Ensure the userId is included in the JWT payload
+    const userId = decoded.id;
+    console.log("User id:", userId);
 
     // Destructure the basic user info from the request body
     const {
@@ -140,11 +146,14 @@ const updateDoctor = async (req, res) => {
     if (gender) userUpdateFields.gender = gender;
     if (phoneNumber) userUpdateFields.phoneNumber = phoneNumber;
     if (role) userUpdateFields.role = role;
-    if (password) userUpdateFields.password = password; // Ensure password is hashed if updated
+    if (password) {
+      // Ensure password is hashed if updated
+      userUpdateFields.password = await hashPassword(password); // Make sure to define this function
+    }
 
     // Update the User model first
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      userId, // Corrected syntax
       { $set: userUpdateFields },
       { new: true }
     );
@@ -165,7 +174,7 @@ const updateDoctor = async (req, res) => {
 
     // Update the DoctorRegistration model
     const updatedDoctor = await DoctorRegistration.findOneAndUpdate(
-      { userId },
+      { userId: userId }, // Corrected syntax
       { $set: doctorUpdateFields },
       { new: true }
     );

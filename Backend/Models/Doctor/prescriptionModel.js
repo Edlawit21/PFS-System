@@ -59,6 +59,7 @@ const prescriptionSchema = new mongoose.Schema(
     qr: {
       type: String,
     },
+    purchased: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

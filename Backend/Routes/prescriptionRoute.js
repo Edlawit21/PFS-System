@@ -35,19 +35,7 @@ router.get(
 router.get("/:id", authMiddleware("doctor", "pharmacist"), getPrescriptionById);
 
 // Route to update a prescription by ID (restricted to doctors)
-router.put(
-  "/:id",
-  [authMiddleware("doctor"), updatePrescriptionValidation],
-  (req, res, next) => {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-  },
-  updatePrescriptionById
-);
+router.put("/:id", updatePrescriptionById);
 router.get("/mobileQr/:id", getAllMobilePrescriptions);
 // Route to delete a prescription by ID (restricted to doctors)
 router.delete("/:id", authMiddleware("doctor"), deletePrescriptionById);

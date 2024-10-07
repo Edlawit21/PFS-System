@@ -29,7 +29,7 @@ router.post(
 );
 
 // Route to update an existing doctor's registration
-router.put("/update/:userId", authMiddleware("doctor", "admin"), updateDoctor);
+router.put("/update", authMiddleware("doctor", "admin"), updateDoctor);
 
 // Route to get a doctor's registration details by userId
 router.get(

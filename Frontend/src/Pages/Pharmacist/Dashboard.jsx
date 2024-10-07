@@ -12,6 +12,7 @@ import "../Doctor/PrescriptionPage/Ant.css";
 import SearchMed from "./SearchMed";
 import GenerateReport from "./GenerateReport";
 import PrescriptionQrSearch from "./PrescriptionQrSearch";
+import Logout from "../../Components/Logout";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -86,6 +87,7 @@ const PharmacistDashboard = () => {
               height: 64,
             }}
           />
+          <Logout />
         </Header>
         <div className="p-6 bg-[#F1F5F9] custom-scrollbar">
           <Content

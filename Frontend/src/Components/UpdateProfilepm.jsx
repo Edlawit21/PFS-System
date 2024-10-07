@@ -6,6 +6,7 @@ import Api from "../api/axiosInstance";
 const UpdateProfilepm = () => {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [form] = Form.useForm();
   const [profileData, setProfileData] = useState({
     id: "",
     pmName: "",
@@ -27,26 +28,26 @@ const UpdateProfilepm = () => {
   useEffect(() => {
     const fetchPharmacyManagers = async () => {
       try {
-        const response = await Api.get("/pharmacy-manager/all"); // Adjust the URL as per your API
-        console.log("Fetched Pharmacy Managers:", response.data); // Log the fetched data
+        const response = await Api.get("/pharmacy-manager/all");
+        console.log("Fetched Pharmacy Managers:", response.data);
         setPharmacyManagers(response.data.pharmacyManagers);
-        // Assuming you want to set the first manager's data as default
+
         if (response.data.pharmacyManagers.length > 0) {
           const manager = response.data.pharmacyManagers[0];
           setProfileData({
-            id: manager._id,
-            pmName: manager.pmName,
-            pharmaName: manager.pharmaName,
-            email: manager.userId.email,
-            phone: manager.userId.phoneNumber,
+            id: manager.user?._id || "",
+            pmName: manager.pmName || "",
+            pharmaName: manager.pharmaName || "",
+            email: manager.user?.email || "",
+            phone: manager.user?.phoneNumber || "",
             password: "", // Password should not be fetched directly
-            state: manager.addressDetails.state,
-            city: manager.addressDetails.city,
-            operatingDays: manager.addressDetails.operatingDays,
-            serviceOffered: manager.addressDetails.servicesOffered.join(", "), // Adjust if this is an array
-            setLocation: "", // Adjust based on your logic
-            latitude: manager.addressDetails.latitude,
-            longitude: manager.addressDetails.longitude,
+            state: manager.addressDetails?.state || "",
+            city: manager.addressDetails?.city || "",
+            operatingDays: manager.addressDetails?.operatingDays || "",
+            serviceOffered:
+              manager.addressDetails?.servicesOffered?.join(", ") || "",
+            latitude: manager.addressDetails?.latitude || "",
+            longitude: manager.addressDetails?.longitude || "",
           });
         }
       } catch (err) {
@@ -70,11 +71,13 @@ const UpdateProfilepm = () => {
   };
 
   const handleEdit = () => {
-    setIsEditing(true); // Start editing when Change Picture is clicked
+    setIsEditing(true);
+    // Set the initial values in the form when entering edit mode
+    form.setFieldsValue(profileData);
   };
 
   const handleBack = () => {
-    setIsEditing(false); // Exit editing when back arrow is clicked
+    setIsEditing(false);
   };
 
   const handleChange = (e) => {
@@ -86,19 +89,26 @@ const UpdateProfilepm = () => {
   };
 
   const handleSave = async () => {
+    console.log("Profile ID:", profileData.id); // Check if this is undefined
+    console.log("Profile Data:", profileData);
+
+    if (!profileData.id) {
+      message.error("Profile ID is missing. Unable to update.");
+      return;
+    }
     try {
-      // Use the ID for the update request
       const response = await Api.put(
         `/pharmacy-manager/update/${profileData.id}`,
         profileData
       );
       console.log("Update response:", response.data);
       message.success("Profile updated successfully!");
+      setIsEditing(false);
+      // Update the form values after saving
+      form.setFieldsValue(profileData);
     } catch (error) {
       console.error("Error updating profile:", error);
       message.error("Failed to update profile.");
-    } finally {
-      setIsEditing(false); // Exit edit mode after saving
     }
   };
 
@@ -115,14 +125,12 @@ const UpdateProfilepm = () => {
           {!isEditing && <Button onClick={handleEdit}>Edit Profile</Button>}
           {isEditing ? (
             <div>
-              {isEditing ? (
-                <Button
-                  type="text"
-                  icon={<ArrowLeftOutlined />}
-                  onClick={handleBack}
-                ></Button>
-              ) : null}
-              <Form layout="vertical">
+              <Button
+                type="text"
+                icon={<ArrowLeftOutlined />}
+                onClick={handleBack}
+              ></Button>
+              <Form form={form} layout="vertical" initialValues={profileData}>
                 <Button>Change Picture</Button>
                 <Form.Item label="Name" name="pmName">
                   <Input
@@ -159,7 +167,7 @@ const UpdateProfilepm = () => {
                     onChange={handleChange}
                   />
                 </Form.Item>
-                <Form.Item label="State :" name="state">
+                <Form.Item label="State:" name="state">
                   <Input
                     name="state"
                     value={profileData.state}
@@ -190,21 +198,21 @@ const UpdateProfilepm = () => {
                 <Form.Item label="Set Location:" name="setLocation">
                   <Input
                     name="setLocation"
-                    value={profileData.setLocation}
+                    value={profileData.setLocation || ""}
                     onChange={handleChange}
                   />
                 </Form.Item>
                 <Form.Item label="Latitude:" name="latitude">
                   <Input
                     name="latitude"
-                    value={profileData.latitude}
+                    value={profileData.latitude || ""}
                     onChange={handleChange}
                   />
                 </Form.Item>
                 <Form.Item label="Longitude:" name="longitude">
                   <Input
                     name="longitude"
-                    value={profileData.longitude}
+                    value={profileData.longitude || ""}
                     onChange={handleChange}
                   />
                 </Form.Item>
@@ -217,17 +225,18 @@ const UpdateProfilepm = () => {
             </div>
           ) : (
             <div>
-              <h2>Name: {profileData.pmName}</h2>
-              <h2>Email: {profileData.email}</h2>
-              <h2>Phone Number: {profileData.phone}</h2>
-              <h2>Password: {profileData.password}</h2>
-              <h2>State: {profileData.state}</h2>
-              <h2>City: {profileData.city}</h2>
-              <h2>Services Offered: {profileData.serviceOffered}</h2>
-              <h2>Operating Days: {profileData.operatingDays}</h2>
-              <h2>Set Location: {profileData.setLocation}</h2>
-              <h2>Latitude: {profileData.latitude}</h2>
-              <h2>Longitude: {profileData.longitude}</h2>
+              <h2>Name: {profileData.pmName || "N/A"}</h2>
+              <h2>Pharmacy Name: {profileData.pharmaName || "N/A"}</h2>
+              <h2>Email: {profileData.email || "N/A"}</h2>
+              <h2>Phone Number: {profileData.phone || "N/A"}</h2>
+              <h2>Password: {profileData.password || "N/A"}</h2>
+              <h2>State: {profileData.state || "N/A"}</h2>
+              <h2>City: {profileData.city || "N/A"}</h2>
+              <h2>Services Offered: {profileData.serviceOffered || "N/A"}</h2>
+              <h2>Operating Days: {profileData.operatingDays || "N/A"}</h2>
+              <h2>Set Location: {profileData.setLocation || "N/A"}</h2>
+              <h2>Latitude: {profileData.latitude || "N/A"}</h2>
+              <h2>Longitude: {profileData.longitude || "N/A"}</h2>
             </div>
           )}
         </div>

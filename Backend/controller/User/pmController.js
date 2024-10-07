@@ -327,10 +327,20 @@ const deletePharmacyManagerRegistration = async (req, res) => {
 const fetchAllPharmacyManagers = async (req, res) => {
   try {
     console.log("Fetching all pharmacy managers...");
+
     // Fetch all pharmacy manager registrations and populate user details
     const pharmacyManagers = await PharmacyManagerRegistration.find().populate(
       "userId",
       "firstname lastname username email phoneNumber role"
+    );
+
+    if (!pharmacyManagers || pharmacyManagers.length === 0) {
+      return res.status(404).json({ message: "No pharmacy managers found." });
+    }
+
+    console.log(
+      "Pharmacy Manager IDs:",
+      pharmacyManagers.map((pm) => pm._id)
     );
 
     // Fetch address registrations based on the pharmacy manager registration IDs
@@ -340,26 +350,42 @@ const fetchAllPharmacyManagers = async (req, res) => {
       },
     });
 
-    // Create a mapping of address registrations for easy lookup
     const addressMap = addressRegistrations.reduce((acc, address) => {
       acc[address.pharmacyManagerRegistrationId] = address;
       return acc;
     }, {});
 
-    // Combine pharmacy manager details with address details
+    console.log(
+      "Fetching products for pharmacy managers based on userId:",
+      pharmacyManagers.map((pm) => pm.userId) // Use the userId to fetch products
+    );
+
+    const products = await Product.find({
+      createdBy: { $in: pharmacyManagers.map((pm) => pm.userId._id) }, // Use pm.userId._id to fetch products
+    });
+
+    console.log("Fetched Products:", products);
+
+    const productMap = products.reduce((acc, product) => {
+      acc[product.createdBy] = product; // Make sure product.createdBy is an ObjectId
+      return acc;
+    }, {});
+
     const results = pharmacyManagers.map((pm) => ({
-      ...pm.toObject(), // Convert Mongoose document to a plain object
-      addressDetails: addressMap[pm._id] || null, // Attach address details
+      ...pm.toObject(),
+      addressDetails: addressMap[pm._id] || null,
+      products:
+        products.filter(
+          (product) => product.createdBy.toString() === pm.userId._id.toString()
+        ) || [], // Ensure it returns an array
     }));
 
-    // Check if any pharmacy managers are found
     if (!results || results.length === 0) {
       return res.status(404).json({ message: "No pharmacy managers found." });
     }
 
     console.log("Fetched Pharmacy Managers:", results);
 
-    // Structure the response to include user, pharmacy manager, and address details
     const formattedResponse = results.map((pm) => ({
       user: pm.userId,
       pmName: pm.pmName,
@@ -379,9 +405,22 @@ const fetchAllPharmacyManagers = async (req, res) => {
       compliance: pm.compliance,
       licensePM: pm.licensePM,
       businessR: pm.businessR,
+      // Ensure products is an array and safely map through it
+      products: Array.isArray(pm.products)
+        ? pm.products.map((product) => ({
+            medname: product.medname,
+            category: product.category,
+            actualPrice: product.actualPrice,
+            sellPrice: product.sellPrice,
+            quantity: product.quantity,
+            soldQty: product.soldQty,
+            remainQty: product.remainQty,
+            registerDate: product.registerDate,
+            expireDate: product.expireDate,
+          }))
+        : [], // If pm.products is not an array, default to an empty array
     }));
 
-    // Send the response
     res.status(200).json({
       message: "Pharmacy managers fetched successfully.",
       pharmacyManagers: formattedResponse,

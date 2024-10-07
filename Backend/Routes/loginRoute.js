@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { login } = require("../controller/loginController");
+const { login, logout } = require("../controller/loginController");
 const authMiddleware = require("../Middelware/authMiddleware");
 
 // Login route
 router.post("/login", login);
+
+router.post("/logout", logout);
 
 {
   /*// Example protected route for Admin

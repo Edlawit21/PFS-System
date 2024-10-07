@@ -13,6 +13,7 @@ import Products from "./Products";
 import RegisterPharmacist from "./RegisterPharmacist";
 import ViewPharmacist from "./ViewPharmacist";
 import ViewReport from "./ViewReport";
+import UpdateProfilepm from "../../Components/UpdateProfilepm";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -87,6 +88,7 @@ const PMDashboard = () => {
               height: 64,
             }}
           />
+          <UpdateProfilepm />
         </Header>
         <div className="p-6 bg-[#F1F5F9] custom-scrollbar">
           <Content
