@@ -23,7 +23,6 @@ const doctorRegistrationSchema = new mongoose.Schema({
     default: "Pending",
   },
   approvalDate: { type: Date },
-  reviewerComments: { type: String },
 });
 
 const DoctorRegistration = mongoose.model(

@@ -37,7 +37,7 @@ const makeSale = async (req, res) => {
     }
 
     // Check if there is enough stock
-    if (product.quantity < quantity) {
+    if (product.remainQty < quantity) {
       return res.status(400).json({ message: "Not enough stock available" });
     }
 
@@ -45,8 +45,8 @@ const makeSale = async (req, res) => {
     const totalPrice = product.sellPrice * quantity;
 
     // Deduct stock
-    product.quantity -= quantity;
-    await product.save();
+    product.remainQty -= quantity; // Deduct the quantity from the remaining stock
+    await product.save(); // Save the updated product
 
     console.log(">>>>Saved product is>>>>>.", product);
 
@@ -55,23 +55,24 @@ const makeSale = async (req, res) => {
       medicineId: product._id, // Store the product ID
       medicineName: product.medname, // Store the product name
       quantity,
+      remainQty: product.remainQty, // Update this to use the new remainQty
       totalPrice,
       date: new Date(),
       pharmacist: pharmacistId,
     });
 
-    console.log(">>>>>TRansaction>>>>", transaction);
+    console.log(">>>>>Transaction>>>>", transaction);
+
     // Save the transaction
     const savedTransaction = await transaction.save();
     console.log("Saved transaction:", savedTransaction);
-    // Save the transaction
-    //await transaction.save();
 
     res.status(201).json({
       message: "Sale recorded successfully",
       transaction: {
         medicineId: savedTransaction.medicineId,
         medicineName: savedTransaction.medicineName, // Include the medicine name
+        remainQty: savedTransaction.remainQty,
         quantity: savedTransaction.quantity,
         totalPrice: savedTransaction.totalPrice,
         date: savedTransaction.date,

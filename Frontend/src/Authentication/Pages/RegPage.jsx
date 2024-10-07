@@ -117,10 +117,32 @@ const RegPage = () => {
         formDataToSend.append(key, formData.basicInfo[key]);
       });
       Object.keys(formData.professionalDetails).forEach((key) => {
-        console.log(key, formData.professionalDetails[key]);
+        console.log("prof", key, formData.professionalDetails[key]);
         formDataToSend.append(key, formData.professionalDetails[key]);
       });
 
+      // Append address info for pharmacyManager
+      if (role === "pharmacyManager") {
+        Object.keys(formData.addressInfo).forEach((key) => {
+          console.log("addres", key, formData.addressInfo[key]);
+
+          formDataToSend.append(key, formData.addressInfo[key]);
+        });
+      }
+
+      const complianceFile =
+        form2.getFieldValue("compliance")?.[0]?.originFileObj;
+      console.log("comp", complianceFile);
+
+      const licensePMFile =
+        form2.getFieldValue("licensePM")?.[0]?.originFileObj;
+      const businessRFile =
+        form2.getFieldValue("businessR")?.[0]?.originFileObj;
+
+      // Append pharmacy manager specific files
+      formDataToSend.append("compliance", complianceFile);
+      formDataToSend.append("licensePM", licensePMFile);
+      formDataToSend.append("businessR", businessRFile);
       // File inputs
       const educationalInfoFile =
         form2.getFieldValue("educationalInfo")?.[0]?.originFileObj;
@@ -134,13 +156,26 @@ const RegPage = () => {
       formDataToSend.append("medicalLicense", medicalLicenseFile);
 
       try {
-        const response = await Api.post("/doctor/register", formDataToSend, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        // Check role and call the appropriate API
+        if (role === "doctor") {
+          const response = await Api.post("/doctor/register", formDataToSend, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          console.log(response.data);
+          message.success("Doctor registration successful!");
+        } else if (role === "pharmacyManager") {
+          console.log("formdat", formDataToSend);
 
-        console.log(response.data);
-
-        message.success("Registration successful!");
+          const response = await Api.post(
+            "/pharmacy-manager/register",
+            formDataToSend,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+          console.log(response.data);
+          message.success("Pharmacy Manager registration successful!");
+        }
       } catch (error) {
         console.error("Error during registration:", error);
         message.error(

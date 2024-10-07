@@ -40,12 +40,6 @@ const { check, body, validationResult } = require("express-validator");
 
 // Validator for creating a pharmacy manager
 const createPharmacyManagerValidator = [
-  check("userId")
-    .isMongoId()
-    .withMessage("Invalid User ID format.")
-    .notEmpty()
-    .withMessage("User ID is required"),
-
   body("pmName")
     .notEmpty()
     .withMessage("Pharmacy Manager name is required.")

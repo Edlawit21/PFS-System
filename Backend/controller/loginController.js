@@ -51,7 +51,7 @@ const login = async (req, res) => {
 
     const payload = { id: user._id, role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "7d",
     });
     console.log("Generated token:", token);
 

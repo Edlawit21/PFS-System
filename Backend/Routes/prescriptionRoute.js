@@ -5,6 +5,7 @@ const {
   getPrescriptionById,
   getAllPrescriptions,
   createPrescription,
+  getAllMobilePrescriptions,
 } = require("../controller/prescriptionController");
 const authMiddleware = require("../Middelware/authMiddleware");
 const {
@@ -19,7 +20,6 @@ const router = express.Router();
 // Route to create a prescription (restricted to doctors)
 router.post(
   "/createPrescription",
-  //signatureUpload.single("signature"),
   [authMiddleware("doctor")],
   createPrescription
 );
@@ -27,7 +27,7 @@ router.post(
 // Route to get all prescriptions (restricted to doctors and pharmacists)
 router.get(
   "/allPrescription",
-  authMiddleware("doctor", "pharmacist"),
+  // authMiddleware("doctor", "pharmacist"),
   getAllPrescriptions
 );
 
@@ -48,7 +48,7 @@ router.put(
   },
   updatePrescriptionById
 );
-
+router.get("/mobileQr/:id", getAllMobilePrescriptions);
 // Route to delete a prescription by ID (restricted to doctors)
 router.delete("/:id", authMiddleware("doctor"), deletePrescriptionById);
 

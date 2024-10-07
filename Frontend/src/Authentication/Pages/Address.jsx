@@ -1,6 +1,7 @@
-import { Form, Input, Select, TimePicker, Button, Card } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
+import { Form, Input, Select, TimePicker, Button, Modal } from "antd";
 import PropTypes from "prop-types";
+import Map from "../Components/Map";
+import { useState } from "react";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -32,6 +33,30 @@ const states = [
 ];
 
 const Address = ({ form }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleLocationSelect = (location) => {
+    setSelectedLocation(location);
+    // Set the form values for latitude and longitude
+    form.setFieldsValue({
+      latitude: location.lat,
+      longitude: location.lng,
+    });
+  };
+
   return (
     <div className="px-6">
       <h1 className="flex justify-center mb-4 font-medium">
@@ -78,67 +103,6 @@ const Address = ({ form }) => {
         >
           <Input type="tel" placeholder="Enter contact number" allowClear />
         </Form.Item>
-
-        <Form.List name="branches">
-          {(fields, { add, remove }) => (
-            <div
-              style={{ display: "flex", flexDirection: "column", rowGap: 16 }}
-            >
-              {/* Render branches */}
-              {fields.map((field) => (
-                <Card
-                  size="small"
-                  title={`Branch ${field.name + 1}`}
-                  key={field.key}
-                  extra={
-                    fields.length > 1 ? (
-                      <CloseOutlined onClick={() => remove(field.name)} />
-                    ) : null
-                  }
-                >
-                  <Form.Item
-                    label="Branch Name :"
-                    name={[field.name, "branchName"]}
-                    rules={[
-                      { required: true, message: "Enter the branch name!" },
-                    ]}
-                  >
-                    <Input placeholder="Branch Name" allowClear />
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Branch Address :"
-                    name={[field.name, "branchAddress"]}
-                    rules={[
-                      { required: true, message: "Enter the branch address!" },
-                    ]}
-                  >
-                    <TextArea
-                      placeholder="123 Haile Gebrselassie Road, Addis Ketema, Kebele 10, Addis Ababa, Ethiopia"
-                      rows={3}
-                      allowClear
-                    />
-                  </Form.Item>
-                </Card>
-              ))}
-
-              {/* Button to add more branches */}
-              <Button
-                type="dashed"
-                onClick={() => add()}
-                style={{
-                  width: "200px",
-                  display: "flex",
-                  margin: "0 auto",
-                  marginBottom: "8px",
-                  backgroundColor: "#F3F3FE",
-                }}
-              >
-                + Add Branch
-              </Button>
-            </div>
-          )}
-        </Form.List>
 
         <Form.Item
           label="Operating Days and Hours :"
@@ -187,6 +151,42 @@ const Address = ({ form }) => {
             ))}
           </Select>
         </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" onClick={showModal}>
+            Set Location
+          </Button>
+          {selectedLocation ? (
+            <div className="mt-2 text-sm text-gray-700">
+              <p>Selected Location:</p>
+              <p>Latitude: {selectedLocation.lat}</p>
+              <p>Longitude: {selectedLocation.lng}</p>
+            </div>
+          ) : (
+            <p className="text-red-600 text-sm">
+              Please select a location on the map.
+            </p>
+          )}
+        </Form.Item>
+
+        {/* Hidden form fields for latitude and longitude */}
+        <Form.Item name="latitude" style={{ display: "none" }}>
+          <Input type="hidden" />
+        </Form.Item>
+
+        <Form.Item name="longitude" style={{ display: "none" }}>
+          <Input type="hidden" />
+        </Form.Item>
+
+        {/* Modal for setting the location */}
+        <Modal
+          title="Set Location"
+          visible={isModalVisible}
+          onOk={handleOk}
+          onCancel={handleCancel}
+        >
+          <Map onLocationSelect={handleLocationSelect} />
+        </Modal>
       </Form>
     </div>
   );

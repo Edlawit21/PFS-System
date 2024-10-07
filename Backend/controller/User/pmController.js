@@ -1,13 +1,58 @@
 const PharmacyManagerRegistration = require("../../Models/Userform/pmRegModel");
 const User = require("../../Models/Userform/userModel");
+const AddressRegistration = require("../../Models/Userform/addressModel");
 
 // Create a new pharmacy manager's registration
 const createPharmacyManager = async (req, res) => {
   try {
-    const { userId, pmName, pharmaName, experience } = req.body;
+    console.log("Request body:", req.body); // Log the request body
 
+    // Destructure the basic info and professional details from the request body
+    const {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+      password,
+      pmName,
+      pharmaName,
+      experience,
+      state,
+      city,
+      contactNumber,
+      operatingDays,
+      servicesOffered,
+      latitude,
+      longitude,
+    } = req.body;
+
+    console.log("Basic info received:", {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+    });
+
+    console.log("body ", req.body);
+
+    // Check if the email or username already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Email or username already exists." });
+    }
     // Ensure files are uploaded
-    if (!req.files || Object.keys(req.files).length < 3) {
+    if (!req.files || req.files.length < 3) {
       return res.status(400).json({
         message:
           "All files (compliance, license, business registration) are required.",
@@ -15,38 +60,35 @@ const createPharmacyManager = async (req, res) => {
     }
 
     const compliance = req.files["compliance"]
-      ? req.files["compliance"][0].path
+      ? "Uploads/documents/" + req.files["compliance"][0].filename
       : null;
     const licensePM = req.files["licensePM"]
-      ? req.files["licensePM"][0].path
+      ? "Uploads/documents/" + req.files["licensePM"][0].filename
       : null;
     const businessR = req.files["businessR"]
-      ? req.files["businessR"][0].path
+      ? "Uploads/documents/" + req.files["businessR"][0].filename
       : null;
 
-    // Ensure the user exists
-    const userExists = await User.findById(userId);
-    if (!userExists) {
-      return res.status(404).json({ message: "User not found." });
-    }
+    // Create a new user with the hashed password
+    const newUser = new User({
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      role,
+      password,
+      status: "Pending", // Set the initial status to "Pending"
+    });
 
-    if (userExists.role !== "pharmacyManager") {
-      return res
-        .status(400)
-        .json({ message: "User is not a Pharmacy Manager." });
-    }
-
-    // Check if user registration is completed
-    if (!userExists.firstname || !userExists.lastname) {
-      return res.status(400).json({
-        message:
-          "User registration must be completed before pharmacy manager registration.",
-      });
-    }
+    // Save the user first
+    const savedUser = await newUser.save(); // Save the new user to the database
+    console.log("User created and saved with ID:", savedUser._id);
 
     // Create a new pharmacy manager registration
     const newPharmacyManagerRegistration = new PharmacyManagerRegistration({
-      userId,
+      userId: savedUser._id,
       pmName,
       pharmaName,
       compliance,
@@ -57,12 +99,25 @@ const createPharmacyManager = async (req, res) => {
 
     await newPharmacyManagerRegistration.save();
 
+    const addressRegistration = new AddressRegistration({
+      pharmacyManagerRegistrationId: newPharmacyManagerRegistration._id,
+      state,
+      city,
+      contactNumber,
+      operatingDays,
+      servicesOffered,
+      latitude,
+      longitude,
+    });
+    await addressRegistration.save();
+
     res.status(201).json({
       message: "Pharmacy Manager registration completed successfully.",
       pharmacyManagerRegistration: newPharmacyManagerRegistration,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error creating pharmacy manager:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -81,13 +136,13 @@ const updatePharmacyManager = async (req, res) => {
 
     if (req.files) {
       updateFields.compliance = req.files["compliance"]
-        ? req.files["compliance"][0].path
+        ? req.files["compliance"][0].filename
         : undefined;
       updateFields.licensePM = req.files["licensePM"]
-        ? req.files["licensePM"][0].path
+        ? req.files["licensePM"][0].filename
         : undefined;
       updateFields.businessR = req.files["businessR"]
-        ? req.files["businessR"][0].path
+        ? req.files["businessR"][0].filename
         : undefined;
     }
 

@@ -137,6 +137,29 @@ const getAllPrescriptions = async (req, res) => {
   }
 };
 
+const getAllMobilePrescriptions = async (req, res) => {
+  try {
+    const { id } = req.params; // Extract the id from the route parameters
+
+    // Fetch the prescription by its ID from the database
+    const prescription = await Prescription.findById(id);
+
+    if (!prescription) {
+      // If the prescription is not found, return a 404 response
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+
+    // Respond with the prescription data
+    res.status(200).json(prescription);
+  } catch (error) {
+    // Handle errors during fetching the prescription
+    res.status(500).json({
+      message: "Error fetching prescription",
+      error: error.message,
+    });
+  }
+};
+
 // Controller to get a single prescription by ID
 const getPrescriptionById = async (req, res) => {
   try {
@@ -185,4 +208,5 @@ module.exports = {
   getPrescriptionById,
   updatePrescriptionById,
   deletePrescriptionById,
+  getAllMobilePrescriptions,
 };

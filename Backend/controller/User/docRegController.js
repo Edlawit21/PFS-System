@@ -71,13 +71,13 @@ const createDoctor = async (req, res) => {
     }
 
     const educationalInfo = req.files["educationalInfo"]
-      ? req.files["educationalInfo"][0].path
+      ? "Uploads/documents" + req.files["educationalInfo"][0].filename
       : null;
     const certificate = req.files["certificate"]
-      ? req.files["certificate"][0].path
+      ? "Uploads/documents" + req.files["certificate"][0].file
       : null; // Optional
     const medicalLicense = req.files["medicalLicense"]
-      ? req.files["medicalLicense"][0].path
+      ? "Uploads/documents" + req.files["medicalLicense"][0].file
       : null;
 
     // Create a new doctor registration with the saved user's _id (userId)
@@ -107,10 +107,21 @@ const createDoctor = async (req, res) => {
   }
 };
 
+//Update
 const updateDoctor = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    // Destructure the basic user info from the request body
     const {
+      firstname,
+      lastname,
+      username,
+      email,
+      gender,
+      phoneNumber,
+      password, // Optional, only if the password needs to be updated
+      role,
       docName,
       hospitalName,
       hospitalType,
@@ -119,37 +130,43 @@ const updateDoctor = async (req, res) => {
       pin,
     } = req.body;
 
-    // Ensure document fields are updated if they exist
-    const updateFields = {
-      docName,
-      hospitalName,
-      hospitalType,
-      specialization,
-      experience,
-      pin,
-    };
+    // Create an object for the user fields to update if they are provided
+    const userUpdateFields = {};
 
-    if (req.files) {
-      updateFields.educationalInfo = req.files["educationalInfo"]
-        ? req.files["educationalInfo"][0].filename
-        : undefined;
-      updateFields.certificate = req.files["certificate"]
-        ? req.files["certificate"][0].filename
-        : undefined;
-      updateFields.medicalLicense = req.files["medicalLicense"]
-        ? req.files["medicalLicense"][0].filename
-        : undefined;
-    }
+    if (firstname) userUpdateFields.firstname = firstname;
+    if (lastname) userUpdateFields.lastname = lastname;
+    if (username) userUpdateFields.username = username;
+    if (email) userUpdateFields.email = email;
+    if (gender) userUpdateFields.gender = gender;
+    if (phoneNumber) userUpdateFields.phoneNumber = phoneNumber;
+    if (role) userUpdateFields.role = role;
+    if (password) userUpdateFields.password = password; // Ensure password is hashed if updated
 
-    // Remove fields with undefined values
-    Object.keys(updateFields).forEach(
-      (key) => updateFields[key] === undefined && delete updateFields[key]
+    // Update the User model first
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: userUpdateFields },
+      { new: true }
     );
 
-    // Find and update the doctor registration by userId
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Now handle doctor-specific fields
+    const doctorUpdateFields = {};
+
+    if (docName) doctorUpdateFields.docName = docName;
+    if (hospitalName) doctorUpdateFields.hospitalName = hospitalName;
+    if (hospitalType) doctorUpdateFields.hospitalType = hospitalType;
+    if (specialization) doctorUpdateFields.specialization = specialization;
+    if (experience) doctorUpdateFields.experience = experience;
+    if (pin) doctorUpdateFields.pin = pin;
+
+    // Update the DoctorRegistration model
     const updatedDoctor = await DoctorRegistration.findOneAndUpdate(
       { userId },
-      updateFields,
+      { $set: doctorUpdateFields },
       { new: true }
     );
 
@@ -160,11 +177,12 @@ const updateDoctor = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Doctor registration updated successfully.",
+      message: "Doctor and user information updated successfully.",
+      user: updatedUser,
       doctor: updatedDoctor,
     });
   } catch (error) {
-    console.error("Error updating doctor registration:", error); // Log the error to the server console
+    console.error("Error updating doctor and user information:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -173,6 +191,8 @@ const updateDoctor = async (req, res) => {
 const getDoctorRegistration = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    // Fetch the doctor registration using the userId
     const doctorRegistration = await DoctorRegistration.findOne({ userId });
 
     if (!doctorRegistration) {
@@ -181,31 +201,49 @@ const getDoctorRegistration = async (req, res) => {
         .json({ message: "Doctor registration not found." });
     }
 
-    res.status(200).json({ doctorRegistration });
+    // Fetch the user information associated with the doctor
+    const userInfo = await User.findById(userId);
+
+    if (!userInfo) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Combine both user info and doctor registration details
+    res.status(200).json({
+      userInfo,
+      doctorRegistration,
+    });
   } catch (error) {
+    console.error("Error fetching doctor profile:", error); // Log the error for debugging
     res.status(500).json({ message: "Server error", error });
   }
 };
 
-// Get all doctor registrations with pagination
-const getAllDoctorRegistrations = async (req, res) => {
+// Get a doctor's registration details by userId and include user info
+const getAllDoctorRegistration = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Current page number
-    const limit = parseInt(req.query.limit) || 10; // Number of records per page
-    const skip = (page - 1) * limit; // Calculate records to skip
+    const { userId } = req.params;
 
-    const doctorRegistrations = await DoctorRegistration.find()
-      .skip(skip)
-      .limit(limit);
+    // Fetch the doctor registration using the userId
+    const doctorRegistration = await DoctorRegistration.findOne({ userId });
 
-    const count = await DoctorRegistration.countDocuments(); // Total number of records
+    if (!doctorRegistration) {
+      return res
+        .status(404)
+        .json({ message: "Doctor registration not found." });
+    }
 
+    // Fetch the user information associated with the doctor
+    const userInfo = await User.findById(userId);
+
+    if (!userInfo) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Combine both user info and doctor registration details
     res.status(200).json({
-      total: count,
-      page,
-      limit,
-      totalPages: Math.ceil(count / limit),
-      doctorRegistrations,
+      userInfo,
+      doctorRegistration,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -240,6 +278,6 @@ module.exports = {
   createDoctor,
   updateDoctor,
   getDoctorRegistration,
-  getAllDoctorRegistrations,
+  getAllDoctorRegistration,
   deleteDoctorRegistration,
 };

@@ -2,12 +2,11 @@ import { useState } from "react";
 import { QRCode, Button } from "antd";
 import PropTypes from "prop-types";
 
-const GenerateQR = ({ formData }) => {
+const GenerateQR = ({ prescriptionId }) => {
   const [qrData, setQrData] = useState("");
 
   const generateQRCode = () => {
-    const qrCodeString = JSON.stringify(formData);
-    setQrData(qrCodeString);
+    setQrData("http://localhost/prescription/qr/" + prescriptionId);
   };
 
   return (
@@ -24,27 +23,7 @@ const GenerateQR = ({ formData }) => {
 
 // Define PropTypes for the component
 GenerateQR.propTypes = {
-  formData: PropTypes.shape({
-    prescriptionDate: PropTypes.string,
-    patient: PropTypes.shape({
-      name: PropTypes.string,
-    }),
-    gender: PropTypes.number,
-    allergies: PropTypes.string,
-    medications: PropTypes.arrayOf(
-      PropTypes.shape({
-        medicationName: PropTypes.string.isRequired,
-        purpose: PropTypes.string.isRequired,
-        dosage: PropTypes.string.isRequired,
-        route: PropTypes.string.isRequired,
-        frequency: PropTypes.string.isRequired,
-      })
-    ),
-    physician: PropTypes.shape({
-      name: PropTypes.string,
-    }),
-    physicianPhonenumber: PropTypes.string,
-  }).isRequired, // Marking formData as required
+  prescriptionId: PropTypes.string.isRequired,
 };
 
 export default GenerateQR;

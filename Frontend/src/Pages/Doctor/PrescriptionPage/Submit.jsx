@@ -4,7 +4,7 @@ import { Modal, Button, QRCode } from "antd";
 import PropTypes from "prop-types";
 import Pin from "./Pin";
 
-const Submit = ({ isVisible, onClose, formData }) => {
+const Submit = ({ isVisible, onClose, prescriptionId }) => {
   const [qrData, setQrData] = useState("");
   const [showQrCode, setShowQrCode] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -24,15 +24,15 @@ const Submit = ({ isVisible, onClose, formData }) => {
 
   // Generate QR Code
   const generateQRCode = () => {
-    const qrCodeString = JSON.stringify(formData);
-    setQrData(qrCodeString);
+    setQrData(
+      `http://localhost:3000/pharmacist/dashboard/prescription/${prescriptionId}`
+    );
     setShowQrCode(true);
     setQrGenerated(true);
   };
 
   // Handle Edit button click
   const handleEditClick = () => {
-    // Close the modal when Edit is clicked
     onClose();
     resetModalState(); // Reset modal state
   };
@@ -44,8 +44,8 @@ const Submit = ({ isVisible, onClose, formData }) => {
         footer={null}
         open={isVisible}
         onCancel={() => {
-          onClose(); // Ensure parent component closes modal
-          resetModalState(); // Reset modal state when closed
+          onClose();
+          resetModalState();
         }}
         centered
         width={900}
@@ -56,7 +56,8 @@ const Submit = ({ isVisible, onClose, formData }) => {
           </div>
         ) : (
           <>
-            <ModalSubmit formData={formData} />
+            {/* Pass prescriptionId from formData */}
+            <ModalSubmit prescriptionId={prescriptionId} />
             <div className="flex justify-center gap-6 pb-4">
               <Button onClick={generateQRCode}>Generate QR Code</Button>
               <Button onClick={handleEditClick}>Edit</Button>
@@ -92,11 +93,12 @@ const Submit = ({ isVisible, onClose, formData }) => {
   );
 };
 
-// Define prop types for the component
+// Define prop types for Submit component
 Submit.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  formData: PropTypes.func.isRequired,
+  formData: PropTypes.object.isRequired,
+  prescriptionId: PropTypes.string.isRequired,
 };
 
 export default Submit;

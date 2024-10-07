@@ -5,7 +5,7 @@ const {
   createDoctor,
   updateDoctor,
   getDoctorRegistration,
-  getAllDoctorRegistrations,
+  getAllDoctorRegistration,
   deleteDoctorRegistration,
 } = require("../controller/User/docRegController");
 const {
@@ -29,24 +29,17 @@ router.post(
 );
 
 // Route to update an existing doctor's registration
-router.put(
-  "/update/:userId",
-  authMiddleware("doctor", "admin"),
-  documentUpload.fields([
-    { name: "educationalInfo", maxCount: 1 },
-    { name: "certificate", maxCount: 1 },
-    { name: "medicalLicense", maxCount: 1 },
-  ]),
-  updateDoctorValidator,
-  validate,
-  updateDoctor
-);
+router.put("/update/:userId", authMiddleware("doctor", "admin"), updateDoctor);
 
 // Route to get a doctor's registration details by userId
-router.get("/:userId", authMiddleware("admin"), getDoctorRegistration);
+router.get(
+  "/:userId",
+  authMiddleware("admin", "doctor"),
+  getDoctorRegistration
+);
 
 // Route to get all doctor registrations with pagination
-router.get("/", authMiddleware("admin"), getAllDoctorRegistrations);
+router.get("/", authMiddleware("admin", "doctor"), getAllDoctorRegistration);
 
 // Route to delete a doctor's registration by userId
 router.delete(

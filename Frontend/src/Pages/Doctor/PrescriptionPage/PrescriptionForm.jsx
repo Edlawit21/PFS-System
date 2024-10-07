@@ -7,6 +7,7 @@ import SignatureField from "./Sign";
 import Submit from "./Submit";
 import Head from "./Head";
 import Api from "../../../api/axiosInstance";
+import UpdateProfileDoc from "../../../Components/UpdateProfileDoc";
 
 const { TextArea } = Input;
 
@@ -18,7 +19,7 @@ const PrescriptionForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [modalForm] = Form.useForm();
-
+  const [prescriptionId, setPrescriptionId] = useState(null);
   const handleAddMedication = (medication) => {
     if (isEditing) {
       setMedications((prevMedications) =>
@@ -84,7 +85,9 @@ const PrescriptionForm = () => {
         { withCredentials: true }
       );
 
-      console.log(response.data);
+      console.log(response?.data?.data._id);
+      setPrescriptionId(response?.data?.data._id);
+
       setFormData(fullFormData);
       setIsModalVisible(true);
     } catch (error) {
@@ -95,6 +98,7 @@ const PrescriptionForm = () => {
 
   return (
     <div className="w-screen h-screen bg-[#F3F3FE] overflow-auto">
+      <UpdateProfileDoc />
       <Head />
       <div className="w-11/12 my-6 mx-auto bg-white shadow-md">
         <Form form={form} name="form" layout="vertical" requiredMark={false}>
@@ -340,6 +344,7 @@ const PrescriptionForm = () => {
           isVisible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
           formData={formData}
+          prescriptionId={prescriptionId}
         />
       </div>
     </div>

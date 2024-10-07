@@ -55,6 +55,8 @@ export default Scan;
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useState } from "react";
 
+// Import useNavigate
+
 const Scan = () => {
   console.log("Scan component rendered");
   const [scanResult, setScanResult] = useState(null);
@@ -84,7 +86,10 @@ const Scan = () => {
           console.log("Scan success:", result);
           setScanResult(result);
           scanner.clear(); // Clear scanner after successful scan
+          // Use window.location.href to navigate to the full URL
+          window.location.href = result; // Redirect to the scanned URL
         },
+
         (error) => {
           console.warn("Scan error:", error);
         }

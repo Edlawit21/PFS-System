@@ -1,7 +1,6 @@
 import { Button, DatePicker, Table, message } from "antd";
 import { useState } from "react";
 import { columnReport } from "../../Components/Column";
-//import { dataProduct } from "../../Data/data"; // This may need to be replaced with actual fetched data
 import Api from "../../api/axiosInstance";
 
 const GenerateReport = () => {
@@ -30,9 +29,12 @@ const GenerateReport = () => {
       message.error("Please select a date.");
       return;
     }
+
     const token = localStorage.getItem("token");
     try {
       const formattedDate = selectedDate.format("YYYY-MM-DD");
+      console.log("Fetching reports for date:", formattedDate); // Log the formatted date
+
       const response = await Api.post(
         "/report/sales-report",
         { date: formattedDate },
@@ -41,7 +43,6 @@ const GenerateReport = () => {
 
       console.log("API Response:", response.data); // Log the response
 
-      // Check if the response contains the report and transactions
       if (response.data && response.data.report) {
         const transactions = response.data.report.transactions;
 
@@ -63,14 +64,19 @@ const GenerateReport = () => {
       }
     } catch (error) {
       console.error("API Error:", error);
-      if (error.response && error.response.status === 404) {
-        const errorMessage =
-          error.response.data.message || "Failed to fetch reports.";
-        message.error(errorMessage);
+      if (error.response) {
+        console.error("Error response:", error.response.data); // Log the error response
+        if (error.response.status === 404) {
+          const errorMessage =
+            error.response.data.message || "Failed to fetch reports.";
+          message.error(errorMessage);
+        } else {
+          message.error(
+            "Failed to fetch reports. Please check the console for details."
+          );
+        }
       } else {
-        message.error(
-          "Failed to fetch reports. Please check the console for details."
-        );
+        message.error("Network error or server not reachable.");
       }
     }
   };

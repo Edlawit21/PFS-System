@@ -1,10 +1,11 @@
 const express = require("express");
 const {
   createProduct,
-  getProducts,
   getProduct,
   updateProduct,
   deleteProduct,
+  getAll,
+  searchProducts,
 } = require("../controller/productController"); // Ensure this path is correct
 const authMiddleware = require("../Middelware/authMiddleware"); // Ensure this path is correct
 const router = express.Router();
@@ -15,8 +16,8 @@ router.post("/createProduct", authMiddleware("pharmacyManager"), createProduct);
 // Route to get all products (accessible to Pharmacy Manager and Pharmacist)
 router.get(
   "/getallProduct",
-  authMiddleware("pharmacyManager", "pharmacist"),
-  getProducts
+  //authMiddleware("pharmacyManager", "pharmacist"),
+  searchProducts
 );
 
 // Route to get a specific product by ID (accessible to Pharmacy Manager and Pharmacist)
@@ -27,5 +28,11 @@ router.put("/:id", authMiddleware("pharmacyManager"), updateProduct);
 
 // Route to delete a product by ID (restricted to Pharmacy Manager)
 router.delete("/:id", authMiddleware("pharmacyManager"), deleteProduct);
+
+router.get(
+  "/allproduct",
+  // authMiddleware("pharmacyManager", "pharmacist"),
+  getAll
+);
 
 module.exports = router;

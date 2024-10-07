@@ -11,6 +11,7 @@ import Scan from "./Scan";
 import "../Doctor/PrescriptionPage/Ant.css";
 import SearchMed from "./SearchMed";
 import GenerateReport from "./GenerateReport";
+import PrescriptionQrSearch from "./PrescriptionQrSearch";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -98,6 +99,10 @@ const PharmacistDashboard = () => {
               <Route path="scan" element={<Scan />} />
               <Route path="search" element={<SearchMed />} />
               <Route path="generate-report" element={<GenerateReport />} />
+              <Route
+                path="prescription/:qr"
+                element={<PrescriptionQrSearch />}
+              />
             </Routes>
           </Content>
         </div>

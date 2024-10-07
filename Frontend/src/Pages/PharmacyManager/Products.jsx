@@ -24,7 +24,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await Api.get("/product/getallProduct");
+        const response = await Api.get("/product/allproduct");
         console.log("Fetched products:", response.data);
 
         // Ensure each product has a unique key
@@ -34,6 +34,7 @@ const Products = () => {
         }));
 
         setData(productsWithKey); // Set the fetched data here
+        console.log("Data set in state:", productsWithKey);
       } catch (error) {
         console.error(
           "Fetch products Error:",

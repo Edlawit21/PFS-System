@@ -13,6 +13,11 @@ import PharmacistDashboard from "./Pages/Pharmacist/Dashboard";
 //import useUserStore from "./store/userStore";
 //import { Navigate } from "react-router-dom";
 import RegistrationPage from "./Authentication/Pages/RegPage";
+import PrescriptionQrScand from "./Pages/Doctor/PrescriptionPage/PrescriptionQrScand";
+import MedicationSearch from "./Pages/Pharmacist/SearchMed";
+import PrescriptionQrSearch from "./Pages/Pharmacist/PrescriptionQrSearch";
+import UpdateProfileDoc from "./Components/UpdateProfileDoc";
+import UpdateProfilepm from "./Components/UpdateProfilepm";
 
 function App() {
   return (
@@ -28,9 +33,12 @@ function App() {
             path="/pharmacist/dashboard/*"
             element={<PharmacistDashboard />}
           />
+          <Route path="prescription/qr/:qr" element={<PrescriptionQrScand />} />
         </Routes>
       </Router>
-      {/*<PrescriptionForm />*/}
+      {/*<PrescriptionForm />
+      <PrescriptionQrSearch />
+      <UpdateProfilepm />*/}
     </div>
   );
 }

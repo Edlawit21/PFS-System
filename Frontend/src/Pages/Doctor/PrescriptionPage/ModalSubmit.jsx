@@ -1,7 +1,13 @@
+import { useEffect, useState } from "react";
 import { Divider } from "antd";
 import PropTypes from "prop-types";
+import Api from "../../../api/axiosInstance"; // Import your Axios instance
 
-const ModalSubmit = ({ formData }) => {
+const ModalSubmit = ({ prescriptionId }) => {
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(true); // Added loading state
+  console.log(prescriptionId);
+
   // Helper function to format the date
   const formatDate = (date) => {
     if (!date) return "N/A"; // Return fallback text if date is not present
@@ -9,8 +15,26 @@ const ModalSubmit = ({ formData }) => {
     return formattedDate;
   };
 
-  // Ensure formData is not undefined or null
-  const safeFormData = formData || {};
+  useEffect(() => {
+    // Fetch prescription data using the prescriptionId
+    const fetchPrescriptionData = async () => {
+      try {
+        const response = await Api.get(`/prescription/${prescriptionId}`);
+        console.log("pres log", response.data);
+
+        setFormData(response.data); // Set the fetched data
+      } catch (error) {
+        console.error("Error fetching prescription data:", error);
+      } finally {
+        setLoading(false); // Set loading to false when the request completes
+      }
+    };
+    fetchPrescriptionData();
+  }, [prescriptionId]);
+
+  if (loading) {
+    return <p>Loading...</p>; // Show loading state while fetching data
+  }
 
   return (
     <div>
@@ -18,9 +42,7 @@ const ModalSubmit = ({ formData }) => {
       <Divider style={{ borderColor: "#e0e0e0", borderWidth: "1px" }} />
       <div>
         <div className="flex justify-between mx-24">
-          <h4>
-            Prescription Date: {formatDate(safeFormData.prescriptionDate)}
-          </h4>
+          <h4>Prescription Date: {formatDate(formData.prescriptionDate)}</h4>
         </div>
 
         <h2 className="mx-24">Patient Information</h2>
@@ -29,30 +51,28 @@ const ModalSubmit = ({ formData }) => {
           <span>
             <h4>
               Name:{" "}
-              {`${safeFormData.patient?.name?.first || "N/A"} ${
-                safeFormData.patient?.name?.last || ""
+              {`${formData.patient?.name?.first || "N/A"} ${
+                formData.patient?.name?.last || ""
               }`}
             </h4>
             <h4>
-              Gender:{" "}
-              {safeFormData.patient?.gender === "Male" ? "Male" : "Female"}
+              Gender: {formData.patient?.gender === "Male" ? "Male" : "Female"}
             </h4>
-            <h4>Allergies: {safeFormData.patient?.allergies || "None"}</h4>
+            <h4>Allergies: {formData.patient?.allergies || "None"}</h4>
           </span>
           <span>
-            <h4>Age: {safeFormData.patient?.age || "N/A"}</h4>
-            <h4>Phone Number: {safeFormData.patient?.phonenumber || "N/A"}</h4>
+            <h4>Age: {formData.patient?.age || "N/A"}</h4>
+            <h4>Phone Number: {formData.patient?.phonenumber || "N/A"}</h4>
             <h4>
-              Notable Health Condition:{" "}
-              {safeFormData.patient?.condition || "None"}
+              Notable Health Condition: {formData.patient?.condition || "None"}
             </h4>
           </span>
         </div>
 
         <div className="mx-24">
           <h4>List of Prescribed Medication:</h4>
-          {safeFormData.medications && safeFormData.medications.length > 0 ? (
-            safeFormData.medications.map((med, index) => (
+          {formData.medications && formData.medications.length > 0 ? (
+            formData.medications.map((med, index) => (
               <div key={index} style={{ marginBottom: "8px" }}>
                 <h4>Medication Name: {med.medicationName}</h4>
                 <p>Purpose: {med.purpose}</p>
@@ -70,14 +90,14 @@ const ModalSubmit = ({ formData }) => {
           <span>
             <h4>
               Physician Name:{" "}
-              {`${safeFormData.physician?.name?.first || "N/A"} ${
-                safeFormData.physician?.name?.last || ""
+              {`${formData.physician?.name?.first || "N/A"} ${
+                formData.physician?.name?.last || ""
               }`}
             </h4>
             <h4>Physician Signature</h4>
-            {safeFormData.signature ? (
+            {formData.signature ? (
               <img
-                src={safeFormData.signature}
+                src={formData.signature}
                 alt="Physician Signature"
                 style={{
                   width: "200px",
@@ -92,8 +112,7 @@ const ModalSubmit = ({ formData }) => {
           </span>
           <span>
             <h4>
-              Physician Phone Number:{" "}
-              {safeFormData.physician?.phonenumber || "N/A"}
+              Physician Phone Number: {formData.physician?.phonenumber || "N/A"}
             </h4>
           </span>
         </div>
@@ -103,39 +122,8 @@ const ModalSubmit = ({ formData }) => {
   );
 };
 
-// Define PropTypes for the component
 ModalSubmit.propTypes = {
-  formData: PropTypes.shape({
-    prescriptionDate: PropTypes.string,
-    patient: PropTypes.shape({
-      name: PropTypes.shape({
-        first: PropTypes.string,
-        last: PropTypes.string,
-      }),
-      gender: PropTypes.string,
-      age: PropTypes.number,
-      phonenumber: PropTypes.string,
-      allergies: PropTypes.string,
-      condition: PropTypes.string,
-    }),
-    medications: PropTypes.arrayOf(
-      PropTypes.shape({
-        medicationName: PropTypes.string.isRequired,
-        purpose: PropTypes.string.isRequired,
-        dosage: PropTypes.string.isRequired,
-        route: PropTypes.string.isRequired,
-        frequency: PropTypes.string.isRequired,
-      })
-    ),
-    physician: PropTypes.shape({
-      name: PropTypes.shape({
-        first: PropTypes.string,
-        last: PropTypes.string,
-      }),
-      phonenumber: PropTypes.string,
-    }),
-    signature: PropTypes.string, // Add signature prop validation
-  }),
+  prescriptionId: PropTypes.string.isRequired, // Prop to receive prescriptionId
 };
 
 export default ModalSubmit;
