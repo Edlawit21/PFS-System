@@ -199,7 +199,7 @@ const RegPage = () => {
     <div className="bg-[#F0F6FF] w-full h-screen pt-6">
       <div className="flex w-4/6 h-[540px] mx-auto shadow-md border-t rounded-xl custom-steps bg-[white]">
         {/* Container for Steps */}
-        <div className="flex flex-col w-1/3 h-[515px] my-auto ml-3 rounded-lg border border-gray-300 p-4 bg-[#483EFF]">
+        <div className="flex flex-col w-1/3 h-[515px] my-auto ml-3 rounded-lg border border-gray-300 p-4 bg-[linear-gradient(45deg,#8d4bff,#ea4bff)]">
           {!showLoginForm && !showForgetPassword && (
             <>
               <Steps
@@ -297,6 +297,8 @@ const RegPage = () => {
                   width: "100px",
                   height: "40px",
                   fontSize: "large",
+                  color: "white",
+                  backgroundImage: "linear-gradient(45deg, #8d4bff, #ea4bff)",
                 }}
               >
                 {current === steps.length - 1 ? "Done" : "Next"}

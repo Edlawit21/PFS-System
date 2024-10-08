@@ -131,7 +131,7 @@ const LoginForm = ({ onForgetPassword, onBack }) => {
         <Form.Item>
           <Button
             type="primary"
-            style={{ width: "100%", marginTop: "15px" }}
+            style={{ width: "100%", marginTop: "15px", color: "white" }}
             htmlType="submit"
           >
             Login
