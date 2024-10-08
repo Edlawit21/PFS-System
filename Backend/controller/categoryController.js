@@ -1,4 +1,5 @@
 // controllers/categoryController.js
+const mongoose = require("mongoose");
 const Category = require("../Models/PharmacyM/categoryModel");
 const jwt = require("jsonwebtoken");
 
@@ -107,27 +108,37 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const pharmacyManagerId = req.manager._id; // The logged-in pharmacy manager
+
+    // Retrieve the user ID from the token
+    const userId = req.user.id; // Assuming you have set req.user in your middleware
+
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
 
     // Fetch category
     const categoryToDelete = await Category.findById(id);
-    if (!categoryToDelete)
+
+    // Check if the category exists
+    if (!categoryToDelete) {
       return res.status(404).json({ message: "Category not found" });
-    if (
-      categoryToDelete.pharmacyManager.toString() !==
-      pharmacyManagerId.toString()
-    ) {
+    }
+
+    // Ensure the user owns the category
+    if (categoryToDelete.createdBy.toString() !== userId.toString()) {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // Delete category
+    // Delete the category
     await Category.findByIdAndDelete(id);
-    res.status(200).json({ message: "Category deleted successfully" });
+
+    return res.status(200).json({ message: "Category deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Delete Category Error: ", error); // Log the error for debugging
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 module.exports = {
   createCategory,
   getCategories,

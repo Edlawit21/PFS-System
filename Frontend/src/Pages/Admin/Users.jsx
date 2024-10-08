@@ -170,6 +170,7 @@ const Users = () => {
                     return (
                       <Button
                         onClick={() => handleToggle(record._id, record.status)}
+                        style={{ color: "white", background: "red" }}
                       >
                         Deactivate
                       </Button>
@@ -178,12 +179,17 @@ const Users = () => {
                     return (
                       <Button
                         onClick={() => handleToggle(record._id, record.status)}
+                        style={{ color: "white", background: "#00e600" }}
                       >
                         Activate
                       </Button>
                     );
                   } else if (record.status === "Pending") {
-                    return <span>Pending</span>; // Display pending without a button
+                    return (
+                      <span className="text-blue-500 font-bold text-lg">
+                        Pending
+                      </span>
+                    ); // Display pending without a button
                   }
                   return null; // Return null if no action is needed
                 },

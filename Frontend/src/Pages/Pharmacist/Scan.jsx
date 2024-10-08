@@ -100,7 +100,7 @@ const Scan = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col items-center">
       <h1 className="mb-6">QR Code Scanning</h1>
       {scanResult ? (
         <div className="bg-white flex justify-center p-4">

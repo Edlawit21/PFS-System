@@ -68,6 +68,10 @@ export const columnDoc = (showModal, handleApprove, handleReject) => [
     sorter: (a, b) => a.hospitalName.localeCompare(b.hospitalName),
   },
   {
+    title: "Status ",
+    dataIndex: "status",
+  },
+  {
     title: "View Document",
     dataIndex: "educationalInfo", // Update if needed
     render: (_, record) => (
@@ -88,13 +92,14 @@ export const columnDoc = (showModal, handleApprove, handleReject) => [
         <Button
           onClick={() => handleApprove(record._id)}
           key={`approve-${record.id}`} // Use record._id
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 8, background: " #00e600", color: "white" }}
         >
           Approve
         </Button>
         <Button
           onClick={() => handleReject(record._id)}
           key={`reject-${record.id}`}
+          style={{ background: "red", color: "white" }}
         >
           Reject
         </Button>
@@ -103,7 +108,7 @@ export const columnDoc = (showModal, handleApprove, handleReject) => [
   },
 ];
 
-export const columnPm = (showModal) => [
+export const columnPm = (showModal, handleApprove, handleReject) => [
   {
     title: "Name",
     dataIndex: "pmName",
@@ -138,6 +143,10 @@ export const columnPm = (showModal) => [
     sorter: (a, b) => a.licenseInformation.localeCompare(b.licenseInformation), // Correctly sorts alphabetically by 'hospitalDetails'
   },
   {
+    title: "Status ",
+    dataIndex: "status",
+  },
+  {
     title: "View Document",
     dataIndex: "viewDocument",
     render: (_, record) => (
@@ -152,17 +161,15 @@ export const columnPm = (showModal) => [
     render: (_, record) => (
       <div className="flex ">
         <Button
-          onClick={() => handleApprove(record.key)}
-          style={{
-            marginRight: 8,
-            background: "#23C560",
-            color: "white",
-          }}
+          onClick={() => handleApprove(record._id)}
+          key={`approve-${record.id}`} // Use record._id
+          style={{ marginRight: 8, background: " #00e600", color: "white" }}
         >
           Approve
         </Button>
         <Button
-          onClick={() => handleReject(record.key)}
+          onClick={() => handleReject(record._id)}
+          key={`reject-${record.id}`}
           style={{ background: "red", color: "white" }}
         >
           Reject
@@ -173,12 +180,6 @@ export const columnPm = (showModal) => [
 ];
 
 export const columnUser = [
-  {
-    title: "User ID",
-    dataIndex: "_id", // Ensure you have the correct key for user ID
-    key: "_id",
-  },
-
   {
     title: "Name",
     dataIndex: "name",
@@ -197,25 +198,6 @@ export const columnUser = [
   {
     title: "Gender",
     dataIndex: "gender",
-  },
-  {
-    /*
-    title: "Profile",
-    dataIndex: "profile",
-    render: (_, record) => (
-      <Avatar
-        size={{
-          xs: 24,
-          sm: 32,
-          md: 40,
-          lg: 64,
-          xl: 70,
-        }}
-        src={record.profilePictureUrl} // Assuming record.profilePictureUrl contains the URL of the profile picture
-        alt="Profile Picture"
-      />
-    ),
-  */
   },
 
   {
@@ -246,7 +228,8 @@ export const columnUser = [
       if (record.status === "Active") {
         return (
           <Button
-            onClick={() => handleToggle(record._id, record.status)} // Change from record.userId to record._id
+            onClick={() => handleToggle(record._id, record.status)}
+            style={{ color: "white", background: "#dc2626" }}
           >
             Deactivate
           </Button>
@@ -254,13 +237,14 @@ export const columnUser = [
       } else if (record.status === "Inactive") {
         return (
           <Button
-            onClick={() => handleToggle(record._id, record.status)} // Change from record.userId to record._id
+            onClick={() => handleToggle(record._id, record.status)}
+            style={{ background: "red", color: "white" }}
           >
             Activate
           </Button>
         );
       } else if (record.status === "Pending") {
-        return <span>Pending</span>; // Display pending without a button
+        return <span className="text-blue-500">Pending</span>; // Display pending without a button
       }
       return null; // Return null if no action is needed
     },
@@ -327,7 +311,7 @@ export const columnCategory = (
         />
         <Popconfirm
           title="Sure to delete?"
-          onConfirm={() => handleDelete(record.key)}
+          onConfirm={() => handleDelete(record._id)}
         >
           <DeleteFilled
             style={{
@@ -345,88 +329,6 @@ export const columnCategory = (
   },
 ];
 
-{
-  /*export const columnPurchase = (handleEdit, handleDelete) => [
-  {
-    title: "Medicine Name",
-    dataIndex: "medName",
-    sorter: (a, b) => a.medName.localeCompare(b.medName), // Correctly sorts alphabetically by 'name'
-  },
-  {
-    title: "Category",
-    dataIndex: "category",
-    sorter: (a, b) => a.category.localeCompare(b.category), // Correctly sorts alphabetically by 'username'
-  },
-  {
-    title: "Sub-Category",
-    dataIndex: "subcategory",
-    sorter: (a, b) => a.subcategory.localeCompare(b.subcategory), // Correctly sorts alphabetically by 'email'
-  },
-  {
-    title: "Cost",
-    dataIndex: "cost",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.cost.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.cost.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      return numA - numB; // Sort numerically
-    },
-  },
-  {
-    title: "Quantity",
-    dataIndex: "quantity",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.quantity.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.quantity.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      return numA - numB; // Sort numerically
-    },
-  },
-
-  {
-    title: "Expire-Date",
-    dataIndex: "expiredate",
-    sorter: (a, b) => {
-      const numA = parseFloat(a.expiredate.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      const numB = parseFloat(b.expiredate.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
-      return numA - numB; // Sort numerically
-    },
-  },
-  {
-    title: "Actions",
-    dataIndex: "actions",
-    render: (_, record) => (
-      <div className="flex items-center justify-center gap-4">
-        <FormOutlined
-          style={{
-            color: "white",
-            fontSize: "20px",
-            background: "blue",
-            padding: "8px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-          onClick={() => handleEdit(record)}
-        />
-        <Popconfirm
-          title="Sure to delete?"
-          onConfirm={() => handleDelete(record.key)}
-        >
-          <DeleteFilled
-            style={{
-              color: "white",
-              fontSize: "20px",
-              background: "red",
-              padding: "8px",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          />
-        </Popconfirm>
-      </div>
-    ),
-  },
-];*/
-}
-
 export const columnProduct = (handleEdit, handleDelete) => [
   {
     title: "Medicine Name",
@@ -434,6 +336,7 @@ export const columnProduct = (handleEdit, handleDelete) => [
     sorter: (a, b) => a.medname.localeCompare(b.medname),
   },
   {
+    /*
     title: "Category",
     dataIndex: ["category", "category"],
     sorter: (a, b) => a.category.localeCompare(b.category),
@@ -442,6 +345,7 @@ export const columnProduct = (handleEdit, handleDelete) => [
     title: "Sub-Category",
     dataIndex: ["category", "subcategory"],
     sorter: (a, b) => a.subcategory.localeCompare(b.subcategory),
+  */
   },
   {
     title: "Actual Price",
@@ -462,11 +366,23 @@ export const columnProduct = (handleEdit, handleDelete) => [
     title: "Registered-Date",
     dataIndex: "registerDate", // Match the key from fetched data
     sorter: (a, b) => new Date(a.registerDate) - new Date(b.registerDate),
+    render: (text) => {
+      // Use JavaScript's Date object to format the date
+      const date = new Date(text); // Convert the timestamp string to a Date object
+      const formattedDate = date.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+      return formattedDate; // Return only the date part
+    },
   },
   {
     title: "Expire-Date",
     dataIndex: "expireDate", // Match the key from fetched data
     sorter: (a, b) => new Date(a.expireDate) - new Date(b.expireDate),
+    render: (text) => {
+      // Use JavaScript's Date object to format the date
+      const date = new Date(text); // Convert the timestamp string to a Date object
+      const formattedDate = date.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+      return formattedDate; // Return only the date part
+    },
   },
   {
     title: "Sold-Qty",
@@ -496,7 +412,7 @@ export const columnProduct = (handleEdit, handleDelete) => [
         />
         <Popconfirm
           title="Sure to delete?"
-          onConfirm={() => handleDelete(record.key)}
+          onConfirm={() => handleDelete(record._id)}
         >
           <DeleteFilled
             style={{
@@ -566,7 +482,12 @@ export const columnPharmacist = (handleEdit, handleDelete, showModal) => [
     dataIndex: "createdAt", // Use 'createdAt' which is the registration date
     key: "createdAt",
     sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt), // Sorting based on date
-    render: (date) => new Date(date).toLocaleDateString(), // Format date for display
+    render: (text) => {
+      // Use JavaScript's Date object to format the date
+      const date = new Date(text); // Convert the timestamp string to a Date object
+      const formattedDate = date.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+      return formattedDate; // Return only the date part
+    },
   },
   {
     title: "License Number",
@@ -648,25 +569,58 @@ export const columnAdminPharmacist = () => [
     title: "Registered-Date",
     dataIndex: "createdAt", // Use createdAt timestamp for registration date
     sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    render: (text) => {
+      // Use JavaScript's Date object to format the date
+      const date = new Date(text); // Convert the timestamp string to a Date object
+      const formattedDate = date.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+      return formattedDate; // Return only the date part
+    },
   },
   {
     title: "License Number",
     dataIndex: "licenseNumber", // Use licenseNumber as dataIndex
     sorter: (a, b) => a.licenseNumber.localeCompare(b.licenseNumber),
   },
+];
+
+export const columnReport = [
   {
-    title: "Created By",
-    dataIndex: "createdBy", // This assumes createdBy is populated correctly
-    render: (text, record) => {
-      const createdBy = record.createdBy?.firstname
-        ? `${record.createdBy.firstname} ${record.createdBy.lastname}`
-        : "Unknown"; // Fallback to 'Unknown' if createdBy is null
-      return createdBy;
+    title: "Medicine Name",
+    dataIndex: "medicineName",
+    sorter: (a, b) => a.medicineName.localeCompare(b.medicineName),
+  },
+  {
+    title: "Quantity",
+    dataIndex: "quantity",
+    sorter: (a, b) => {
+      const numA = parseFloat(a.quantity.replace(/[^\d.-]/g, ""));
+      const numB = parseFloat(b.quantity.replace(/[^\d.-]/g, ""));
+      return numA - numB;
+    },
+  },
+  {
+    title: "Total Price",
+    dataIndex: "totalPrice",
+    sorter: (a, b) => {
+      const numA = parseFloat(a.totalPrice); // Use totalPrice
+      const numB = parseFloat(b.totalPrice); // Use totalPrice
+      return numA - numB; // Sort numerically
+    },
+  },
+  {
+    title: "Date",
+    dataIndex: "date",
+    sorter: (a, b) => new Date(a.date) - new Date(b.date),
+    render: (text) => {
+      // Use JavaScript's Date object to format the date
+      const date = new Date(text); // Convert the timestamp string to a Date object
+      const formattedDate = date.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+      return formattedDate; // Return only the date part
     },
   },
 ];
 
-export const columnReport = [
+export const columnReportPm = [
   {
     title: "Medicine Name",
     dataIndex: "medicineName",

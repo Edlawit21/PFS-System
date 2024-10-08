@@ -78,17 +78,22 @@ const PMDashboard = () => {
             zIndex: 1000,
           }}
         >
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={toggleSidebar}
-            style={{
-              fontSize: "16px",
-              width: 64,
-              height: 64,
-            }}
-          />
-          <UpdateProfilepm />
+          <div className="flex justify-between">
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={toggleSidebar}
+              style={{
+                fontSize: "16px",
+                width: 64,
+                height: 64,
+              }}
+            />
+            <div className="mr-4">
+              {" "}
+              <UpdateProfilepm />
+            </div>
+          </div>
         </Header>
         <div className="p-6 bg-[#F1F5F9] custom-scrollbar">
           <Content

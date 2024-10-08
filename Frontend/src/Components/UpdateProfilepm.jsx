@@ -1,7 +1,8 @@
-import { Drawer, Button, Avatar, Input, Form, message } from "antd";
+import { Drawer, Button, Input, Form, message } from "antd";
 import { useState, useEffect } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Api from "../api/axiosInstance";
+import { UserOutlined } from "@ant-design/icons";
 
 const UpdateProfilepm = () => {
   const [open, setOpen] = useState(false);
@@ -114,15 +115,29 @@ const UpdateProfilepm = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={showDrawer}>
-        Open
+      <Button
+        style={{ width: "50px", height: "50px", borderRadius: "50%" }}
+        onClick={showDrawer}
+      >
+        <UserOutlined style={{ fontSize: "20px" }} />
       </Button>
       <Drawer title="Profile" onClose={onClose} open={open}>
-        <div className="">
-          <Avatar size={100} />
-        </div>
         <div>
-          {!isEditing && <Button onClick={handleEdit}>Edit Profile</Button>}
+          {!isEditing && (
+            <div className="flex justify-center items-center h-full">
+              <Button
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+                onClick={handleEdit}
+              >
+                Edit Profile
+              </Button>
+            </div>
+          )}
           {isEditing ? (
             <div>
               <Button
@@ -130,8 +145,12 @@ const UpdateProfilepm = () => {
                 icon={<ArrowLeftOutlined />}
                 onClick={handleBack}
               ></Button>
-              <Form form={form} layout="vertical" initialValues={profileData}>
-                <Button>Change Picture</Button>
+              <Form
+                style={{ marginTop: "10px" }}
+                form={form}
+                layout="vertical"
+                initialValues={profileData}
+              >
                 <Form.Item label="Name" name="pmName">
                   <Input
                     name="pmName"
@@ -224,19 +243,97 @@ const UpdateProfilepm = () => {
               </Form>
             </div>
           ) : (
-            <div>
-              <h2>Name: {profileData.pmName || "N/A"}</h2>
-              <h2>Pharmacy Name: {profileData.pharmaName || "N/A"}</h2>
-              <h2>Email: {profileData.email || "N/A"}</h2>
-              <h2>Phone Number: {profileData.phone || "N/A"}</h2>
-              <h2>Password: {profileData.password || "N/A"}</h2>
-              <h2>State: {profileData.state || "N/A"}</h2>
-              <h2>City: {profileData.city || "N/A"}</h2>
-              <h2>Services Offered: {profileData.serviceOffered || "N/A"}</h2>
-              <h2>Operating Days: {profileData.operatingDays || "N/A"}</h2>
-              <h2>Set Location: {profileData.setLocation || "N/A"}</h2>
-              <h2>Latitude: {profileData.latitude || "N/A"}</h2>
-              <h2>Longitude: {profileData.longitude || "N/A"}</h2>
+            <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg ">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+                Profile Information
+              </h2>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">Name:</span>
+                  <span className="text-gray-700">
+                    {profileData.pmName || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Pharmacy Name:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.pharmaName || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">Email:</span>
+                  <span className="text-gray-700">
+                    {profileData.email || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Phone Number:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.phone || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">Password:</span>
+                  <span className="text-gray-700">
+                    {profileData.password || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">State:</span>
+                  <span className="text-gray-700">
+                    {profileData.state || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">City:</span>
+                  <span className="text-gray-700">
+                    {profileData.city || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Services Offered:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.serviceOffered || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Operating Days:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.operatingDays || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Set Location:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.setLocation || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">Latitude:</span>
+                  <span className="text-gray-700">
+                    {profileData.latitude || "N/A"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="font-semibold text-gray-600">
+                    Longitude:
+                  </span>
+                  <span className="text-gray-700">
+                    {profileData.longitude || "N/A"}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -1,7 +1,9 @@
-import { Drawer, Button, Avatar, Input, Form, message, Spin } from "antd";
+import { Drawer, Button, Input, Form, message, Spin } from "antd";
 import { useState } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import Api from "../api/axiosInstance"; // Import your Axios instance
+import Api from "../api/axiosInstance";
+import { UserOutlined } from "@ant-design/icons";
+import Logout from "./Logout";
 
 const UpdateProfileDoc = () => {
   const [open, setOpen] = useState(false);
@@ -27,6 +29,11 @@ const UpdateProfileDoc = () => {
       });
       setProfileData(response.data); // Set the fetched profile data
       form.setFieldsValue(response.data.userInfo); // Set the form's initial values
+      form.setFieldsValue({
+        ...response.data.userInfo,
+        hospitalName: response.data.doctorRegistration?.hospitalName, // Include hospitalName
+        specialization: response.data.doctorRegistration?.specialization, // Include specialization
+      });
     } catch (error) {
       console.error(
         "Error fetching profile data:",
@@ -86,19 +93,38 @@ const UpdateProfileDoc = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={showDrawer}>
-        Open Profile
+      <Button
+        style={{
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          margin: "10px",
+        }}
+        onClick={showDrawer}
+      >
+        <UserOutlined style={{ fontSize: "20px" }} />
       </Button>
       <Drawer title="Profile" onClose={onClose} open={open}>
-        <div>
-          <Avatar size={100} />
-        </div>
         <div>
           {loading ? (
             <Spin />
           ) : (
             <>
-              {!isEditing && <Button onClick={handleEdit}>Edit Profile</Button>}
+              {!isEditing && (
+                <div className="flex justify-center items-center h-full">
+                  <Button
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
+                    }}
+                    onClick={handleEdit}
+                  >
+                    Edit Profile
+                  </Button>
+                </div>
+              )}
               {isEditing ? (
                 <div>
                   <Button
@@ -107,58 +133,21 @@ const UpdateProfileDoc = () => {
                     onClick={handleBack}
                   />
                   <Form
+                    style={{ marginTop: "10px" }}
                     form={form} // Associate form instance
                     layout="vertical"
                     initialValues={profileData?.userInfo} // Initial form values from profileData
                   >
-                    <Button>Change Picture</Button>
-                    <Form.Item
-                      label="First Name"
-                      name="firstname"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your first name!",
-                        },
-                      ]}
-                    >
+                    <Form.Item label="First Name" name="firstname">
                       <Input name="firstname" />
                     </Form.Item>
-                    <Form.Item
-                      label="Last Name"
-                      name="lastname"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your last name!",
-                        },
-                      ]}
-                    >
+                    <Form.Item label="Last Name" name="lastname">
                       <Input name="lastname" />
                     </Form.Item>
-                    <Form.Item
-                      label="Email"
-                      name="email"
-                      rules={[
-                        {
-                          required: true,
-                          type: "email",
-                          message: "Please enter a valid email!",
-                        },
-                      ]}
-                    >
+                    <Form.Item label="Email" name="email">
                       <Input name="email" />
                     </Form.Item>
-                    <Form.Item
-                      label="Phone Number"
-                      name="phoneNumber"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your phone number!",
-                        },
-                      ]}
-                    >
+                    <Form.Item label="Phone Number" name="phoneNumber">
                       <Input name="phoneNumber" />
                     </Form.Item>
                     <Form.Item label="Hospital Name" name="hospitalName">
@@ -175,23 +164,55 @@ const UpdateProfileDoc = () => {
                   </Form>
                 </div>
               ) : (
-                <div>
-                  <h2>First Name: {profileData?.userInfo?.firstname}</h2>
-                  <h2>Last Name: {profileData?.userInfo?.lastname}</h2>
-                  <h2>Email: {profileData?.userInfo?.email}</h2>
-                  <h2>Phone Number: {profileData?.userInfo?.phoneNumber}</h2>
-                  <h2>
-                    Hospital Name:{" "}
-                    {profileData?.doctorRegistration?.hospitalName}
-                  </h2>
-                  <h2>
-                    Specialization:{" "}
-                    {profileData?.doctorRegistration?.specialization}
-                  </h2>
+                <div className="mt-8">
+                  <h1 className="text-2xl font-bold text-center mb-4">
+                    Profile Information
+                  </h1>
+                  <div className="space-y-4 text-lg">
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">First Name:</span>
+                      <span className="text-gray-600">
+                        {profileData?.userInfo?.firstname}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">Last Name:</span>
+                      <span className="text-gray-600">
+                        {profileData?.userInfo?.lastname}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">Email:</span>
+                      <span className="text-gray-600">
+                        {profileData?.userInfo?.email}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">Phone Number:</span>
+                      <span className="text-gray-600">
+                        {profileData?.userInfo?.phoneNumber}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">Hospital Name:</span>
+                      <span className="text-gray-600">
+                        {profileData?.doctorRegistration?.hospitalName}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="font-semibold">Specialization:</span>
+                      <span className="text-gray-600">
+                        {profileData?.doctorRegistration?.specialization}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </>
           )}
+        </div>
+        <div className="m-6 flex justify-center ">
+          <Logout />
         </div>
       </Drawer>
     </div>

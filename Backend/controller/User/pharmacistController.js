@@ -173,23 +173,22 @@ const updatePharmacist = async (req, res) => {
 // Get all pharmacists with optional pharmacy manager details
 const getPharmacists = async (req, res) => {
   try {
-    const managerId = req.user.id;
-    // Fetch all pharmacists and populate the createdBy field to link to the pharmacy manager
-    const pharmacists = await Pharmacist.find({ createdBy: managerId })
+    // Fetch all pharmacists and populate the createdBy field to include pharmacy manager details
+    const pharmacists = await Pharmacist.find({})
       .populate({
-        path: "createdBy", // Ensure this references the correct field and model
-        select: "firstname lastname", // Selecting only necessary fields
+        path: "createdBy", // Reference to the pharmacy manager
       })
       .exec();
+    console.log("Pharmacists data:", JSON.stringify(pharmacists, null, 2));
     if (!pharmacists.length) {
       return res
         .status(404)
-        .json({ message: "No pharmacists found for this manager." });
+        .json({ message: "No pharmacists found in the system." });
     }
 
     res.status(200).json({ pharmacists });
   } catch (error) {
-    console.error("Error fetching pharmacists:", error); // Log the error
+    console.error("Error fetching pharmacists:", error); // Log the error for debugging
     res.status(500).json({ error: error.message });
   }
 };

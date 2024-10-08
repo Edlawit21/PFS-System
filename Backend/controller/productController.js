@@ -98,16 +98,35 @@ const searchProducts = async (req, res) => {
 // Get all products for the logged-in pharmacy manager or pharmacist (under the same PM)
 const getAll = async (req, res) => {
   try {
-    const pharmacy = await Pharmacist.find();
-    // Find all products created by the pharmacy manager
-    const products = await Product.findOne({
-      createdBy: pharmacyManagerId,
-    })
-      .populate("category", "category") // Populate category field
-      .populate("subcategory", "subcategory"); // Populate subcategory if needed
+    let pharmacyManagerId;
 
-    res.status(200).json({ products, pharmacyManager }); // Respond with the products
+    if (req.user.role === "pharmacyManager") {
+      pharmacyManagerId = req.user._id;
+    } else if (req.user.role === "pharmacist") {
+      pharmacyManagerId = req.user.createdBy;
+    } else {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    console.log("Pharmacy Manager ID:", pharmacyManagerId);
+
+    // Find all products created by the pharmacy manager
+    const products = await Product.find({
+      createdBy: pharmacyManagerId,
+    }).populate({
+      path: "category", // Populate the category field
+      select: "category subcategory", // Select fields to include in the response
+    });
+
+    console.log("Products found:", products);
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    res.status(200).json({ products });
   } catch (error) {
+    console.error("Error fetching products:", error);
     res.status(400).json({ message: error.message });
   }
 };

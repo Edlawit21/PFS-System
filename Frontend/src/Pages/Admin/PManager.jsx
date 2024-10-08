@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Modal, Select } from "antd";
+import { Table, Modal, Select, message } from "antd";
 import { columnPm } from "../../Components/Column";
-//import { dataDoc } from "../../Data/data";
 import "../Doctor/PrescriptionPage/Ant.css";
 import Api from "../../api/axiosInstance";
 
@@ -11,21 +10,25 @@ const PManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [selectedGender, setSelectedGender] = useState(""); // State for selected gender
-  const [pharmacyManagerData, setPharmacyManagerData] = useState([]); // State for doctor data
+  const [pharmacyManagerData, setPharmacyManagerData] = useState([]); // State for pharmacy manager data
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    // Fetch doctor registrations from the backend
+    // Fetch pharmacy manager data from the backend
     const fetchPharmacyManagerData = async () => {
       try {
         const response = await Api.get("/approve/pharmacy-managers"); // Adjust the URL as needed
         console.log(
-          "Fetched doctor data:",
+          "Fetched pm data:",
           response.data.pharmacyManagersWithUserDetails
         );
-        setPharmacyManagerData(response.data.pharmacyManagersWithUserDetails);
+
+        // Ensure the data is an array before setting the state
+        setPharmacyManagerData(
+          response.data.pharmacyManagersWithUserDetails || []
+        );
       } catch (error) {
-        console.error("Error fetching doctor data:", error);
+        console.error("Error fetching pharmacy manager data:", error);
       }
     };
 
@@ -49,6 +52,44 @@ const PManager = () => {
     setSelectedGender(value);
   };
 
+  const refreshPmData = async () => {
+    try {
+      const response = await Api.get("/approve/pharmacy-managers");
+      setPharmacyManagerData(
+        response.data.pharmacyManagersWithUserDetails || []
+      ); // Ensure data is set as an array
+    } catch (error) {
+      console.error("Error refreshing pharmacy manager data:", error);
+      message.error("Failed to refresh pharmacy manager data.");
+    }
+  };
+
+  const handleApprove = async (pmId) => {
+    try {
+      await Api.put(`/approve/pharmacy-managers/${pmId}`, {
+        status: "Approved",
+      });
+      message.success("Pharmacy Manager approved successfully!");
+      await refreshPmData(); // Refresh the pharmacy manager data
+    } catch (error) {
+      console.error("Error approving pharmacy manager:", error);
+      message.error("Failed to approve pharmacy manager.");
+    }
+  };
+
+  const handleReject = async (pmId) => {
+    try {
+      await Api.put(`/approve/pharmacy-managers/${pmId}`, {
+        status: "Rejected",
+      });
+      message.success("Pharmacy Manager rejected successfully!");
+      await refreshPmData(); // Refresh the pharmacy manager data
+    } catch (error) {
+      console.error("Error rejecting pharmacy manager:", error);
+      message.error("Failed to reject pharmacy manager.");
+    }
+  };
+
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
 
@@ -56,7 +97,7 @@ const PManager = () => {
     pageSizeOptions,
     showSizeChanger: true,
     defaultPageSize,
-    total: pharmacyManagerData.length, // Use the length of doctorData    ,
+    total: pharmacyManagerData.length || 0, // Use the length of pharmacyManagerData,
     current: currentPage,
     onChange: (page) => {
       setCurrentPage(page);
@@ -98,7 +139,7 @@ const PManager = () => {
               );
             },
           }}
-          columns={columnPm(showModal)} // Pass showModal to columns
+          columns={columnPm(showModal, handleApprove, handleReject)} // Pass showModal to columns
           dataSource={filteredData} // Use filtered data
           pagination={pagination}
           style={{

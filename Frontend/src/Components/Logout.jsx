@@ -1,3 +1,4 @@
+import { Button } from "antd";
 import Api from "../api/axiosInstance";
 
 const Logout = () => {
@@ -20,7 +21,7 @@ const Logout = () => {
 
   return (
     <div>
-      <button onClick={handleLogout}>Logout</button>
+      <Button onClick={handleLogout}>Logout</Button>
     </div>
   );
 };

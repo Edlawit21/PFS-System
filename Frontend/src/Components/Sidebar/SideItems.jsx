@@ -4,8 +4,6 @@ import {
   CheckCircleOutlined,
   TeamOutlined,
   UserOutlined,
-  EnvironmentOutlined,
-  SolutionOutlined,
   UserAddOutlined,
   LineChartOutlined,
   HomeOutlined,
@@ -19,7 +17,7 @@ export const sideItems = {
       icon: <CheckCircleOutlined />,
       label: "Approval",
       children: [
-        { key: "1-1", label: "Doctors", path: "/admin/dashboard/doctors" },
+        { key: "1-1", label: "Doctors", path: "/admin/dashboard" },
         {
           key: "1-2",
           label: "Pharmacy Managers",
@@ -40,6 +38,7 @@ export const sideItems = {
       path: "/admin/dashboard/view-pharmacist",
     },
     {
+      /*
       key: "4",
       icon: <EnvironmentOutlined />,
       label: "App Track",
@@ -50,6 +49,7 @@ export const sideItems = {
       icon: <SolutionOutlined />,
       label: "User Support",
       path: "/admin/dashboard/user-support",
+    */
     },
   ],
   pharmacist: [
@@ -72,12 +72,6 @@ export const sideItems = {
   pmanager: [
     {
       key: "1",
-      icon: <AppstoreOutlined />,
-      label: "Dashboard ",
-      path: "/",
-    },
-    {
-      key: "2",
       icon: <HomeOutlined />,
       label: " Inventory",
       children: [
@@ -86,7 +80,7 @@ export const sideItems = {
       ],
     },
     {
-      key: "3",
+      key: "2",
       icon: <UserAddOutlined />,
       label: " Pharmacist",
       children: [
@@ -103,7 +97,7 @@ export const sideItems = {
       ],
     },
     {
-      key: "4",
+      key: "3",
       icon: <LineChartOutlined />,
       label: "View Report",
       path: "pmanager/dashboard/view-report",

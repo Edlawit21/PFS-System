@@ -2,6 +2,7 @@ const PharmacyManagerRegistration = require("../../Models/Userform/pmRegModel");
 const User = require("../../Models/Userform/userModel");
 const AddressRegistration = require("../../Models/Userform/addressModel");
 const Product = require("../../Models/PharmacyM/productModel");
+const jwt = require("jsonwebtoken");
 
 // Create a new pharmacy manager's registration
 const createPharmacyManager = async (req, res) => {
@@ -408,6 +409,7 @@ const fetchAllPharmacyManagers = async (req, res) => {
       // Ensure products is an array and safely map through it
       products: Array.isArray(pm.products)
         ? pm.products.map((product) => ({
+            _id: product._id,
             medname: product.medname,
             category: product.category,
             actualPrice: product.actualPrice,

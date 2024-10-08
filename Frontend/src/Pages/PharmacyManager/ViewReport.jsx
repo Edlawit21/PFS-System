@@ -25,7 +25,6 @@ const ViewReport = () => {
       `Showing ${range[0]}-${range[1]} of ${total} items`,
     position: ["bottomCenter"],
   };
-
   const fetchReports = async () => {
     const [startDate, endDate] = dateRange;
     if (!startDate || !endDate) {
@@ -43,21 +42,31 @@ const ViewReport = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data && response.data.reports) {
-        const reportsWithKeys = response.data.reports.map((report) => ({
-          ...report,
-          key: report._id || Math.random(), // Use a unique key
-        }));
+      // Log the entire API response
+      console.log("API Response:", response.data); // Check the response structure
+
+      // Ensure that the response.data contains the expected structure
+      if (response.data && Array.isArray(response.data.reports)) {
+        const reportsWithKeys = response.data.reports.flatMap((report) =>
+          report.transactions.map((transaction) => ({
+            medicineName: transaction.medicineName || "", // Extract medicine name
+            quantity: transaction.quantity || "0", // Extract quantity
+            totalPrice: transaction.totalPrice
+              ? transaction.totalPrice.toFixed(2)
+              : "0.00", // Format totalPrice
+            date: transaction.date || new Date().toISOString(), // Extract date
+            key: transaction._id || Math.random().toString(36).substr(2, 9), // Generate a unique key if needed
+          }))
+        );
+
         setData(reportsWithKeys);
-        console.log("Fetched Reports Data:", reportsWithKeys);
+        console.log("Fetched Reports Data:", reportsWithKeys); // Check the data structure
       } else {
         message.error("Unexpected response format.");
       }
     } catch (error) {
       console.error("API Error:", error);
-      message.error(
-        "Failed to fetch reports. Please check the console for details."
-      );
+      message.error("No reports found");
     }
   };
 
@@ -104,6 +113,9 @@ const ViewReport = () => {
               border: "1px solid #E3E6EB",
             }}
             showSorterTooltip={false}
+            scroll={{
+              x: 600,
+            }}
           />
         </div>
       </div>

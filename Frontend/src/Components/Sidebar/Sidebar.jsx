@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
 import { sideItems } from "./SideItems"; // Adjust the path as needed
+import Logout from "../Logout";
 
 const getLevelKeys = (items1) => {
   const key = {};
@@ -61,23 +62,16 @@ const Sidebar = ({ role }) => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div
-        style={{
-          fontSize: "24px",
-          fontWeight: "bold",
-          textAlign: "center",
-          padding: "14px 0",
-          borderBottom: "1px solid #e8e8e8",
-        }}
-      >
+      <div className="text-4xl font-bold text-center py-3 border-b border-gray-200 bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 text-transparent bg-clip-text  rounded-lg">
         PFS
       </div>
+
       <Menu
         mode="inline"
         openKeys={stateOpenKeys}
         onOpenChange={onOpenChange}
         onClick={handleClick}
-        style={{ height: "100%", overflowY: "auto" }}
+        style={{ height: "100%", overflowY: "auto", marginTop: "10px" }}
       >
         {items.map((item) =>
           item.children ? (
@@ -92,6 +86,10 @@ const Sidebar = ({ role }) => {
             </Menu.Item>
           )
         )}
+        <div className="flex flex-col mt-56 items-center">
+          {" "}
+          <Logout />
+        </div>
       </Menu>
     </div>
   );

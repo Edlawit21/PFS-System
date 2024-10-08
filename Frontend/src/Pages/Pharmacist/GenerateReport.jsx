@@ -124,6 +124,9 @@ const GenerateReport = () => {
               border: "1px solid #E3E6EB",
             }}
             showSorterTooltip={false}
+            scroll={{
+              x: 600,
+            }}
           />
         </div>
       </div>

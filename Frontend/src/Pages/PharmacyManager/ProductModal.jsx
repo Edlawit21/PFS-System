@@ -1,32 +1,50 @@
-import { Button, Divider, Form, Input, Modal, Select, DatePicker } from "antd";
+import { Button, Divider, Form, Input, Modal, DatePicker, message } from "antd";
 import { useEffect } from "react";
 import PropTypes from "prop-types";
-import "../Doctor/PrescriptionPage/Ant.css";
-
-const { Option } = Select;
 
 const ProductModal = ({ visible, onClose, onAdd, initialValues }) => {
   const [form] = Form.useForm();
 
+  // Set form initial values
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
+    } else {
+      form.resetFields(); // Reset fields if no initialValues
     }
   }, [initialValues, form]);
 
-  const handleSubmit = () => {
-    form.validateFields().then((values) => {
-      onAdd(values);
-      form.resetFields();
+  // Handle form submission
+  const handleSubmit = async (values) => {
+    try {
+      console.log(values);
+
+      const formattedValues = {
+        ...values,
+        expireDate: values.expireDate
+          ? values.expireDate.format("YYYY-MM-DD")
+          : null,
+        registerDate: values.registerDate
+          ? values.registerDate.format("YYYY-MM-DD")
+          : null,
+      };
+
+      await onAdd(formattedValues); // Call the add or update function
+      message.success(
+        `Product ${initialValues ? "updated" : "added"} successfully!`
+      );
       onClose();
-    });
+    } catch (error) {
+      console.log(error);
+      message.error("Failed to submit the form. Please try again.");
+    }
   };
 
   return (
     <Modal
       open={visible}
       footer={[
-        <Button key="submit" onClick={handleSubmit} style={{ width: "100%" }}>
+        <Button key="submit" onClick={form.submit} style={{ width: "100%" }}>
           {initialValues ? "Update" : "Add"}
         </Button>,
       ]}
@@ -34,127 +52,83 @@ const ProductModal = ({ visible, onClose, onAdd, initialValues }) => {
     >
       <div>
         <h3 className="mb-4">
-          {initialValues ? "Edit Category" : "Add Product"}
+          {initialValues ? "Edit Product" : "Add Product"}
         </h3>
         <Divider />
         <Form
           form={form}
           requiredMark={false}
-          labelCol={{ span: 8 }} // Adjust label column width
+          labelCol={{ span: 8 }}
+          onFinish={handleSubmit} // Handle form submission
           className="product-form"
         >
+          {/* Medicine Name */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Medicine Name</span>}
+            label="Medicine Name"
             name="medname"
             rules={[
-              {
-                required: true,
-                message: "Please input the medicine name",
-              },
+              { required: true, message: "Please input the medicine name" },
             ]}
           >
             <Input />
           </Form.Item>
+
+          {/* Actual Price */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Category</span>}
-            name="category"
-            rules={[
-              {
-                required: true,
-                message: "Please input the category",
-              },
-            ]}
-          >
-            <Select>
-              <Option value="category1">Category 1</Option>
-              <Option value="category2">Category 2</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Sub-Category</span>}
-            name="subcategory"
-            rules={[
-              {
-                required: true,
-                message: "Please input the subcategory",
-              },
-            ]}
-          >
-            <Select>
-              <Option value="subcategory1">Sub-Category 1</Option>
-              <Option value="subcategory2">Sub-Category 2</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Actual Price</span>}
-            name="actual-price"
-            rules={[
-              {
-                required: true,
-                message: "Please input actual price",
-              },
-            ]}
+            label="Actual Price"
+            name="actualPrice"
+            rules={[{ required: true, message: "Please input actual price" }]}
           >
             <Input type="number" />
           </Form.Item>
+
+          {/* Selling Price */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Selling Price</span>}
-            name="sell-price"
-            rules={[
-              {
-                required: true,
-                message: "Please input selling price",
-              },
-            ]}
+            label="Selling Price"
+            name="sellPrice"
+            rules={[{ required: true, message: "Please input selling price" }]}
           >
             <Input type="number" />
           </Form.Item>
+
+          {/* Quantity */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Quantity</span>}
+            label="Quantity"
             name="quantity"
-            rules={[
-              {
-                required: true,
-                message: "Please input quantity",
-              },
-            ]}
+            rules={[{ required: true, message: "Please input quantity" }]}
           >
             <Input type="number" />
           </Form.Item>
+
+          {/* Register Date */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Register Date</span>}
-            name="register-date"
+            label="Register Date"
+            name="registerDate"
             rules={[
-              {
-                required: true,
-                message: "Please choose the register date!",
-              },
+              { required: true, message: "Please choose the register date" },
             ]}
           >
             <DatePicker />
           </Form.Item>
+
+          {/* Expire Date */}
           <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Expire Date</span>}
-            name="expire-date"
+            label="Expire Date"
+            name="expireDate"
             rules={[
-              {
-                required: true,
-                message: "Please choose the expire date!",
-              },
+              { required: true, message: "Please choose the expire date" },
             ]}
           >
             <DatePicker />
           </Form.Item>
-          <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Sold-Quantity</span>}
-            name="sold-qty"
-          >
+
+          {/* Sold Quantity */}
+          <Form.Item label="Sold Quantity" name="soldQty">
             <Input disabled />
           </Form.Item>
-          <Form.Item
-            label={<span style={{ fontSize: "16px" }}>Remain-Quantity</span>}
-            name="remain-qty"
-          >
+
+          {/* Remaining Quantity */}
+          <Form.Item label="Remaining Quantity" name="remainQty">
             <Input disabled />
           </Form.Item>
         </Form>

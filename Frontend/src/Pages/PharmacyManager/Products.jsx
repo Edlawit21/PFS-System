@@ -1,70 +1,74 @@
 import { columnProduct } from "../../Components/Column";
 import { dataProduct } from "../../Data/data"; // Default data
 import { useState, useEffect } from "react";
-import { Button, Table, Select, Input, message } from "antd";
+import { Button, Table, Input, message } from "antd";
 import ProductModal from "./ProductModal";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import Api from "../../api/axiosInstance";
 
-const { Option } = Select;
-
 const Products = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState([]); // Initialize as an empty array
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [data, setData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [editingRecord, setEditingRecord] = useState(null);
+  const [editingRecord, setEditingRecord] = useState([]);
 
   const pageSizeOptions = ["5", "10", "30", "40", "50"];
   const defaultPageSize = 5;
 
-  // Fetch products from the backend
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await Api.get("/product/allproduct");
-        console.log("Fetched products:", response.data);
+  const fetchProducts = async () => {
+    try {
+      const response = await Api.get("/pharmacy-manager/all");
+      console.log("Fetched products response:", response.data);
 
-        // Ensure each product has a unique key
-        const productsWithKey = response.data.map((product) => ({
-          ...product,
-          key: product._id, // assuming _id is your unique identifier
-        }));
-
-        setData(productsWithKey); // Set the fetched data here
-        console.log("Data set in state:", productsWithKey);
-      } catch (error) {
-        console.error(
-          "Fetch products Error:",
-          error.response ? error.response.data : error.message
+      if (
+        response.data.pharmacyManagers &&
+        Array.isArray(response.data.pharmacyManagers)
+      ) {
+        const allProducts = response.data.pharmacyManagers.flatMap(
+          (pharmacy) => {
+            if (Array.isArray(pharmacy.products)) {
+              return pharmacy.products.map((product) => {
+                console.log("Product fetched:", product); // Log each product
+                return {
+                  key: product._id || product.medname + Math.random(),
+                  _id: product._id, // This should be the id
+                  medname: product.medname,
+                  actualPrice: product.actualPrice,
+                  sellPrice: product.sellPrice,
+                  quantity: product.quantity,
+                  expireDate: product.expireDate,
+                  registerDate: product.registerDate,
+                  remainQty: product.remainQty,
+                  soldQty: product.soldQty,
+                };
+              });
+            }
+            return [];
+          }
         );
-        message.error(error.response ? error.response.data : error.message);
-        setData(dataProduct); // Fallback to default data
+
+        setData(allProducts);
+        console.log("Data set in state:", allProducts);
+      } else {
+        throw new Error(
+          "Response data does not contain pharmacyManagers array"
+        );
       }
-    };
-
-    fetchProducts();
-
-    console.log("loggg", data);
-  }, []);
+    } catch (error) {
+      console.error(
+        "Fetch products Error:",
+        error.response ? error.response.data : error.message
+      );
+      message.error(error.response ? error.response.data : error.message);
+      setData(dataProduct);
+    }
+  };
 
   const filteredData = data.filter((item) => {
-    const categoryMatches =
-      item.category &&
-      typeof item.category === "string" &&
-      item.category.toLowerCase().includes(searchText.toLowerCase());
-
-    const subcategoryMatches =
-      item.subcategory &&
-      typeof item.subcategory === "string" &&
-      item.subcategory.toLowerCase().includes(searchText.toLowerCase());
-
-    return (
-      (!selectedSubCategory || item.category === selectedSubCategory) &&
-      (categoryMatches || subcategoryMatches)
-    );
+    const lowerCaseSearchText = searchText.toLowerCase();
+    return item.medname?.toLowerCase().includes(lowerCaseSearchText);
   });
 
   const pagination = {
@@ -91,31 +95,33 @@ const Products = () => {
 
   const handleAddProduct = async (newProduct) => {
     try {
-      const response = editingRecord
-        ? await Api.put(`/product/${editingRecord._id}`, newProduct)
-        : await Api.post("/product/createProduct", newProduct);
+      if (editingRecord) {
+        // Update existing product
+        const response = await Api.put(
+          `/product/${editingRecord._id}`,
+          newProduct
+        );
+        setData((prevData) =>
+          prevData.map((item) =>
+            item._id === editingRecord._id
+              ? { ...item, ...response.data }
+              : item
+          )
+        );
+      } else {
+        // Add new product
+        const response = await Api.post("/product/createProduct", newProduct);
+        console.log(response.data);
 
-      const savedProduct = response.data;
-      setData((prevData) =>
-        editingRecord
-          ? prevData.map((item) =>
-              item._id === editingRecord._id ? savedProduct : item
-            )
-          : [...prevData, savedProduct]
-      );
-      handleModalClose();
-      message.success(
-        `Product ${editingRecord ? "updated" : "added"} successfully`
-      );
+        setData((prevData) => [...prevData, response.data]);
+      }
+      message.success("Product added successfully!");
     } catch (error) {
       console.log(error);
-
-      message.error(error.message);
+      message.error("Failed to save product.");
+    } finally {
+      handleModalClose();
     }
-  };
-
-  const handleSubCategoryChange = (value) => {
-    setSelectedSubCategory(value);
   };
 
   const handleSearch = (e) => {
@@ -130,17 +136,17 @@ const Products = () => {
     try {
       await Promise.all(
         selectedRowKeys.map(async (key) => {
-          await Api.delete(`/product/${key}`);
+          await Api.delete(`/product/delete/${key}`);
         })
       );
 
       setData((prevData) =>
-        prevData.filter((item) => !selectedRowKeys.includes(item._id))
+        prevData.filter((item) => !selectedRowKeys.includes(item.medname))
       );
       setSelectedRowKeys([]);
       message.success("Selected products deleted successfully");
     } catch (error) {
-      message.error(error.message);
+      message.error(error.response ? error.response.data : error.message);
     }
   };
 
@@ -148,15 +154,20 @@ const Products = () => {
     handleModalOpen(record);
   };
 
-  const handleDelete = async (key) => {
+  const handleDelete = async (id) => {
     try {
-      await Api.delete(`/product/${key}`);
-      setData((prevData) => prevData.filter((item) => item._id !== key));
+      console.log(id); // Log the id to see its value
+      await Api.delete(`/product/delete/${id}`);
+      setData((prevData) => prevData.filter((item) => item._id !== id)); // Use _id for filtering
       message.success("Product deleted successfully");
     } catch (error) {
-      message.error(error.message);
+      message.error(error.response ? error.response.data : error.message);
     }
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <div>
@@ -168,27 +179,6 @@ const Products = () => {
           style={{ width: "200px", marginRight: "16px" }}
           onChange={handleSearch}
         />
-        <Select
-          placeholder="Filter by category"
-          size="large"
-          style={{ width: "260px" }}
-          onChange={handleSubCategoryChange}
-          allowClear
-        >
-          <Option value="">All</Option>
-          <Option value="Prescription Medication">
-            Prescription Medication
-          </Option>
-          <Option value="Over-the-Counter (OTC) Medications">
-            Over-the-Counter (OTC) Medications
-          </Option>
-          <Option value="Controlled Substances">Controlled Substances</Option>
-          <Option value="Specialty Medications">Specialty Medications</Option>
-          <Option value="Medical Supplies">Medical Supplies</Option>
-          <Option value="Health and Wellness Products">
-            Health and Wellness Products
-          </Option>
-        </Select>
       </div>
       <div className="bg-white p-6 rounded-xl">
         <div className="flex justify-end gap-4">
@@ -196,13 +186,13 @@ const Products = () => {
             onClick={() => handleModalOpen()}
             style={{ background: "blue", color: "white" }}
           >
-            <PlusOutlined />
-            Add Product
+            <PlusOutlined /> Add Product
           </Button>
-          {selectedRowKeys.length >= 2 && (
+          {selectedRowKeys.length > 0 && (
             <Button
               onClick={handleDeleteSelected}
               style={{ background: "red", color: "white" }}
+              disabled={selectedRowKeys.length < 1} // Disable if no products selected
             >
               <DeleteOutlined /> Delete Selected
             </Button>
@@ -214,7 +204,7 @@ const Products = () => {
             onChange: handleSelectChange,
           }}
           columns={columnProduct(handleEdit, handleDelete)}
-          dataSource={data} // Filtered data
+          dataSource={filteredData} // Pass filtered data
           pagination={pagination}
           style={{
             boxShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
@@ -226,7 +216,7 @@ const Products = () => {
           }}
           showSorterTooltip={false}
           scroll={{
-            x: 10,
+            x: 900,
           }}
         />
       </div>
@@ -234,7 +224,7 @@ const Products = () => {
         visible={modalVisible}
         onClose={handleModalClose}
         onAdd={handleAddProduct}
-        initialValues={editingRecord}
+        editingRecord={editingRecord}
       />
     </div>
   );

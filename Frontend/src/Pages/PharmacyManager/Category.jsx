@@ -33,7 +33,6 @@ const Category = () => {
     };
 
     fetchCategories();
-    console.log("cat", data);
   }, []); // Run this effect only once on component mount
 
   const filteredData = data.filter(
@@ -132,12 +131,30 @@ const Category = () => {
   };
 
   const handleDelete = async (key) => {
+    if (!key) {
+      message.error("Invalid category key. Cannot delete.");
+      return;
+    }
+
     try {
-      await Api.delete(`/category/${key}`);
-      setData((prevData) => prevData.filter((item) => item._id !== key));
-      message.success("Category deleted successfully!");
+      const token = localStorage.getItem("token"); // Retrieve the token
+      console.log("Token:", token); // Debug statement to check the token value
+
+      const response = await Api.delete(`/category/${key}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token in headers
+        },
+      });
+
+      if (response.status === 200) {
+        setData((prevData) => prevData.filter((item) => item._id !== key));
+        message.success("Category deleted successfully!");
+      } else {
+        message.error(response.data.message || "Failed to delete category.");
+      }
     } catch (error) {
-      message.error("Failed to delete category.");
+      console.error("Delete Error:", error);
+      message.error("Failed to delete category. Check console for details.");
     }
   };
 
@@ -160,7 +177,7 @@ const Category = () => {
         >
           <Option value="">All</Option>
           {data.map((category) => (
-            <Option key={category.id} value={category.id}>
+            <Option key={category._id} value={category._id}>
               {category.name}{" "}
               {/* Adjust keys based on your actual data structure */}
             </Option>
@@ -198,6 +215,7 @@ const Category = () => {
           )}
           dataSource={filteredData}
           pagination={pagination}
+          rowKey="_id" // Ensure row key is set to the correct field
           style={{
             boxShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
             borderRadius: "8px",
@@ -206,6 +224,9 @@ const Category = () => {
             border: "1px solid #E3E6EB",
           }}
           showSorterTooltip={false}
+          scroll={{
+            x: 100,
+          }}
         />
       </div>
       <CategoryModal

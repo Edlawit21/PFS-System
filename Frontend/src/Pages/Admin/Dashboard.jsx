@@ -96,7 +96,7 @@ const AdminDashboard = () => {
             }}
           >
             <Routes>
-              <Route path="doctors" element={<DocApprove />} />
+              <Route path="/" element={<DocApprove />} />
               <Route path="pmanagers" element={<PManager />} />
               <Route path="view-users" element={<Users />} />
               <Route path="view-pharmacist" element={<ViewPharmacist />} />
